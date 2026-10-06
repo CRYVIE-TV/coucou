@@ -357,11 +357,11 @@ struct SettingsView: View {
                 }
                 HStack(spacing: 8) {
                     Button(String(localized: "Restart Coucou")) {
-                        let url = Bundle.main.bundleURL
-                        let config = NSWorkspace.OpenConfiguration()
+                        let appPath = Bundle.main.bundleURL.path
+                        let pid = ProcessInfo.processInfo.processIdentifier
                         let task = Process()
                         task.executableURL = URL(fileURLWithPath: "/bin/sh")
-                        task.arguments = ["-c", "sleep 1; open -b \(Bundle.main.bundleIdentifier ?? "fr.louisraille.NotchBuddy")"]
+                        task.arguments = ["-c", "while kill -0 \(pid) 2>/dev/null; do sleep 0.2; done; open \"\(appPath)\""]
                         try? task.run()
                         NSApp.terminate(nil)
                     }

@@ -1477,8 +1477,8 @@ struct SearchingView: View {
 
     var label: String {
         switch state.promptContext {
-        case .window(_, let title, _): return String(localized: "Claude is reading \(title)…")
-        case .file(let name, _):       return String(localized: "Claude is reading \(name)…")
+        case .window(_, let title, _): return String(format: String(localized: "Claude is reading %@…"), title)
+        case .file(let name, _):       return String(format: String(localized: "Claude is reading %@…"), name)
         case nil:                      return String(localized: "Claude is searching…")
         }
     }

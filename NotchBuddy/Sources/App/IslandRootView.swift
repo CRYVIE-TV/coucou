@@ -22,6 +22,7 @@ struct IslandRootView: View {
 
 struct IslandContainer: View {
     @ObservedObject var state: AppState
+    @ObservedObject private var demoEngine = DemoEngine.shared
     @State private var islandWidth:  CGFloat = IslandConst.notchWidth
     @State private var islandHeight: CGFloat = IslandConst.notchHeight
     @State private var cornerRadius: CGFloat = IslandConst.roundedCorner
@@ -105,6 +106,19 @@ struct IslandContainer: View {
                 .animation(.easeInOut(duration: 0.25), value: uploadActive || greetingActive)
 
             CountdownBar(state: state, islandW: islandWidth)
+
+            if demoEngine.isActive {
+                Text("DEMO")
+                    .font(.system(size: 8, weight: .bold, design: .monospaced))
+                    .foregroundColor(.black)
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 2)
+                    .background(Color(hex: "#4ADE80"))
+                    .clipShape(Capsule())
+                    .position(x: 32, y: islandHeight - 8)
+                    .transition(.opacity.combined(with: .scale(scale: 0.8)))
+                    .animation(.spring(response: 0.3, dampingFraction: 0.8), value: demoEngine.isActive)
+            }
 
             Group {
                 if state.mode == .compact {

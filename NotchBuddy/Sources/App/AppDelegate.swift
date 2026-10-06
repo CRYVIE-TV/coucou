@@ -41,6 +41,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         button.image?.isTemplate = true
 
         let menu = NSMenu()
+        menu.addItem(withTitle: NSLocalizedString("Demo mode", comment: ""), action: #selector(toggleDemoMode), keyEquivalent: "")
+        menu.addItem(.separator())
         menu.addItem(withTitle: NSLocalizedString("Open Coucou", comment: ""), action: #selector(openIsland), keyEquivalent: "")
         menu.addItem(.separator())
         menu.addItem(withTitle: NSLocalizedString("Weekly recap", comment: ""), action: #selector(openWeeklyRecap), keyEquivalent: "")
@@ -52,6 +54,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     // MARK: - Actions
+
+    @objc private func toggleDemoMode() {
+        if DemoEngine.shared.isActive { DemoEngine.shared.stop() }
+        else { DemoEngine.shared.start() }
+    }
 
     @objc private func openIsland() {
         islandController?.expand(to: .overview)

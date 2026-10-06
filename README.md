@@ -114,6 +114,12 @@ macOS releases are published as `v*` tags. See [CHANGELOG.md](CHANGELOG.md) for 
 
 Windows 0.1.1 and Linux 0.1.1 (beta) are in Releases under the `windows-v*` and `linux-v*` tags.
 
+## Demo mode
+
+No API key, no Claude Code, no setup — open **Settings → General → Demo**, click **Try demo mode**, and Coucou walks through a scripted session: a Claude Code session with live steps and a diff you can read, a permission request, an AskUserQuestion, a parallel Codex session, the GitHub, Stripe, Vercel and other integration pills loaded with sample data, the chat with a streamed response, the weekly recap with a share image you can actually save.
+
+Nothing is written to disk during the demo — no Keychain entries, no hook files, no recap history. Your real sessions and keys are saved and restored exactly as they were when you stop.
+
 ## Install
 
 ### App Store

@@ -1,0 +1,1279 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+
+    "step.runs" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Runs" } },
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "يُشغّل" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "চালায়" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ejecuta" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Exécute" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "चलाता है" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Menjalankan" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Executa" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Запускает" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "执行" } }
+      }
+    },
+
+    "step.reads" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Reads" } },
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "يقرأ" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "পড়ে" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Lee" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Lit" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "पढ़ता है" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Membaca" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Lê" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Читает" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "读取" } }
+      }
+    },
+
+    "step.writes" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Writes" } },
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "يكتب" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "লেখে" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Escribe" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Écrit" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "लिखता है" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Menulis" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Escreve" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Записывает" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "写入" } }
+      }
+    },
+
+    "step.edits" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Edits" } },
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "يُعدّل" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "সম্পাদনা করে" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Edita" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Modifie" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "संपादित करता है" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Mengedit" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Edita" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Редактирует" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "编辑" } }
+      }
+    },
+
+    "step.searches" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Searches" } },
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "يبحث" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "খোঁজে" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Busca" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Cherche" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "खोजता है" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Mencari" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Pesquisa" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Ищет" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "搜索" } }
+      }
+    },
+
+    "step.web-search" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Searches the web" } },
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "يبحث على الويب" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "ওয়েব খোঁজে" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Busca en la web" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Recherche web" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "वेब खोजता है" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Mencari web" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Pesquisa na web" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Ищет в сети" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "搜索网络" } }
+      }
+    },
+
+    "step.fetches" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Fetches" } },
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "يجلب" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "আনে" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Obtiene" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Récupère" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "प्राप्त करता है" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Mengambil" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Busca" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Получает" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "获取" } }
+      }
+    },
+
+    "step.tasks" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Tasks" } },
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "مهام" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "কার্য" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Tareas" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Tâches" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "कार्य" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Tugas" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Tarefas" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Задачи" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "任务" } }
+      }
+    },
+
+    "step.agent" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Agent" } },
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "وكيل" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "এজেন্ট" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Agente" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Agent" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "एजेंट" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Agen" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Agente" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Агент" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "代理" } }
+      }
+    },
+
+    "step.lists" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Lists" } },
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "يُدرج" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "তালিকা" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Lista" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Liste" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "सूची" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Daftar" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Lista" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Перечисляет" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "列出" } }
+      }
+    },
+
+    "step.notebook" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Notebook" } },
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "Notebook" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "নোটবুক" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Notebook" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Notebook" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "Notebook" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Notebook" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Notebook" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Notebook" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Notebook" } }
+      }
+    },
+
+    "step.tests" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Tests" } },
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "يختبر" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "পরীক্ষা করে" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Prueba" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Teste" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "परीक्षण करता है" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Menguji" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Testa" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Тестирует" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "测试" } }
+      }
+    },
+
+    "Nothing running right now." : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "لا يوجد شيء يعمل الآن." } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "এখন কিছু চলছে না।" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Nada en ejecución." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Rien ne tourne pour l'instant." } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "अभी कुछ नहीं चल रहा।" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Tidak ada yang berjalan sekarang." } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Nada em execução no momento." } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Сейчас ничего не запущено." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "当前没有任务。" } }
+      }
+    },
+
+    "Drop a file or window, or ask me anything." : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "أسقط ملفاً أو نافذة، أو اسألني أي شيء." } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "একটি ফাইল বা উইন্ডো ড্রপ করুন, অথবা যেকোনো কিছু জিজ্ঞেস করুন।" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Suelta un archivo o ventana, o pregúntame cualquier cosa." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Dépose un fichier ou une fenêtre, ou demande-moi n'importe quoi." } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "कोई फ़ाइल या विंडो ड्रॉप करें, या कुछ भी पूछें।" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Seret file atau jendela, atau tanya apa saja." } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Solte um arquivo ou janela, ou me pergunte qualquer coisa." } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Перетащите файл или окно, или спросите меня что угодно." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "拖入文件或窗口，或问我任何问题。" } }
+      }
+    },
+
+    "Ask Claude" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "اسأل Claude" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "Claude-কে জিজ্ঞেস করুন" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Preguntar a Claude" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Demander à Claude" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "Claude से पूछें" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Tanya Claude" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Perguntar ao Claude" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Спросить Claude" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "问 Claude" } }
+      }
+    },
+
+    "needs permission" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "يحتاج إذناً" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "অনুমতি প্রয়োজন" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "necesita permiso" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "a besoin d'une permission" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "अनुमति चाहिए" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "butuh izin" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "precisa de permissão" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "требует разрешения" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "需要权限" } }
+      }
+    },
+
+    "Deny" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "رفض" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "প্রত্যাখ্যান" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Denegar" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Refuser" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "अस्वीकार" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Tolak" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Negar" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Отклонить" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "拒绝" } }
+      }
+    },
+
+    "Allow" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "السماح" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "অনুমতি দিন" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Permitir" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Autoriser" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "अनुमति दें" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Izinkan" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Permitir" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Разрешить" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "允许" } }
+      }
+    },
+
+    "Always" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "دائماً" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "সর্বদা" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Siempre" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Toujours" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "हमेशा" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Selalu" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Sempre" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Всегда" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "始终允许" } }
+      }
+    },
+
+    "Claude Code is asking" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "Claude Code يسأل" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "Claude Code জিজ্ঞেস করছে" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Claude Code está preguntando" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Claude Code demande" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "Claude Code पूछ रहा है" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Claude Code bertanya" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Claude Code está perguntando" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Claude Code спрашивает" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Claude Code 正在询问" } }
+      }
+    },
+
+    "Reply in terminal" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "الرد في الطرفية" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "টার্মিনালে উত্তর দিন" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Responder en terminal" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Répondre dans le terminal" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "टर्मिनल में उत्तर दें" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Balas di terminal" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Responder no terminal" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Ответить в терминале" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "在终端回复" } }
+      }
+    },
+
+    "Your answer…" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "إجابتك…" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "আপনার উত্তর…" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Tu respuesta…" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Votre réponse…" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "आपका उत्तर…" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Jawaban Anda…" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Sua resposta…" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Ваш ответ…" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "您的答案…" } }
+      }
+    },
+
+    "Send" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "إرسال" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "পাঠান" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Enviar" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Envoyer" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "भेजें" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Kirim" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Enviar" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Отправить" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "发送" } }
+      }
+    },
+
+    "Next" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "التالي" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "পরবর্তী" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Siguiente" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Suivant" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "अगला" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Berikutnya" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Próximo" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Далее" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "下一步" } }
+      }
+    },
+
+    "Other…" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "أخرى…" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "অন্যান্য…" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Otro…" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Autre…" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "अन्य…" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Lainnya…" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Outro…" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Другое…" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "其他…" } }
+      }
+    },
+
+    "Workflow stopped." : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "توقف سير العمل." } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "ওয়ার্কফ্লো বন্ধ হয়ে গেছে।" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Flujo de trabajo detenido." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Workflow arrêté." } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "वर्कफ़्लो रुक गया।" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Alur kerja dihentikan." } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Fluxo de trabalho parado." } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Рабочий процесс остановлен." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "工作流已停止。" } }
+      }
+    },
+
+    "Gmail node timed out after 30s. Retry or open n8n." : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "انتهت مهلة عقدة Gmail بعد 30 ثانية. أعد المحاولة أو افتح n8n." } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "Gmail নোড 30 সেকেন্ড পরে টাইম আউট হয়েছে। পুনরায় চেষ্টা করুন বা n8n খুলুন।" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "El nodo de Gmail expiró después de 30s. Reintenta o abre n8n." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Le nœud Gmail a expiré après 30s. Réessaie ou ouvre n8n." } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "Gmail नोड 30 सेकंड बाद टाइम आउट हो गया। पुनः प्रयास करें या n8n खोलें।" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Node Gmail habis waktu setelah 30 detik. Coba lagi atau buka n8n." } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Nó do Gmail expirou após 30s. Tente novamente ou abra o n8n." } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Узел Gmail завершился по таймауту через 30с. Повторите или откройте n8n." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Gmail 节点在 30 秒后超时。请重试或打开 n8n。" } }
+      }
+    },
+
+    "Retry" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "إعادة المحاولة" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "পুনরায় চেষ্টা" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Reintentar" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Réessayer" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "पुनः प्रयास" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Coba lagi" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Tentar novamente" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Повторить" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "重试" } }
+      }
+    },
+
+    "Open in n8n" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "فتح في n8n" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "n8n-এ খুলুন" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Abrir en n8n" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Ouvrir dans n8n" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "n8n में खोलें" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Buka di n8n" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Abrir no n8n" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Открыть в n8n" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "在 n8n 中打开" } }
+      }
+    },
+
+    "Claude Code finished" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "انتهى Claude Code" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "Claude Code শেষ হয়েছে" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Claude Code terminó" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Claude Code a terminé" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "Claude Code समाप्त हो गया" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Claude Code selesai" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Claude Code terminou" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Claude Code завершил" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Claude Code 已完成" } }
+      }
+    },
+
+    "Session finished" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "انتهت الجلسة" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "সেশন শেষ" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Sesión finalizada" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Session terminée" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "सत्र समाप्त" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Sesi selesai" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Sessão finalizada" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Сессия завершена" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "会话已结束" } }
+      }
+    },
+
+    "Open terminal" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "فتح الطرفية" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "টার্মিনাল খুলুন" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Abrir terminal" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Ouvrir le terminal" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "टर्मिनल खोलें" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Buka terminal" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Abrir terminal" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Открыть терминал" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "打开终端" } }
+      }
+    },
+
+    "OK" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "موافق" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "ঠিক আছে" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Aceptar" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "OK" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "ठीक है" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "OK" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "OK" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "ОК" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "确定" } }
+      }
+    },
+
+    "Too many hits at once." : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "طلبات كثيرة دفعة واحدة." } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "একসাথে অনেক বেশি অনুরোধ।" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Demasiadas solicitudes a la vez." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Trop de requêtes en même temps." } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "एक साथ बहुत सारे अनुरोध।" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Terlalu banyak permintaan sekaligus." } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Muitas solicitações de uma vez." } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Слишком много запросов сразу." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "同时来了太多请求。" } }
+      }
+    },
+
+    "Give me a sec — back to work in three seconds." : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "لحظة — سأعود للعمل في ثلاث ثوانٍ." } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "এক সেকেন্ড — তিন সেকেন্ডে কাজে ফিরে যাচ্ছি।" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Dame un segundo — de vuelta al trabajo en tres segundos." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Une seconde — de retour au travail dans trois secondes." } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "एक पल — तीन सेकंड में वापस काम पर।" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Satu detik — kembali bekerja dalam tiga detik." } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Um segundo — voltando ao trabalho em três segundos." } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Секунду — вернусь к работе через три секунды." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "给我一秒钟——三秒后恢复工作。" } }
+      }
+    },
+
+    "Drop your files here" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "أسقط ملفاتك هنا" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "আপনার ফাইলগুলি এখানে ড্রপ করুন" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Suelta tus archivos aquí" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Dépose tes fichiers ici" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "अपनी फ़ाइलें यहाँ छोड़ें" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Letakkan file Anda di sini" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Solte seus arquivos aqui" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Перетащите файлы сюда" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "把文件拖到这里" } }
+      }
+    },
+
+    " is ready." : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : " جاهز." } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : " প্রস্তুত।" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : " está listo." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : " est prêt." } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : " तैयार है।" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : " siap." } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : " está pronto." } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : " готов." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : " 已就绪。" } }
+      }
+    },
+
+    "What do you want to do with it?" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "ماذا تريد أن تفعل به؟" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "আপনি এটা দিয়ে কী করতে চান?" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "¿Qué quieres hacer con él?" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Que veux-tu faire avec ?" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "आप इसके साथ क्या करना चाहते हैं?" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Apa yang ingin Anda lakukan dengannya?" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "O que você quer fazer com ele?" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Что вы хотите с ним сделать?" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "您想对它做什么？" } }
+      }
+    },
+
+    "Ask a question" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "اطرح سؤالاً" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "একটি প্রশ্ন করুন" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Hacer una pregunta" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Poser une question" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "एक प्रश्न पूछें" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Ajukan pertanyaan" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Fazer uma pergunta" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Задать вопрос" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "提问" } }
+      }
+    },
+
+    "Send by email" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "إرسال بالبريد الإلكتروني" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "ইমেইলে পাঠান" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Enviar por email" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Envoyer par email" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "ईमेल से भेजें" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Kirim via email" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Enviar por email" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Отправить по email" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "通过邮件发送" } }
+      }
+    },
+
+    "New email" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "بريد جديد" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "নতুন ইমেইল" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Nuevo email" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Nouvel email" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "नया ईमेल" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Email baru" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Novo email" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Новое письмо" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "新邮件" } }
+      }
+    },
+
+    "with" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "مع" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "সহ" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "con" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "avec" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "के साथ" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "dengan" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "com" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "с" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "附带" } }
+      }
+    },
+
+    "To" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "إلى" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "প্রতি" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Para" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "À" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "प्रति" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Kepada" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Para" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Кому" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "收件人" } }
+      }
+    },
+
+    "Subject" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "الموضوع" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "বিষয়" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Asunto" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Objet" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "विषय" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Subjek" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Assunto" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Тема" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "主题" } }
+      }
+    },
+
+    "Cancel" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "إلغاء" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "বাতিল" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cancelar" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Annuler" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "रद्द करें" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Batal" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Cancelar" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Отмена" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "取消" } }
+      }
+    },
+
+    "Claude is searching…" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "Claude يبحث…" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "Claude খুঁজছে…" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Claude está buscando…" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Claude cherche…" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "Claude खोज रहा है…" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Claude sedang mencari…" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Claude está pesquisando…" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Claude ищет…" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Claude 正在搜索…" } }
+      }
+    },
+
+    "Claude is reading %@…" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "Claude يقرأ %@…" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "Claude %@ পড়ছে…" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Claude está leyendo %@…" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Claude lit %@…" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "Claude %@ पढ़ रहा है…" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Claude sedang membaca %@…" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Claude está lendo %@…" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Claude читает %@…" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Claude 正在读取 %@…" } }
+      }
+    },
+
+    "Automation not allowed" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "الأتمتة غير مسموح بها" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "অটোমেশন অনুমোদিত নয়" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Automatización no permitida" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Automatisation non autorisée" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "स्वचालन की अनुमति नहीं" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Otomatisasi tidak diizinkan" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Automação não permitida" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Автоматизация не разрешена" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "不允许自动化" } }
+      }
+    },
+
+    "Not playing" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "لا يعزف" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "চলছে না" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "No está reproduciendo" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Pas en lecture" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "नहीं चल रहा" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Tidak diputar" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Não está tocando" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Не воспроизводится" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "未播放" } }
+      }
+    },
+
+    "Coming soon" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "قريباً" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "শীঘ্রই আসছে" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Próximamente" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Bientôt disponible" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "जल्द आ रहा है" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Segera hadir" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Em breve" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Скоро" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "即将推出" } }
+      }
+    },
+
+    "Hooks installed" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "Hooks مثبتة" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "Hooks ইনস্টল করা আছে" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Hooks instalados" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Hooks installés" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "Hooks स्थापित" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Hooks terpasang" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Hooks instalados" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Хуки установлены" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Hooks 已安装" } }
+      }
+    },
+
+    "Connected · %@" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "متصل · %@" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "সংযুক্ত · %@" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Conectado · %@" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Connecté · %@" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "जुड़ा है · %@" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Terhubung · %@" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Conectado · %@" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Подключено · %@" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "已连接 · %@" } }
+      }
+    },
+
+    "Key configured · %@" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "المفتاح مُهيَّأ · %@" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "কী কনফিগার করা হয়েছে · %@" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Clave configurada · %@" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Clé configurée · %@" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "की कॉन्फ़िगर हुई · %@" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Kunci dikonfigurasi · %@" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Chave configurada · %@" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Ключ настроен · %@" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "密钥已配置 · %@" } }
+      }
+    },
+
+    "Connected · loading…" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "متصل · جارٍ التحميل…" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "সংযুক্ত · লোড হচ্ছে…" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Conectado · cargando…" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Connecté · chargement…" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "जुड़ा है · लोड हो रहा है…" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Terhubung · memuat…" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Conectado · carregando…" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Подключено · загрузка…" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "已连接 · 加载中…" } }
+      }
+    },
+
+    "Hooks not installed" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "Hooks غير مثبتة" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "Hooks ইনস্টল নেই" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Hooks no instalados" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Hooks non installés" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "Hooks स्थापित नहीं" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Hooks belum terpasang" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Hooks não instalados" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Хуки не установлены" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Hooks 未安装" } }
+      }
+    },
+
+    "Not connected" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "غير متصل" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "সংযুক্ত নয়" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "No conectado" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Non connecté" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "कनेक्ट नहीं" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Tidak terhubung" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Não conectado" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Не подключено" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "未连接" } }
+      }
+    },
+
+    "Key not configured" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "المفتاح غير مُهيَّأ" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "কী কনফিগার নেই" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Clave no configurada" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Clé non configurée" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "की कॉन्फ़िगर नहीं हुई" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Kunci belum dikonfigurasi" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Chave não configurada" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Ключ не настроен" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "密钥未配置" } }
+      }
+    },
+
+    "General" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "عام" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "সাধারণ" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "General" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Général" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "सामान्य" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Umum" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Geral" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Основные" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "通用" } }
+      }
+    },
+
+    "Active pills" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "الأقراص النشطة" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "সক্রিয় পিলস" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Píldoras activas" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Pilules actives" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "सक्रिय पिल्स" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Pil aktif" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Pílulas ativas" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Активные таблетки" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "活跃标签" } }
+      }
+    },
+
+    "Agents" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "الوكلاء" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "এজেন্টস" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Agentes" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Agents" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "एजेंट्स" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Agen" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Agentes" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Агенты" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "代理" } }
+      }
+    },
+
+    "Chat" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "الدردشة" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "চ্যাট" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Chat" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Chat" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "चैट" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Obrolan" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Chat" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Чат" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "聊天" } }
+      }
+    },
+
+    "Integrations" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "التكاملات" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "ইন্টিগ্রেশন" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Integraciones" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Intégrations" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "एकीकरण" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Integrasi" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Integrações" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Интеграции" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "集成" } }
+      }
+    },
+
+    "Shortcuts" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "الاختصارات" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "শর্টকাট" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Atajos" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Raccourcis" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "शॉर्टकट" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Pintasan" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Atalhos" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Горячие клавиши" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "快捷键" } }
+      }
+    },
+
+    "Sound" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "الصوت" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "শব্দ" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Sonido" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Son" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "ध्वनि" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Suara" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Som" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Звук" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "声音" } }
+      }
+    },
+
+    "Enable sounds" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "تفعيل الأصوات" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "শব্দ সক্ষম করুন" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Habilitar sonidos" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Activer les sons" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "ध्वनि सक्षम करें" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Aktifkan suara" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Ativar sons" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Включить звуки" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "启用声音" } }
+      }
+    },
+
+    "Volume" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "مستوى الصوت" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "ভলিউম" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Volumen" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Volume" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "वॉल्यूम" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Volume" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Volume" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Громкость" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "音量" } }
+      }
+    },
+
+    "Behavior" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "السلوك" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "আচরণ" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Comportamiento" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Comportement" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "व्यवहार" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Perilaku" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Comportamento" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Поведение" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "行为" } }
+      }
+    },
+
+    "Close after" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "إغلاق بعد" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "পরে বন্ধ করুন" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cerrar después de" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Fermer après" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "बाद में बंद करें" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Tutup setelah" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Fechar após" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Закрыть через" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "自动关闭" } }
+      }
+    },
+
+    "s inactive" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "ث بدون نشاط" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "সে. নিষ্ক্রিয়" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "s inactivo" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "s d'inactivité" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "से. निष्क्रिय" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "dtk tidak aktif" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "s inativo" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "с без активности" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "秒无活动" } }
+      }
+    },
+
+    "Hide after" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "إخفاء بعد" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "পরে লুকান" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ocultar después de" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Masquer après" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "बाद में छुपाएं" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Sembunyikan setelah" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Ocultar após" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Скрыть через" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "隐藏于" } }
+      }
+    },
+
+    "min without movement" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "دقيقة بدون حركة" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "মিনিট নড়াচড়া ছাড়া" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "min sin movimiento" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "min sans mouvement" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "मिनट बिना हलचल" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "mnt tanpa gerakan" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "min sem movimento" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "мин без активности" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "分钟无动作" } }
+      }
+    },
+
+    "Hotkey" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "المفتاح السريع" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "হটকি" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Tecla de acceso" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Raccourci" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "हॉटकी" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Tombol pintas" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Tecla de atalho" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Горячая клавиша" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "快捷键" } }
+      }
+    },
+
+    "Show island with shortcut" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "إظهار الجزيرة بالاختصار" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "শর্টকাট দিয়ে আইল্যান্ড দেখান" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Mostrar isla con atajo" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Afficher l'île avec le raccourci" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "शॉर्टकट से द्वीप दिखाएं" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Tampilkan island dengan pintasan" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Mostrar ilha com atalho" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Показывать остров горячей клавишей" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "用快捷键显示岛" } }
+      }
+    },
+
+    "Shortcut" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "الاختصار" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "শর্টকাট" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Atajo" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Raccourci" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "शॉर्टकट" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Pintasan" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Atalho" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Сочетание клавиш" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "快捷键" } }
+      }
+    },
+
+    "presses this → island opens" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "اضغط هذا → تفتح الجزيرة" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "এটি চাপলে → আইল্যান্ড খোলে" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "presiona esto → se abre la isla" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "appuyez → l'île s'ouvre" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "दबाने पर → द्वीप खुलता है" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "tekan ini → island terbuka" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "pressione → a ilha abre" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "нажми → остров открывается" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "按此键 → 岛打开" } }
+      }
+    },
+
+    "Startup" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "بدء التشغيل" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "স্টার্টআপ" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Inicio" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Démarrage" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "स्टार्टअप" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Mulai" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Inicialização" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Запуск" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "启动" } }
+      }
+    },
+
+    "Launch at Mac startup" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "تشغيل عند بدء تشغيل Mac" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "Mac স্টার্টআপে চালু করুন" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Iniciar al arrancar el Mac" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Lancer au démarrage du Mac" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "Mac स्टार्टअप पर लॉन्च करें" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Jalankan saat Mac startup" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Iniciar ao ligar o Mac" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Запускать при старте Mac" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "在 Mac 启动时自动启动" } }
+      }
+    },
+
+    "Language" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "اللغة" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "ভাষা" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Idioma" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Langue" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "भाषा" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Bahasa" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Idioma" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Язык" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "语言" } }
+      }
+    },
+
+    "System" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "النظام" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "সিস্টেম" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Sistema" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Système" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "सिस्टम" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Sistem" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Sistema" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Системный" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "系统" } }
+      }
+    },
+
+    "Restart Coucou" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "إعادة تشغيل Coucou" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "Coucou পুনরায় শুরু করুন" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Reiniciar Coucou" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Redémarrer Coucou" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "Coucou को पुनः आरंभ करें" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Mulai ulang Coucou" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Reiniciar Coucou" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Перезапустить Coucou" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "重启 Coucou" } }
+      }
+    },
+
+    "Applies on next launch" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "يُطبَّق عند التشغيل التالي" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "পরবর্তী চালুতে প্রযোজ্য হবে" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Se aplica en el próximo inicio" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Appliqué au prochain lancement" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "अगली बार लॉन्च पर लागू होगा" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Berlaku saat peluncuran berikutnya" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Aplica no próximo lançamento" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Применится при следующем запуске" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "下次启动时生效" } }
+      }
+    },
+
+    "Open Coucou" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "فتح Coucou" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "Coucou খুলুন" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Abrir Coucou" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Ouvrir Coucou" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "Coucou खोलें" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Buka Coucou" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Abrir Coucou" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Открыть Coucou" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "打开 Coucou" } }
+      }
+    },
+
+    "Settings…" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "الإعدادات…" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "সেটিংস…" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Configuración…" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Réglages…" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "सेटिंग्स…" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Pengaturan…" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Configurações…" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Настройки…" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "设置…" } }
+      }
+    },
+
+    "Quit" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "إنهاء" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "বাহির হন" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Salir" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Quitter" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "छोड़ें" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Keluar" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Sair" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Выход" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "退出" } }
+      }
+    },
+
+    "Allow Coucou to control Music" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "السماح لـ Coucou بالتحكم في الموسيقى" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "Coucou-কে Music নিয়ন্ত্রণ করতে দিন" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Permitir que Coucou controle Music" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Autoriser Coucou à contrôler Music" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "Coucou को Music नियंत्रित करने दें" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Izinkan Coucou mengontrol Music" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Permitir que o Coucou controle o Music" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Разрешить Coucou управлять Music" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "允许 Coucou 控制音乐" } }
+      }
+    },
+
+    "Wardrobe" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "خزانة الملابس" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "পোশাক ঘর" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Guardarropa" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Garde-robe" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "अलमारी" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Lemari" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Guarda-roupa" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Гардероб" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "衣橱" } }
+      }
+    },
+
+    "Loading models…" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "جارٍ تحميل النماذج…" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "মডেল লোড হচ্ছে…" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cargando modelos…" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Chargement des modèles…" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "मॉडल लोड हो रहे हैं…" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Memuat model…" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Carregando modelos…" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Загрузка моделей…" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "正在加载模型…" } }
+      }
+    },
+
+    "Connected" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "متصل" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "সংযুক্ত" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Conectado" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Connecté" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "जुड़ा है" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Terhubung" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Conectado" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Подключено" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "已连接" } }
+      }
+    },
+
+    "Save" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "حفظ" } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "সংরক্ষণ" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Guardar" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Enregistrer" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "सहेजें" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Simpan" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Salvar" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Сохранить" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "保存" } }
+      }
+    },
+
+    "Choose the tools you use. Coucou only shows what you declare here." : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "اختر الأدوات التي تستخدمها. يعرض Coucou فقط ما تُعلنه هنا." } },
+        "bn" : { "stringUnit" : { "state" : "translated", "value" : "আপনি যে টুলগুলো ব্যবহার করেন তা বেছে নিন। Coucou শুধুমাত্র আপনার ঘোষণা করা জিনিস দেখায়।" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Elige las herramientas que usas. Coucou solo muestra lo que declares aquí." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Choisis les outils que tu utilises. Coucou n'affiche que ce que tu déclares ici." } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "वे टूल चुनें जो आप उपयोग करते हैं। Coucou केवल वही दिखाता है जो आप यहाँ घोषित करते हैं।" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Pilih alat yang Anda gunakan. Coucou hanya menampilkan yang Anda deklarasikan di sini." } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Escolha as ferramentas que você usa. O Coucou mostra apenas o que você declarar aqui." } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Выберите инструменты, которые используете. Coucou показывает только то, что вы объявите здесь." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "选择你使用的工具。Coucou 只显示你在这里声明的内容。" } }
+      }
+    }
+
+  },
+  "version" : "1.0"
+}

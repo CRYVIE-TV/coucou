@@ -226,6 +226,9 @@ final class AppState: ObservableObject {
         }
     }
 
+    // Selected app language ("" = System, else BCP-47 code e.g. "fr")
+    @Published var appLanguage: String = UserDefaults.standard.stringArray(forKey: "AppleLanguages")?.first ?? ""
+
     // Context for prompt (window attach / file)
     @Published var promptContext: PromptContext? = nil
 

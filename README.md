@@ -265,6 +265,8 @@ The macOS app is native Swift 6 / SwiftUI / AppKit with **zero third-party depen
 
 Issues and PRs are very welcome — new integrations, new emotes, new sounds, bug fixes. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
+Want to add or improve a translation? Open a PR with changes to `NotchBuddy/Resources/Localizable.xcstrings`.
+
 ## Credits
 
 Built by [Louis Raillé](https://louisraille.fr) with Claude Code.

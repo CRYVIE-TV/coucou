@@ -153,7 +153,7 @@ The relay (`coucou-hook.exe`) works with any tool that can run a command on hook
 | Amp | TypeScript plugin (`coucou.ts`) | `%USERPROFILE%\.config\amp\plugins\coucou.ts` |
 | Any other | `--agent <name>` positional arg | your tool's hook config |
 
-OpenCode and Amp use a plugin model on both Mac and Windows; the plugin is installed via **Settings → OpenCode Plugin** and **Settings → Amp Plugin** on the Mac side. On Windows, drop the generated plugin file into the path shown above.
+OpenCode and Amp use a plugin model. The plugin installer (**Settings → OpenCode Plugin** / **Settings → Amp Plugin**) is Mac-only: it installs a TypeScript/JavaScript file into `~/.config/opencode/plugins/` and `~/.config/amp/plugins/`, which are macOS paths. The Windows/Linux Tauri app does not ship a plugin installer for these two agents. To use them on Windows or Linux, generate the plugin file on a Mac (or write it by hand) and drop it into `%USERPROFILE%\.config\opencode\plugins\coucou.js` or `%USERPROFILE%\.config\amp\plugins\coucou.ts` as shown in the table above.
 
 ## What's different from the Mac version
 

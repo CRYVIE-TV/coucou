@@ -2142,10 +2142,18 @@ const EVENT_MAP = {
   'session.idle': 'Stop',
   'session.error': 'StopFailure',
   'session.deleted': 'SessionEnd',
-  'tool.execute.before': 'PreToolUse',
-  'tool.execute.after': 'PostToolUse',
   'permission.asked': 'PermissionRequest',
 };
+
+function forward(hook_event_name, payload) {
+  const p = spawn('/bin/sh', [HOOK, '--agent', 'opencode'],
+                  { stdio: ['pipe', 'ignore', 'ignore'], detached: true });
+  p.on('error', () => {});
+  p.stdin.on('error', () => {});
+  p.stdin.write(JSON.stringify({ hook_event_name, ...payload }) + '\\n');
+  p.stdin.end();
+  p.unref();
+}
 
 export const CoucouPlugin = async (_ctx) => ({
   event: async ({ event }) => {
@@ -2153,20 +2161,28 @@ export const CoucouPlugin = async (_ctx) => ({
     if (!hook_event_name) return;
     const props = event.properties || {};
     const payload = {
-      hook_event_name,
       session_id: event.sessionID || event.session_id || props.sessionID || props.session_id || '',
       cwd: event.cwd || event.directory || props.cwd || props.directory || '',
     };
     if (typeof props.tool === 'string') payload.tool_name = props.tool;
     if (props.input != null) payload.tool_input = props.input;
-    const p = spawn('/bin/sh', [HOOK, '--agent', 'opencode'],
-                    { stdio: ['pipe', 'ignore', 'ignore'], detached: true });
-    p.on('error', () => {});
-    p.stdin.on('error', () => {});
-    p.stdin.write(JSON.stringify(payload) + '\\n');
-    p.stdin.end();
-    p.unref();
-  }
+    forward(hook_event_name, payload);
+  },
+  'tool.execute.before': async (input) => {
+    forward('PreToolUse', {
+      session_id: input.sessionID || input.session_id || '',
+      cwd: input.cwd || '',
+      tool_name: typeof input.tool === 'string' ? input.tool : '',
+      tool_input: input.input ?? null,
+    });
+  },
+  'tool.execute.after': async (input, _output) => {
+    forward('PostToolUse', {
+      session_id: input.sessionID || input.session_id || '',
+      cwd: input.cwd || '',
+      tool_name: typeof input.tool === 'string' ? input.tool : '',
+    });
+  },
 });
 """
     }

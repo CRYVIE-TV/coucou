@@ -74,7 +74,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let win = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 720, height: 560),
                            styleMask: [.titled, .closable, .miniaturizable, .resizable],
                            backing: .buffered, defer: false)
-        win.title = "Settings — Coucou"
+        win.title = String(localized: "settings.window.title")
         let host = NSHostingView(rootView: SettingsView())
         host.sizingOptions = [.minSize]
         win.contentView = host

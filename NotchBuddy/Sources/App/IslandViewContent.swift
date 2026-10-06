@@ -433,7 +433,7 @@ struct QuestionView: View {
                                     .buttonStyle(.plain)
                                     .keyboardShortcut(KeyEquivalent(Character(String(idx + 1))), modifiers: [])
                                 } else {
-                                    SecondaryButton(opt.label) {
+                                    SecondaryButton(verbatim: opt.label) {
                                         selectAndProceed(q: q, qi: qi, label: opt.label, isLast: isLast)
                                     }
                                     .keyboardShortcut(KeyEquivalent(Character(String(idx + 1))), modifiers: [])
@@ -918,7 +918,8 @@ struct ChooseView: View {
             CardBackground(wash: nil)
             VStack(alignment: .leading, spacing: 8) {
                 let fileName = state.droppedFile?.name ?? "file"
-                (Text(fileName).font(.system(size: 14, weight: .semibold)) + Text(" is ready.").font(.system(size: 14, weight: .semibold)))
+                Text(String(format: String(localized: "file.ready %@"), fileName))
+                    .font(.system(size: 14, weight: .semibold))
                 Text("What do you want to do with it?").font(.system(size: 12.5)).foregroundColor(Color(hex: "#9398A1"))
                 HStack(spacing: 8) {
                     PrimaryButton("Ask a question") { state.view = .prompt }
@@ -948,8 +949,8 @@ struct MailView: View {
                 HStack(spacing: 6) {
                     Text("New email").font(.system(size: 12, weight: .semibold))
                     if let name = state.droppedFile?.name {
-                        Text("with").font(.system(size: 12)).foregroundColor(Color(hex: "#8E939C"))
-                        Text(name).font(.system(size: 12)).foregroundColor(Color(hex: "#8E939C"))
+                        Text(String(format: String(localized: "mail.with %@"), name))
+                            .font(.system(size: 12)).foregroundColor(Color(hex: "#8E939C"))
                             .lineLimit(1).truncationMode(.middle)
                     }
                 }
@@ -4536,17 +4537,24 @@ struct ShimmerOverlay: View {
 
 struct PrimaryButton: View {
     let title: String
+    let verbatim: Bool
     let kbd: String?
     let action: () -> Void
 
     init(_ title: String, kbd: String? = nil, action: @escaping () -> Void) {
-        self.title = title; self.kbd = kbd; self.action = action
+        self.title = title; self.verbatim = false; self.kbd = kbd; self.action = action
+    }
+
+    init(verbatim title: String, kbd: String? = nil, action: @escaping () -> Void) {
+        self.title = title; self.verbatim = true; self.kbd = kbd; self.action = action
     }
 
     var body: some View {
         Button(action: action) {
             HStack(spacing: 7) {
-                Text(LocalizedStringKey(title)).font(.system(size: 12.5, weight: .medium))
+                Group {
+                    if verbatim { Text(verbatim: title) } else { Text(LocalizedStringKey(title)) }
+                }.font(.system(size: 12.5, weight: .medium))
                 if let k = kbd {
                     Text(k).font(.system(size: 10.5))
                         .padding(.horizontal, 4)
@@ -4565,17 +4573,24 @@ struct PrimaryButton: View {
 
 struct SecondaryButton: View {
     let title: String
+    let verbatim: Bool
     let kbd: String?
     let action: () -> Void
 
     init(_ title: String, kbd: String? = nil, action: @escaping () -> Void) {
-        self.title = title; self.kbd = kbd; self.action = action
+        self.title = title; self.verbatim = false; self.kbd = kbd; self.action = action
+    }
+
+    init(verbatim title: String, kbd: String? = nil, action: @escaping () -> Void) {
+        self.title = title; self.verbatim = true; self.kbd = kbd; self.action = action
     }
 
     var body: some View {
         Button(action: action) {
             HStack(spacing: 7) {
-                Text(LocalizedStringKey(title)).font(.system(size: 12.5, weight: .medium))
+                Group {
+                    if verbatim { Text(verbatim: title) } else { Text(LocalizedStringKey(title)) }
+                }.font(.system(size: 12.5, weight: .medium))
                 if let k = kbd {
                     Text(k).font(.system(size: 10.5))
                         .padding(.horizontal, 4)

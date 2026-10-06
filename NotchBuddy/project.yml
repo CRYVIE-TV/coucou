@@ -5,6 +5,17 @@ options:
     macOS: "15.0"
   xcodeVersion: "27.0"
   createIntermediateGroups: true
+  knownRegions:
+    - en
+    - ar
+    - bn
+    - es
+    - fr
+    - hi
+    - id
+    - pt-BR
+    - ru
+    - zh-Hans
 
 # DebugCloud = Debug, but signed with iCloud (CloudKit) and push entitlements
 # and compiled with PHONE_LINK, for the iPhone link spike. ReleaseCloud = the
@@ -137,6 +148,17 @@ targets:
         NSAccessibilityUsageDescription: "Pour lire le titre de la fenêtre active et l'attacher comme contexte."
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
+        CFBundleLocalizations:
+          - en
+          - ar
+          - bn
+          - es
+          - fr
+          - hi
+          - id
+          - pt-BR
+          - ru
+          - zh-Hans
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: fr.louisraille.NotchBuddy
@@ -193,6 +215,17 @@ targets:
         ITSAppUsesNonExemptEncryption: NO
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
+        CFBundleLocalizations:
+          - en
+          - ar
+          - bn
+          - es
+          - fr
+          - hi
+          - id
+          - pt-BR
+          - ru
+          - zh-Hans
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: fr.louisraille.Coucou

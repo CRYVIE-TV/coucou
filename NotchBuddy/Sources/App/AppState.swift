@@ -227,7 +227,11 @@ final class AppState: ObservableObject {
     }
 
     // Selected app language ("" = System, else BCP-47 code e.g. "fr")
-    @Published var appLanguage: String = UserDefaults.standard.stringArray(forKey: "AppleLanguages")?.first ?? ""
+    @Published var appLanguage: String = {
+        let bundleId = Bundle.main.bundleIdentifier ?? "fr.louisraille.NotchBuddy"
+        let langs = UserDefaults.standard.persistentDomain(forName: bundleId)?["AppleLanguages"] as? [String]
+        return langs?.first ?? ""
+    }()
 
     // Context for prompt (window attach / file)
     @Published var promptContext: PromptContext? = nil

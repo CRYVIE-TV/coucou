@@ -13,7 +13,7 @@ struct WeeklyRecapCardView: View {
             VStack(alignment: .leading, spacing: 5) {
                 if let s = summary {
                     HStack(spacing: 0) {
-                        Text("Weekly recap")
+                        Text(String(localized: "recap.title"))
                             .font(.system(size: 11, weight: .semibold))
                             .foregroundColor(Color(hex: "#818CF8"))
                         Spacer(minLength: 6)
@@ -23,21 +23,21 @@ struct WeeklyRecapCardView: View {
                             .lineLimit(1)
                     }
                     HStack(spacing: 14) {
-                        statChip(formatDuration(s.totalMinutes), label: "coding")
-                        statChip("\(s.sessionCount)", label: s.sessionCount == 1 ? "session" : "sessions")
-                        statChip("\(s.filesChanged)", label: s.filesChanged == 1 ? "file" : "files")
+                        statChip(formatDuration(s.totalMinutes), label: String(localized: "recap.coding"))
+                        statChip("\(s.sessionCount)", label: s.sessionCount == 1 ? String(localized: "recap.session") : String(localized: "recap.sessions"))
+                        statChip("\(s.filesChanged)", label: s.filesChanged == 1 ? String(localized: "recap.file") : String(localized: "recap.files"))
                         if s.commandsRun > 0 {
-                            statChip("\(s.commandsRun)", label: "commands")
+                            statChip("\(s.commandsRun)", label: String(localized: "recap.commands"))
                         }
                     }
                     HStack(spacing: 8) {
-                        PrimaryButton("Share image") { shareImage(s) }
+                        PrimaryButton(verbatim: String(localized: "recap.share-image")) { shareImage(s) }
                         SecondaryButton("OK") {
                             NotificationCenter.default.post(name: .islandCollapse, object: nil)
                         }
                     }
                 } else {
-                    Text("No activity last week")
+                    Text(String(localized: "recap.no-activity"))
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(Color(hex: "#F1F2F4"))
                     SecondaryButton("OK") {
@@ -95,7 +95,7 @@ enum RecapSharePanel {
             styleMask: [.titled, .closable, .fullSizeContentView],
             backing: .buffered, defer: false
         )
-        win.title = "Weekly recap"
+        win.title = String(localized: "recap.title")
         win.titlebarAppearsTransparent = true
         win.isMovableByWindowBackground = true
         let host = NSHostingView(rootView: RecapSharePanelView(summary: summary, hideProjects: hideProjects))
@@ -218,7 +218,7 @@ struct RecapShareImageView: View {
                 Text("Coucou")
                     .font(.system(size: 52, weight: .black, design: .rounded))
                     .foregroundColor(Color(hex: "#F1F2F4"))
-                Text("Weekly recap")
+                Text(String(localized: "recap.title"))
                     .font(.system(size: 30, weight: .medium))
                     .foregroundColor(Color(hex: "#8E939C"))
                     .padding(.top, 6)
@@ -235,7 +235,7 @@ struct RecapShareImageView: View {
                         .foregroundColor(Color(hex: "#F1F2F4"))
                         .minimumScaleFactor(0.4)
                         .lineLimit(1)
-                    Text("TIME CODING")
+                    Text(String(localized: "recap.image.time-coding"))
                         .font(.system(size: 22, weight: .semibold))
                         .foregroundColor(Color(hex: "#8E939C"))
                         .tracking(3)
@@ -243,12 +243,12 @@ struct RecapShareImageView: View {
 
                 // Secondary stats
                 HStack(spacing: 0) {
-                    statBlock("\(summary.sessionCount)", label: "SESSIONS")
+                    statBlock("\(summary.sessionCount)", label: String(localized: "recap.image.sessions"))
                     statDivider()
-                    statBlock("\(summary.filesChanged)", label: "FILES")
+                    statBlock("\(summary.filesChanged)", label: String(localized: "recap.image.files"))
                     if summary.commandsRun > 0 {
                         statDivider()
-                        statBlock("\(summary.commandsRun)", label: "COMMANDS")
+                        statBlock("\(summary.commandsRun)", label: String(localized: "recap.image.commands"))
                     }
                 }
                 .padding(.top, 56)
@@ -270,21 +270,21 @@ struct RecapShareImageView: View {
                 // Badges
                 VStack(spacing: 16) {
                     if let agent = summary.topAgent {
-                        recapBadge("Top agent", value: agent)
+                        recapBadge(String(localized: "recap.image.top-agent"), value: agent)
                     }
                     if !hideProjects, let project = summary.topProject {
-                        recapBadge("Top project", value: project)
+                        recapBadge(String(localized: "recap.image.top-project"), value: project)
                     }
                     if let day = summary.busiestDay {
-                        recapBadge("Busiest day", value: day)
+                        recapBadge(String(localized: "recap.image.busiest-day"), value: day)
                     }
                     if summary.longestSessionMinutes > 1 {
-                        recapBadge("Longest session", value: formatDuration(summary.longestSessionMinutes))
+                        recapBadge(String(localized: "recap.image.longest-session"), value: formatDuration(summary.longestSessionMinutes))
                     }
                     if summary.permissionsAllowed + summary.permissionsDenied > 0 {
                         HStack(spacing: 16) {
-                            recapBadge("Approved", value: "\(summary.permissionsAllowed)")
-                            recapBadge("Denied", value: "\(summary.permissionsDenied)")
+                            recapBadge(String(localized: "recap.image.approved"), value: "\(summary.permissionsAllowed)")
+                            recapBadge(String(localized: "recap.image.denied"), value: "\(summary.permissionsDenied)")
                         }
                     }
                 }

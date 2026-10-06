@@ -245,6 +245,10 @@ final class RecapStore {
 
     private func save() {
         pruneStale()
+        persist()
+    }
+
+    private func persist() {
         let dir = Self.storageURL.deletingLastPathComponent()
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         if let encoded = try? JSONEncoder().encode(data) {
@@ -279,6 +283,10 @@ final class RecapStore {
             staleKeys.append(key)
         }
         for key in staleKeys { drafts.removeValue(forKey: key) }
+        if !staleKeys.isEmpty {
+            prune()
+            persist()
+        }
     }
 
     // MARK: - Interval merging (prevents double-counting parallel sessions)

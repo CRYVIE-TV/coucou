@@ -18,6 +18,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.setActivationPolicy(.accessory)
         setupMenuBarItem()
         setupIsland()
+        #if DEBUG
+        let debugMenu = NSMenu(title: "Debug")
+        debugMenu.addItem(NSMenuItem(title: "Render recap image", action: #selector(renderRecapImage), keyEquivalent: ""))
+        let debugMenuItem = NSMenuItem(title: "Debug", action: nil, keyEquivalent: "")
+        debugMenuItem.submenu = debugMenu
+        NSApp.mainMenu?.addItem(debugMenuItem)
+        #endif
         #if PHONE_LINK
         CloudProbe.shared.startIfEnabled()
         #endif
@@ -101,6 +108,36 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         win.setFrame(frame, display: true)
     }
 
+    // MARK: - Debug helpers
+
+    #if DEBUG
+    @objc func renderRecapImage() {
+        let summary = RecapStore.shared.weeklySummary() ?? WeeklySummary(
+            weekStart: Date(), weekEnd: Date(),
+            totalMinutes: 300, sessionCount: 6,
+            filesChanged: 31, linesAdded: 1217, linesRemoved: 312,
+            commandsRun: 54, questionsAnswered: 11,
+            permissionsAllowed: 4, permissionsDenied: 1,
+            topAgent: "Claude Code", topProject: "coucou",
+            busiestDay: "Friday", longestSessionMinutes: 300
+        )
+        let view = RecapShareImageView(summary: summary, hideProjects: false)
+        let renderer = ImageRenderer(content: view)
+        renderer.proposedSize = ProposedViewSize(width: 1080, height: 1920)
+        renderer.scale = 1
+        guard let cg = renderer.cgImage else { return }
+        let img = NSImage(cgImage: cg, size: NSSize(width: 1080, height: 1920))
+        let url = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent("Desktop/coucou-recap-debug.png")
+        if let tiff = img.tiffRepresentation,
+           let rep = NSBitmapImageRep(data: tiff),
+           let png = rep.representation(using: .png, properties: [:]) {
+            try? png.write(to: url)
+            NSWorkspace.shared.open(url)
+        }
+    }
+    #endif
+
     // MARK: - Weekly recap trigger
 
     /// On Monday ≥ 8 am, show the recap card once (if there is activity to display).
@@ -120,11 +157,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let lastShown = UserDefaults.standard.integer(forKey: "recapLastShownWeek")
         guard weekKey != lastShown else { return }
         guard RecapStore.shared.weeklySummary() != nil else { return }
-        UserDefaults.standard.set(weekKey, forKey: "recapLastShownWeek")
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
             let s = AppState.shared
             guard s.pendingApproval == nil, s.pendingQuestion == nil else { return }
             self?.islandController?.expand(to: .recap)
+            UserDefaults.standard.set(weekKey, forKey: "recapLastShownWeek")
         }
     }
 

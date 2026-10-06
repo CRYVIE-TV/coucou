@@ -316,6 +316,20 @@ struct SettingsView: View {
                 .padding(6)
         }
 
+        GroupBox("Weekly recap") {
+            VStack(alignment: .leading, spacing: 10) {
+                Toggle("Keep a history of my coding sessions", isOn: $state.recapEnabled)
+                Text("Stored locally on your Mac. Nothing leaves your Mac. Retained for 12 weeks.")
+                    .font(.system(size: 11))
+                    .foregroundColor(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                Toggle("Hide project names in shared images", isOn: $state.recapHideProjects)
+                    .disabled(!state.recapEnabled)
+                Button("Clear history") { RecapStore.shared.clearHistory() }
+            }
+            .padding(6)
+        }
+
         #if PHONE_LINK
         GroupBox("iPhone") {
             VStack(alignment: .leading, spacing: 6) {

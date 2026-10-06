@@ -36,6 +36,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let menu = NSMenu()
         menu.addItem(withTitle: "Open Coucou", action: #selector(openIsland), keyEquivalent: "")
         menu.addItem(.separator())
+        menu.addItem(withTitle: "Weekly recap", action: #selector(openWeeklyRecap), keyEquivalent: "")
         menu.addItem(withTitle: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
         menu.addItem(.separator())
         menu.addItem(withTitle: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
@@ -47,6 +48,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc private func openIsland() {
         islandController?.expand(to: .overview)
+    }
+
+    @objc private func openWeeklyRecap() {
+        islandController?.expand(to: .recap)
     }
 
     private var settingsWindow: NSWindow?
@@ -96,6 +101,31 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         win.setFrame(frame, display: true)
     }
 
+    // MARK: - Weekly recap trigger
+
+    /// On Monday ≥ 8 am, show the recap card once (if there is activity to display).
+    /// Called from greetComplete, SessionStart/UserPromptSubmit hooks, and on wake.
+    func checkMondayRecap() {
+        let cal = Calendar(identifier: .iso8601)
+        let now = Date()
+        // weekday in ISO 8601 calendar: 2 = Monday
+        guard cal.component(.weekday, from: now) == 2,
+              cal.component(.hour,    from: now) >= 8 else { return }
+        // Don't interrupt a pending approval or question
+        let s = AppState.shared
+        guard s.pendingApproval == nil, s.pendingQuestion == nil else { return }
+        let weekYear = cal.component(.yearForWeekOfYear, from: now)
+        let weekNum  = cal.component(.weekOfYear,        from: now)
+        let weekKey  = weekYear * 100 + weekNum
+        let lastShown = UserDefaults.standard.integer(forKey: "recapLastShownWeek")
+        guard weekKey != lastShown else { return }
+        guard RecapStore.shared.weeklySummary() != nil else { return }
+        UserDefaults.standard.set(weekKey, forKey: "recapLastShownWeek")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+            self?.islandController?.expand(to: .recap)
+        }
+    }
+
     // MARK: - Island setup
 
     private func setupIsland() {
@@ -113,8 +143,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NotificationCenter.default.addObserver(self, selector: #selector(openSettingsFromNotification(_:)),
                                                name: .openFullSettings, object: nil)
         // After the greeting ends, fly Mochi back to the desktop if it was there at last quit
-        NotificationCenter.default.addObserver(forName: .greetComplete, object: nil, queue: .main) { _ in
+        NotificationCenter.default.addObserver(forName: .greetComplete, object: nil, queue: .main) { [weak self] _ in
             DesktopMochiController.shared.launchFlyIfNeeded()
+            self?.checkMondayRecap()
+        }
+        // Check for Monday recap on wake and when a new session/prompt arrives
+        NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.didWakeNotification,
+                                                          object: nil, queue: .main) { [weak self] _ in
+            self?.checkMondayRecap()
+        }
+        NotificationCenter.default.addObserver(forName: .checkMondayRecap, object: nil, queue: .main) { [weak self] _ in
+            self?.checkMondayRecap()
         }
         #if !APPSTORE
         _ = MusicController.shared

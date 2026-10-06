@@ -29,6 +29,12 @@ struct WeeklyRecapCardView: View {
                         if s.commandsRun > 0 {
                             statChip("\(s.commandsRun)", label: "commands")
                         }
+                        if s.linesAdded + s.linesRemoved > 0 {
+                            statChip("+\(s.linesAdded) / -\(s.linesRemoved)", label: "lines")
+                        }
+                        if s.questionsAnswered > 0 {
+                            statChip("\(s.questionsAnswered)", label: s.questionsAnswered == 1 ? "question" : "questions")
+                        }
                     }
                     HStack(spacing: 8) {
                         PrimaryButton("Share image") { shareImage(s) }
@@ -51,6 +57,9 @@ struct WeeklyRecapCardView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .onAppear { summary = RecapStore.shared.weeklySummary() }
+        .onChange(of: state.view) { _, newView in
+            if newView == .recap { summary = RecapStore.shared.weeklySummary() }
+        }
     }
 
     private func statChip(_ value: String, label: String) -> some View {

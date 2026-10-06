@@ -380,6 +380,11 @@ final class HookServer: @unchecked Sendable {
         }
 
         let focused = state.focusId == agentId
+        // For sessions that carry no id, derive a unique key from pill + cwd so that
+        // concurrent anonymous sessions are tracked independently in RecapStore.
+        let recapSessionId = (sessionId == "unknown" || sessionId.isEmpty)
+            ? "\(agentId)+\(cwd)"
+            : sessionId
 
         #if PHONE_LINK
         // The iPhone's "last turn" (prompt, actions, diffs, answer).
@@ -437,7 +442,7 @@ final class HookServer: @unchecked Sendable {
             if let prompt = payload["prompt"] as? String, !prompt.isEmpty {
                 appendStep(id: agentId, step: String(prompt.prefix(60)))
             }
-            RecapStore.shared.userPromptSubmit(sessionId: sessionId, pillId: agentId, project: projectName)
+            RecapStore.shared.userPromptSubmit(sessionId: recapSessionId, pillId: agentId, project: projectName)
             NotificationCenter.default.post(name: .checkMondayRecap, object: nil)
             if state.isPresent { expandIfNeeded(to: .overview) }
 
@@ -445,7 +450,7 @@ final class HookServer: @unchecked Sendable {
             activeSessionId = sessionId
             let tool = payload["tool_name"] as? String ?? "Tool"
             if let idx = state.tasks.firstIndex(where: { $0.id == agentId }) { state.tasks[idx].finalLine = nil }
-            RecapStore.shared.preToolUse(sessionId: sessionId, tool: tool)
+            RecapStore.shared.preToolUse(sessionId: recapSessionId, tool: tool)
             // AskUserQuestion is handled via the dedicated --ask hook.
             // Skip state/step update here to avoid flickering over the question card.
             guard tool != "AskUserQuestion" else { break }
@@ -465,7 +470,7 @@ final class HookServer: @unchecked Sendable {
                 let idx = state.appendSessionDiff(diff, for: agentId)
                 let step = String.makeDiffStep(filename: diff.name, added: diff.added, removed: diff.removed, diffId: idx)
                 appendStep(id: agentId, step: step)
-                RecapStore.shared.recordFileDiff(sessionId: sessionId, path: diff.name, added: diff.added, removed: diff.removed)
+                RecapStore.shared.recordFileDiff(sessionId: recapSessionId, path: diff.name, added: diff.added, removed: diff.removed)
             }
 
         case "PostToolUseFailure":
@@ -494,7 +499,7 @@ final class HookServer: @unchecked Sendable {
                     state.tasks[idx].finalLine = finalText
                 }
             }
-            RecapStore.shared.stop(sessionId: sessionId)
+            RecapStore.shared.stop(sessionId: recapSessionId)
             SoundEngine.shared.play("finish")
             if focused {
                 expandIfNeeded(to: .finished)
@@ -511,7 +516,7 @@ final class HookServer: @unchecked Sendable {
             }
 
         case "StopFailure":
-            RecapStore.shared.stop(sessionId: sessionId)
+            RecapStore.shared.stop(sessionId: recapSessionId)
             state.updateTask(id: agentId, state: .error)
             SoundEngine.shared.play("error")
             if focused {
@@ -522,7 +527,7 @@ final class HookServer: @unchecked Sendable {
 
         case "Interrupt":
             // Codex: user stopped the turn
-            RecapStore.shared.stop(sessionId: sessionId)
+            RecapStore.shared.stop(sessionId: recapSessionId)
             activeSessionId = nil
             state.updateTask(id: agentId, state: .idle)
             clearPillBadge(id: agentId)
@@ -532,7 +537,7 @@ final class HookServer: @unchecked Sendable {
             if let idx = state.tasks.firstIndex(where: { $0.id == agentId }) { state.tasks[idx].finalLine = nil }
             state.clearSessionDiffs(for: agentId)
             state.removeTask(id: agentId)
-            RecapStore.shared.sessionEnd(sessionId: sessionId)
+            RecapStore.shared.sessionEnd(sessionId: recapSessionId)
 
         case "SubagentStart":
             appendStep(id: agentId, step: "+ subagent")
@@ -846,7 +851,9 @@ final class HookServer: @unchecked Sendable {
         pendingQuestionFD = fd
         activeSessionId = sessionId
         questionPillId = pillId
-        questionSessionId = sessionId
+        questionSessionId = (sessionId == "unknown" || sessionId.isEmpty)
+            ? "\(pillId)+\(cwd)"
+            : sessionId
 
         upsertWorkspaceTask(id: pillId, projectName: projectName, cwd: cwd)
         state.updateTask(id: pillId, state: .question)

@@ -122,6 +122,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         guard RecapStore.shared.weeklySummary() != nil else { return }
         UserDefaults.standard.set(weekKey, forKey: "recapLastShownWeek")
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+            let s = AppState.shared
+            guard s.pendingApproval == nil, s.pendingQuestion == nil else { return }
             self?.islandController?.expand(to: .recap)
         }
     }

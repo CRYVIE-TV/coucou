@@ -16,7 +16,7 @@ Approve permissions, watch your agents work, drop a file, chat with Claude — a
 ![Swift 6](https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white)
 ![SwiftUI](https://img.shields.io/badge/SwiftUI-native-0A84FF)
 ![Tauri 2](https://img.shields.io/badge/Tauri-2-FFC131?logo=tauri&logoColor=black)
-![License: MIT](https://img.shields.io/badge/license-MIT-green)
+![Code: MIT](https://img.shields.io/badge/code-MIT-green)
 ![GitHub stars](https://img.shields.io/github/stars/Louis-CFM/coucou?style=social)
 
 <img src="docs/media/demo.gif" width="760" alt="Coucou in action">
@@ -28,7 +28,7 @@ Approve permissions, watch your agents work, drop a file, chat with Claude — a
 ## Why
 
 Some studios showed off gorgeous notch companions… and never let anyone use them.
-**Coucou is the open version.** Every line of code, every animation, every sound — free to use, read, fork and remix.
+**Coucou is the open version.** Every line of code is open source under the MIT License: read it, fork it, learn from it. The Coucou name, Mochi and the sounds stay © Louis Raillé (see [License](#license)).
 
 Meet **Mochi**: a soft little squircle with big eyes that pops out of your notch, waves hello, follows your cursor with its eyes, gets annoyed when you poke it (and dizzy if you insist), and tells you the moment Claude Code needs you.
 

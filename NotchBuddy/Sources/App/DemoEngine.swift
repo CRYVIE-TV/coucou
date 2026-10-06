@@ -31,6 +31,11 @@ final class DemoEngine: ObservableObject {
     private var generation: Int = 0                   // incremented on each start() to orphan stale closures
     private var demoInjectedTaskIds: [String] = []   // integration task IDs added by demo
     private var realTaskIdsAtStart: Set<String> = [] // real task IDs that existed before demo
+    private var demoCycleIndex: Int = 0
+    private let rotatingIntegrationIds = [
+        "integration_stripe", "integration_calcom",
+        "integration_n8n", "integration_notion", "integration_vercel"
+    ]
     private var demoDiffIds: [String: [Int]] = [:]   // [pillId: [diffId]]
     private var lastApprovalDecision: String = "allow"
     private var lastQuestionAnswer: String? = nil
@@ -77,6 +82,7 @@ final class DemoEngine: ObservableObject {
         isActive = true
         DemoEngine.isPollerPaused = true
         generation += 1
+        demoCycleIndex = 0
 
         let s = AppState.shared
 
@@ -110,6 +116,10 @@ final class DemoEngine: ObservableObject {
             mode:                s.mode,
             view:                s.view
         )
+
+        // Hide all real pills — show only main during demo (integration + Codex added progressively).
+        let mainTask = s.tasks.first(where: { $0.id == s.mainPillId })
+        s.tasks = mainTask.map { [$0] } ?? []
 
         // Weekly recap: available immediately so the reviewer can share it
         RecapStore.shared.demoSummaryOverride = demoWeeklySummary()
@@ -221,9 +231,11 @@ final class DemoEngine: ObservableObject {
         let realNewTasks = s.tasks.filter { task in
             !snap.tasks.contains(where: { $0.id == task.id }) && !demoIds.contains(task.id)
         }
+        let mainPillId = s.mainPillId
         let restoredSnapTasks = snap.tasks.map { snapTask -> AgentTask in
-            // If this was a real task (not demo-injected) and it still exists in current state,
-            // preserve the current version (may have received real updates during demo).
+            // Main pill: always restore from snapshot — demo may have left steps/finalLine mid-cycle.
+            if snapTask.id == mainPillId { return snapTask }
+            // Other real tasks: keep current (may have received real hook events during demo).
             if realTaskIdsAtStart.contains(snapTask.id), !demoIds.contains(snapTask.id),
                let current = currentTasksById[snapTask.id] {
                 return current
@@ -244,6 +256,7 @@ final class DemoEngine: ObservableObject {
         demoDiffIds = [:]
         demoInjectedTaskIds = []
         realTaskIdsAtStart = []
+        demoCycleIndex = 0
         lastApprovalDecision = "allow"
         lastQuestionAnswer = nil
 
@@ -370,29 +383,14 @@ final class DemoEngine: ObservableObject {
         ]
         s.notionLoaded = true
 
-        // Add integration tasks directly (never touch activeIntegrations → no UserDefaults write)
-        // Cap at 4 non-main pills to stay within the notch display limit.
-        // GitHub, Stripe, Vercel are injected with default idle state.
-        let idleIntegrationIds = [
-            "integration_github", "integration_stripe", "integration_vercel"
-        ]
+        // Inject GitHub pill only — rotating 4th integration added per cycle.
         var injected: [String] = []
-        for id in idleIntegrationIds {
-            guard !s.tasks.contains(where: { $0.id == id }),
-                  let def = PillCatalog.available.first(where: { $0.id == id }) else { continue }
+        let githubId = "integration_github"
+        if !s.tasks.contains(where: { $0.id == githubId }),
+           let def = PillCatalog.available.first(where: { $0.id == githubId }) {
             s.tasks.append(AgentTask(id: def.id, name: def.name, color: def.color,
                                      state: .idle, steps: [], source: def.source, isIntegration: true))
-            injected.append(id)
-        }
-        // n8n: inject with visible steps showing the last successful execution (4th pill).
-        let n8nId = "integration_n8n"
-        if !s.tasks.contains(where: { $0.id == n8nId }),
-           let n8nDef = PillCatalog.available.first(where: { $0.id == n8nId }) {
-            s.tasks.append(AgentTask(id: n8nDef.id, name: n8nDef.name, color: n8nDef.color,
-                                     state: .finished,
-                                     steps: ["Notify on new Stripe payment", "3 nodes executed", "Workflow success"],
-                                     source: n8nDef.source, isIntegration: true))
-            injected.append(n8nId)
+            injected.append(githubId)
         }
         demoInjectedTaskIds = injected
         s.syncMode()
@@ -414,9 +412,23 @@ final class DemoEngine: ObservableObject {
         let s = AppState.shared
         let mainPillId = s.mainPillId
 
+        // Inject the rotating 4th integration pill for this cycle.
+        let rotId = rotatingIntegrationIds[demoCycleIndex % rotatingIntegrationIds.count]
+        if !s.tasks.contains(where: { $0.id == rotId }),
+           let def = PillCatalog.available.first(where: { $0.id == rotId }) {
+            let rotState: BotState = (rotId == "integration_n8n") ? .finished : .idle
+            let rotSteps: [String] = (rotId == "integration_n8n")
+                ? ["Notify on new Stripe payment", "3 nodes executed", "Workflow success"]
+                : []
+            s.tasks.append(AgentTask(id: def.id, name: def.name, color: def.color,
+                                     state: rotState, steps: rotSteps, source: def.source, isIntegration: true))
+            if !demoInjectedTaskIds.contains(rotId) { demoInjectedTaskIds.append(rotId) }
+        }
+        s.syncMode()
+
         // ── Step 1: Start VS Code session ────────────────────────────────────────
         await waitUntilVisible()
-        guard isActive else { return }
+        guard isActive, self.generation == gen else { return }
 
         s.focusId = mainPillId
         if let idx = s.tasks.firstIndex(where: { $0.id == mainPillId }) {
@@ -455,15 +467,15 @@ final class DemoEngine: ObservableObject {
 
         let plainSteps = ["Reading auth/middleware.ts", "Running npm test — 23 tests"]
         // Step 0
-        await waitUntilVisible(); guard isActive else { return }
+        await waitUntilVisible(); guard isActive, self.generation == gen else { return }
         if let idx = s.tasks.firstIndex(where: { $0.id == mainPillId }) {
             s.tasks[idx].steps.append(plainSteps[0])
             s.tasks[idx].stepIndex = 0
         }
-        await sleep(2.0); guard isActive else { return }
+        await sleep(2.0); guard isActive, self.generation == gen else { return }
 
         // Diff step (index 1)
-        await waitUntilVisible(); guard isActive else { return }
+        await waitUntilVisible(); guard isActive, self.generation == gen else { return }
         let diffId = s.appendSessionDiff(diff, for: mainPillId)
         trackDemoDiff(id: diffId, for: mainPillId)
         let diffStep = String.makeDiffStep(filename: diff.name, added: diff.added,
@@ -472,18 +484,18 @@ final class DemoEngine: ObservableObject {
             s.tasks[idx].steps.append(diffStep)
             s.tasks[idx].stepIndex = 1
         }
-        await sleep(2.0); guard isActive else { return }
+        await sleep(2.0); guard isActive, self.generation == gen else { return }
 
         // Step 2
-        await waitUntilVisible(); guard isActive else { return }
+        await waitUntilVisible(); guard isActive, self.generation == gen else { return }
         if let idx = s.tasks.firstIndex(where: { $0.id == mainPillId }) {
             s.tasks[idx].steps.append(plainSteps[1])
             s.tasks[idx].stepIndex = 2
         }
-        await sleep(2.0); guard isActive else { return }
+        await sleep(2.0); guard isActive, self.generation == gen else { return }
 
         // ── Step 3: Second session (Codex) ──────────────────────────────────────
-        await waitUntilVisible(); guard isActive else { return }
+        await waitUntilVisible(); guard isActive, self.generation == gen else { return }
         if !s.tasks.contains(where: { $0.id == "demo_codex" }) {
             s.tasks.append(AgentTask(
                 id: "demo_codex", name: "Codex", color: "#E07950", state: .working,
@@ -492,7 +504,7 @@ final class DemoEngine: ObservableObject {
             ))
             s.syncMode()
         }
-        await sleep(1.5); guard isActive else { return }
+        await sleep(1.5); guard isActive, self.generation == gen else { return }
 
         // ── Step 4: Permission request ───────────────────────────────────────────
         // Does NOT call waitUntilVisible — the hookExpand will open the island.
@@ -510,14 +522,14 @@ final class DemoEngine: ObservableObject {
             s.isPinned = true
             NotificationCenter.default.post(name: .hookExpand, object: IslandView.approval)
             decision = await waitForApprovalOrTimeout(seconds: 8.0)
-            guard isActive else { return }
+            guard isActive, self.generation == gen else { return }
         }
 
         // ── Step 5: AskUserQuestion ──────────────────────────────────────────────
-        await waitUntilVisible(); guard isActive else { return }
+        await waitUntilVisible(); guard isActive, self.generation == gen else { return }
         var chosenReporter = "Verbose"
         if !HookServer.shared.hasRealPendingQuestion {
-            await sleep(0.5); guard isActive else { return }
+            await sleep(0.5); guard isActive, self.generation == gen else { return }
             playSound("question")
             s.pendingQuestion = AskQuestion(questions: [
                 AskQuestionItem(
@@ -535,12 +547,12 @@ final class DemoEngine: ObservableObject {
             NotificationCenter.default.post(name: .hookExpand, object: IslandView.question)
             await waitForQuestionOrTimeout(seconds: 8.0)
             chosenReporter = lastQuestionAnswer ?? "Verbose"
-            guard isActive else { return }
+            guard isActive, self.generation == gen else { return }
         }
 
         // ── Step 6: Finish primary session ───────────────────────────────────────
-        await waitUntilVisible(); guard isActive else { return }
-        await sleep(0.5); guard isActive else { return }
+        await waitUntilVisible(); guard isActive, self.generation == gen else { return }
+        await sleep(0.5); guard isActive, self.generation == gen else { return }
         playSound("finish")
         if let idx = s.tasks.firstIndex(where: { $0.id == mainPillId }) {
             s.tasks[idx].state = .finished
@@ -549,23 +561,23 @@ final class DemoEngine: ObservableObject {
                 : "All 23 tests pass (\(chosenReporter)). Auth refactor complete — 94 % coverage."
         }
         NotificationCenter.default.post(name: .hookExpand, object: IslandView.finished)
-        await sleep(2.5); guard isActive else { return }
+        await sleep(2.5); guard isActive, self.generation == gen else { return }
 
         // ── Step 7: Chat ─────────────────────────────────────────────────────────
-        await waitUntilVisible(); guard isActive else { return }
+        await waitUntilVisible(); guard isActive, self.generation == gen else { return }
         s.chatHistory = []
         NotificationCenter.default.post(name: .hookExpand, object: IslandView.prompt)
-        await sleep(1.0); guard isActive else { return }
+        await sleep(1.0); guard isActive, self.generation == gen else { return }
         s.chatHistory.append(ChatMessage(role: .user, content: "What did you change in LoginForm?"))
-        await sleep(0.4); guard isActive else { return }
-        await streamChatResponse(for: "What did you change in LoginForm?")
-        guard isActive else { return }
-        await sleep(2.0); guard isActive else { return }
+        await sleep(0.4); guard isActive, self.generation == gen else { return }
+        await streamChatResponse(for: "What did you change in LoginForm?", gen: gen)
+        guard isActive, self.generation == gen else { return }
+        await sleep(2.0); guard isActive, self.generation == gen else { return }
 
         // ── Step 8: Weekly recap ─────────────────────────────────────────────────
-        await waitUntilVisible(); guard isActive else { return }
+        await waitUntilVisible(); guard isActive, self.generation == gen else { return }
         NotificationCenter.default.post(name: .hookExpand, object: IslandView.recap)
-        await sleep(5.0); guard isActive else { return }
+        await sleep(5.0); guard isActive, self.generation == gen else { return }
 
         // ── Step 9: Reset for next cycle ─────────────────────────────────────────
         s.chatHistory = []
@@ -587,6 +599,11 @@ final class DemoEngine: ObservableObject {
         demoDiffIds.removeValue(forKey: mainPillId)
 
         s.tasks.removeAll { $0.id == "demo_codex" }
+        // Remove rotating integration and advance cycle counter.
+        s.tasks.removeAll { $0.id == rotId }
+        demoInjectedTaskIds.removeAll { $0 == rotId }
+        demoCycleIndex += 1
+
         if s.pendingApproval?.sessionId == "demo_session" { s.pendingApproval = nil }
         if !HookServer.shared.hasRealPendingQuestion     { s.pendingQuestion = nil }
         if s.pendingApproval == nil && s.pendingQuestion == nil { s.isPinned = false }
@@ -614,7 +631,12 @@ final class DemoEngine: ObservableObject {
 
     // MARK: Chat streaming
 
+    /// Called by ClaudeService when the user types in chat during a demo.
     func streamChatResponse(for query: String) async {
+        await streamChatResponse(for: query, gen: self.generation)
+    }
+
+    private func streamChatResponse(for query: String, gen: Int) async {
         let s = AppState.shared
         let response = """
         I refactored LoginForm.tsx to be type-safe and resilient. \
@@ -631,11 +653,12 @@ final class DemoEngine: ObservableObject {
         let words = response.components(separatedBy: " ")
         var built = ""
         for word in words {
-            guard isActive, !Task.isCancelled else { break }
+            guard isActive, !Task.isCancelled, self.generation == gen else { break }
             built += (built.isEmpty ? "" : " ") + word
             guard let idx = s.chatHistory.firstIndex(where: { $0.id == msgId }) else { break }
             s.chatHistory[idx].content = built
             try? await Task.sleep(nanoseconds: 60_000_000)
+            guard isActive, !Task.isCancelled, self.generation == gen else { break }
         }
     }
 

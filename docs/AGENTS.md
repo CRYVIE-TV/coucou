@@ -142,45 +142,67 @@ island's `tool_name` / `session_id`.
 
 Coucou supports Copilot CLI out of the box via **Settings → GitHub Copilot CLI Hooks → Install hooks**.
 The installer writes to `~/.copilot/hooks/coucou.json` and uses `--agent copilot`.
-Copilot CLI is fail-closed on `PermissionRequest`: the relay always outputs valid JSON
+Copilot CLI uses camelCase event names and `{"bash":"…","timeoutSec":N}` entries.
+Copilot CLI is fail-closed on `permissionRequest`: the relay always outputs valid JSON
 and returns `{"permissionDecision":"ask"}` on timeout so Copilot re-prompts in the terminal.
+Coucou shows a real Allow / Deny card for Copilot approval requests.
 
 | Copilot CLI event | Canonical event |
 |---|---|
-| `PermissionRequest` | `PermissionRequest` |
-| `PreToolUse` | `PreToolUse` |
-| `PostToolUse` | `PostToolUse` |
-| `UserPromptSubmit` | `UserPromptSubmit` |
-| `SessionStart` | `SessionStart` |
-| `Stop` | `Stop` |
-| `SessionEnd` | `SessionEnd` |
+| `sessionStart` | `SessionStart` |
+| `userPromptSubmitted` | `UserPromptSubmit` |
+| `preToolUse` | `PreToolUse` |
+| `permissionRequest` | `PermissionRequest` |
+| `postToolUse` | `PostToolUse` |
+| `agentStop` | `Stop` |
+| `sessionEnd` | `SessionEnd` |
+| `notification` | `Notification` |
 
 ### Muse Code (macOS)
 
 Coucou supports Muse Code out of the box via **Settings → Muse Code Hooks → Install hooks**.
 The installer merges into `~/.config/muse/settings.json` and uses `--agent muse`.
-The relay translates Muse's snake_case event names to canonical Coucou events.
+Muse uses PascalCase event names. Coucou shows a real Allow / Deny card for Muse approval requests.
 
 | Muse Code event | Canonical event |
 |---|---|
-| `pre_tool_use` | `PreToolUse` |
-| `post_tool_use` | `PostToolUse` |
-| `user_prompt_submit` | `UserPromptSubmit` |
-| `session_start` | `SessionStart` |
-| `session_end` | `SessionEnd` |
-| `stop` | `Stop` |
+| `SessionStart` | `SessionStart` |
+| `UserPromptSubmit` | `UserPromptSubmit` |
+| `PreToolUse` | `PreToolUse` |
+| `PermissionRequest` | `PermissionRequest` |
+| `PostToolUse` | `PostToolUse` |
+| `Stop` | `Stop` |
+| `SessionEnd` | `SessionEnd` |
 
 ### OpenCode (macOS)
 
 Coucou supports OpenCode via **Settings → OpenCode Plugin → Install plugin**.
 The installer writes a JS plugin to `~/.config/opencode/plugins/coucou.js`.
-All events are forwarded fire-and-forget; OpenCode is never blocked.
+The plugin maps OpenCode event types to canonical Coucou names and forwards them fire-and-forget; OpenCode is never blocked.
+
+| OpenCode event | Canonical event |
+|---|---|
+| `session.created` | `SessionStart` |
+| `session.idle` | `Stop` |
+| `session.error` | `StopFailure` |
+| `session.deleted` | `SessionEnd` |
+| `tool.execute.before` | `PreToolUse` |
+| `tool.execute.after` | `PostToolUse` |
+| `permission.asked` | `PermissionRequest` |
 
 ### Amp (macOS)
 
 Coucou supports Amp via **Settings → Amp Plugin → Install plugin**.
 The installer writes a TypeScript plugin to `~/.config/amp/plugins/coucou.ts`.
-All events are forwarded display-only; Amp is never blocked.
+The `tool.call` handler returns `{ action: 'allow' }` so Amp always proceeds; all events are forwarded display-only.
+
+| Amp event | Canonical event |
+|---|---|
+| `session.start` | `SessionStart` |
+| `agent.start` | `UserPromptSubmit` |
+| `tool.call` | `PreToolUse` |
+| `tool.result` | `PostToolUse` |
+| `agent.end` | `Stop` |
 
 ### Any other tool
 

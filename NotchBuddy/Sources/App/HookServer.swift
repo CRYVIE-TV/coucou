@@ -623,7 +623,7 @@ final class HookServer: @unchecked Sendable {
             termProgram.lowercased().contains("vscode") ||
             bundleId.lowercased().contains("vscode"))
 
-        // Codex gets the same approval card as Claude Code / Cursor (GitHub build only).
+        // Codex, Copilot CLI and Muse Code get the same approval card as Claude Code / Cursor.
         // Other external agents (any other coucou_agent) answer immediately with "ask"
         // so the agent re-asks in its own terminal — they do not get a notch card.
         #if !APPSTORE
@@ -631,7 +631,9 @@ final class HookServer: @unchecked Sendable {
         #else
         let isCodexRequest = false
         #endif
-        if !isCodexRequest && Self.validateAgent(rawAgent) != nil {
+        let isCopilotRequest = rawAgent == "copilot"
+        let isMuseRequest    = rawAgent == "muse"
+        if !isCodexRequest && !isCopilotRequest && !isMuseRequest && Self.validateAgent(rawAgent) != nil {
             Task.detached { [weak self] in
                 self?.sendLine(fd: fd, text: #"{"permissionDecision":"ask"}"#)
                 close(fd)
@@ -643,12 +645,16 @@ final class HookServer: @unchecked Sendable {
         let pillId: String
         if isCodexRequest {
             pillId = "agent_codex"
+        } else if isCopilotRequest {
+            pillId = "agent_copilot"
+        } else if isMuseRequest {
+            pillId = "agent_muse"
         } else if isCursorEditor {
             pillId = "agent_cursor"
         } else {
             pillId = "integration_claude"
         }
-        guard isCodexRequest || isCursorEditor || isVSCodeEditor else {
+        guard isCodexRequest || isCopilotRequest || isMuseRequest || isCursorEditor || isVSCodeEditor else {
             Task.detached { [weak self] in
                 self?.sendLine(fd: fd, text: #"{"permissionDecision":"ask"}"#)
                 close(fd)
@@ -710,9 +716,11 @@ final class HookServer: @unchecked Sendable {
             guard let self, self.pendingApprovalFD == fd else { return }
             let note: String
             switch capturedPillId {
-            case "agent_cursor": note = "Handled in Cursor."
-            case "agent_codex":  note = "Handled in Codex."
-            default:             note = "Handled in VS Code."
+            case "agent_cursor":  note = "Handled in Cursor."
+            case "agent_codex":   note = "Handled in Codex."
+            case "agent_copilot": note = "Handled in Copilot CLI."
+            case "agent_muse":    note = "Handled in Muse Code."
+            default:              note = "Handled in VS Code."
             }
             self.dismissApprovalCard(note: note)
         }
@@ -727,9 +735,11 @@ final class HookServer: @unchecked Sendable {
             guard let self, self.pendingApprovalFD == captured else { return }
             let note: String
             switch capturedPillId {
-            case "agent_cursor": note = "Still waiting in Cursor."
-            case "agent_codex":  note = "Still waiting in Codex."
-            default:             note = "Still waiting in VS Code."
+            case "agent_cursor":  note = "Still waiting in Cursor."
+            case "agent_codex":   note = "Still waiting in Codex."
+            case "agent_copilot": note = "Still waiting in Copilot CLI."
+            case "agent_muse":    note = "Still waiting in Muse Code."
+            default:              note = "Still waiting in VS Code."
             }
             self.dismissApprovalCard(note: note)
         }
@@ -1867,7 +1877,7 @@ final class HookServer: @unchecked Sendable {
         for value in hooks.values {
             guard let entries = value as? [[String: Any]] else { continue }
             for entry in entries {
-                if let cmd = entry["command"] as? String,
+                if let cmd = entry["bash"] as? String,
                    cmd.contains("nb-hook"), cmd.contains("--agent copilot") { return true }
             }
         }
@@ -1887,13 +1897,18 @@ final class HookServer: @unchecked Sendable {
         }
         let current = exists ? try Data(contentsOf: url) : Data()
         _pendingCopilotFingerprint = sha256Hex(current)
-        let newData = install ? try buildCopilotHooksData() : try withoutCopilotHooks()
-        _pendingCopilotData = newData
-        return String(data: newData, encoding: .utf8) ?? ""
+        if install {
+            let newData = try buildCopilotHooksData()
+            _pendingCopilotData = newData
+            return String(data: newData, encoding: .utf8) ?? ""
+        } else {
+            _pendingCopilotData = nil  // nil = delete signal
+            return "(will delete \(url.path))"
+        }
     }
 
     func writeCopilotHooks() throws {
-        guard let data = _pendingCopilotData, let fp = _pendingCopilotFingerprint else { return }
+        guard let fp = _pendingCopilotFingerprint else { return }
         let url = Self.copilotHooksURL
         let current = (try? Data(contentsOf: url)) ?? Data()
         guard sha256Hex(current) == fp else {
@@ -1901,7 +1916,12 @@ final class HookServer: @unchecked Sendable {
                 NSLocalizedDescriptionKey: "~/.copilot/hooks/coucou.json changed since preview. Refresh and try again."
             ])
         }
-        try writeJSONFile(data, to: url, suffix: "coucou.json")
+        if let data = _pendingCopilotData {
+            try writeJSONFile(data, to: url, suffix: "coucou.json")
+        } else {
+            // Uninstall: delete the file entirely
+            try FileManager.default.removeItem(at: url)
+        }
         _pendingCopilotData = nil
         _pendingCopilotFingerprint = nil
     }
@@ -1915,15 +1935,18 @@ final class HookServer: @unchecked Sendable {
             ])
         }
         let base = hookBase()
-        // Copilot CLI uses camelCase Claude Code events; it is fail-closed on PermissionRequest.
+        // Copilot CLI uses camelCase event names; each entry uses "bash" + "timeoutSec".
+        // The event name is passed as a positional arg so the relay can fall back to it.
+        // Copilot is fail-closed on permissionRequest — must always output valid JSON.
         let events: [(String, Int)] = [
-            ("SessionStart",      10),
-            ("UserPromptSubmit",  10),
-            ("PreToolUse",        10),
-            ("PermissionRequest", 120),
-            ("PostToolUse",       10),
-            ("Stop",              10),
-            ("SessionEnd",         3),
+            ("sessionStart",        10),
+            ("userPromptSubmitted", 10),
+            ("preToolUse",          10),
+            ("permissionRequest",  120),
+            ("postToolUse",         10),
+            ("agentStop",           10),
+            ("sessionEnd",           3),
+            ("notification",        10),
         ]
         var hooks = root["hooks"] as? [String: Any] ?? [:]
         for (event, timeout) in events {
@@ -1933,11 +1956,12 @@ final class HookServer: @unchecked Sendable {
                 ])
             }
             var entries = hooks[event] as? [[String: Any]] ?? []
-            entries.removeAll { ($0["command"] as? String)?.contains("nb-hook") == true }
-            entries.append(["type": "command", "command": "\(base) --agent copilot", "timeout": timeout])
+            entries.removeAll { ($0["bash"] as? String)?.contains("nb-hook") == true }
+            entries.append(["type": "command", "bash": "\(base) --agent copilot \(event)", "timeoutSec": timeout])
             hooks[event] = entries
         }
         root["hooks"] = hooks
+        root["version"] = 1
         return try JSONSerialization.data(withJSONObject: root,
                                          options: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes])
     }
@@ -2027,16 +2051,17 @@ final class HookServer: @unchecked Sendable {
             ])
         }
         let base = hookBase()
-        // Muse uses snake_case events; relay normalises them to canonical names.
-        // Timeouts in seconds × 1000 = milliseconds (Muse format).
+        // Muse uses PascalCase events. Timeouts in milliseconds (seconds × 1000).
         let events: [(String, Int)] = [
-            ("session_start",      10),
-            ("user_prompt_submit",  5),
-            ("pre_tool_use",        5),
-            ("post_tool_use",       5),
-            ("stop",                5),
-            ("session_end",         3),
+            ("SessionStart",      10),
+            ("UserPromptSubmit",   5),
+            ("PreToolUse",         5),
+            ("PermissionRequest", 120),
+            ("PostToolUse",        5),
+            ("Stop",               5),
+            ("SessionEnd",         3),
         ]
+        let isNew = !FileManager.default.fileExists(atPath: Self.museSettingsURL.path)
         var hooks = settings["hooks"] as? [String: Any] ?? [:]
         for (event, timeoutSec) in events {
             if let raw = hooks[event], !(raw is [[String: Any]]) {
@@ -2055,6 +2080,7 @@ final class HookServer: @unchecked Sendable {
             hooks[event] = groups
         }
         settings["hooks"] = hooks
+        if isNew { settings["schema_version"] = 1 }
         return try JSONSerialization.data(withJSONObject: settings,
                                          options: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes])
     }
@@ -2082,6 +2108,9 @@ final class HookServer: @unchecked Sendable {
 
     // MARK: - OpenCode plugin installer
 
+    private var _pendingOpenCodeContent: String?
+    private var _pendingOpenCodeFingerprint: String?
+
     static var openCodePluginURL: URL {
         FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent(".config/opencode/plugins/coucou.js")
@@ -2100,38 +2129,74 @@ final class HookServer: @unchecked Sendable {
 // Coucou hook plugin for OpenCode — generated by Coucou.app
 // Forwards every event to the Coucou notch (fire-and-forget, never blocks).
 import { spawn } from 'node:child_process';
+
 const HOOK = '\(path)';
-export default {
-  name: 'coucou',
-  hooks: {
-    '*': (event) => {
-      const p = spawn('/bin/sh', [HOOK, '--agent', 'opencode'],
-                      { stdio: ['pipe', 'ignore', 'ignore'], detached: true });
-      p.stdin.write(JSON.stringify(event) + '\\n');
-      p.stdin.end();
-      p.unref();
-    }
-  }
+const EVENT_MAP = {
+  'session.created': 'SessionStart',
+  'session.idle': 'Stop',
+  'session.error': 'StopFailure',
+  'session.deleted': 'SessionEnd',
+  'tool.execute.before': 'PreToolUse',
+  'tool.execute.after': 'PostToolUse',
+  'permission.asked': 'PermissionRequest',
 };
+
+export const CoucouPlugin = async (_ctx) => ({
+  event: async ({ event }) => {
+    const hook_event_name = EVENT_MAP[event.type] || event.type;
+    const payload = {
+      hook_event_name,
+      session_id: event.sessionID || event.session_id || '',
+      cwd: event.cwd || event.directory || '',
+    };
+    if (event.tool && event.tool.name) payload.tool_name = event.tool.name;
+    if (event.input != null) payload.tool_input = event.input;
+    const p = spawn('/bin/sh', [HOOK, '--agent', 'opencode'],
+                    { stdio: ['pipe', 'ignore', 'ignore'], detached: true });
+    p.on('error', () => {});
+    p.stdin.on('error', () => {});
+    p.stdin.write(JSON.stringify(payload) + '\\n');
+    p.stdin.end();
+    p.unref();
+  }
+});
 """
     }
 
     func previewOpenCodePlugin(install: Bool) throws -> String {
         let url = Self.openCodePluginURL
+        let exists = FileManager.default.fileExists(atPath: url.path)
         if !install {
-            guard FileManager.default.fileExists(atPath: url.path) else {
+            guard exists else {
                 throw NSError(domain: "CoucouNoop", code: 0, userInfo: [
                     NSLocalizedDescriptionKey: "No OpenCode plugin to remove."
                 ])
             }
+            let current = (try? Data(contentsOf: url)) ?? Data()
+            _pendingOpenCodeFingerprint = sha256Hex(current)
+            _pendingOpenCodeContent = nil
             return "(will delete \(url.path))"
         }
-        return buildOpenCodePluginContent()
+        let current = exists ? (try? Data(contentsOf: url)) ?? Data() : Data()
+        _pendingOpenCodeFingerprint = sha256Hex(current)
+        let content = buildOpenCodePluginContent()
+        _pendingOpenCodeContent = content
+        return content
     }
 
     func writeOpenCodePlugin() throws {
+        guard let fp = _pendingOpenCodeFingerprint else { return }
         let url = Self.openCodePluginURL
-        let content = buildOpenCodePluginContent()
+        let current = (try? Data(contentsOf: url)) ?? Data()
+        guard sha256Hex(current) == fp else {
+            throw NSError(domain: "Coucou", code: 1, userInfo: [
+                NSLocalizedDescriptionKey: "~/.config/opencode/plugins/coucou.js changed since preview. Refresh and try again."
+            ])
+        }
+        guard let content = _pendingOpenCodeContent else {
+            // Uninstall path: checked by removeOpenCodePlugin
+            return
+        }
         let fm = FileManager.default
         if fm.fileExists(atPath: url.path) {
             let fmt = DateFormatter()
@@ -2143,15 +2208,26 @@ export default {
         }
         try fm.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
         try content.write(to: url, atomically: true, encoding: .utf8)
+        _pendingOpenCodeContent = nil
+        _pendingOpenCodeFingerprint = nil
     }
 
     func removeOpenCodePlugin() throws {
         let url = Self.openCodePluginURL
         guard FileManager.default.fileExists(atPath: url.path) else { return }
+        let content = (try? String(contentsOf: url, encoding: .utf8)) ?? ""
+        guard content.contains("generated by Coucou") else {
+            throw NSError(domain: "Coucou", code: 3, userInfo: [
+                NSLocalizedDescriptionKey: "~/.config/opencode/plugins/coucou.js was not generated by Coucou — not deleting it."
+            ])
+        }
         try FileManager.default.removeItem(at: url)
     }
 
     // MARK: - Amp plugin installer
+
+    private var _pendingAmpContent: String?
+    private var _pendingAmpFingerprint: String?
 
     static var ampPluginURL: URL {
         FileManager.default.homeDirectoryForCurrentUser
@@ -2171,37 +2247,64 @@ export default {
 // Coucou hook plugin for Amp — generated by Coucou.app
 // Forwards every event to the Coucou notch (display only, never blocks).
 import { spawn } from 'node:child_process';
+
 const HOOK = '\(path)';
-export default {
-  hooks: {
-    '*': (event: unknown): void => {
-      const p = spawn('/bin/sh', [HOOK, '--agent', 'amp'],
-                      { stdio: ['pipe', 'ignore', 'ignore'], detached: true });
-      (p.stdin as import('node:stream').Writable).write(JSON.stringify(event) + '\\n');
-      (p.stdin as import('node:stream').Writable).end();
-      p.unref();
-    }
-  }
-};
+
+function forward(event_name: string, fields: Record<string, unknown>): void {
+  const payload = JSON.stringify({ hook_event_name: event_name, ...fields });
+  const p = spawn('/bin/sh', [HOOK, '--agent', 'amp'],
+                  { stdio: ['pipe', 'ignore', 'ignore'], detached: true });
+  p.on('error', () => {});
+  (p.stdin as import('node:stream').Writable).on('error', () => {});
+  (p.stdin as import('node:stream').Writable).write(payload + '\\n');
+  (p.stdin as import('node:stream').Writable).end();
+  p.unref();
+}
+
+export default function (amp: any): void {
+  amp.on('session.start', (e: any) => { forward('SessionStart',     { session_id: e.thread?.id ?? '' }); });
+  amp.on('agent.start',   (e: any) => { forward('UserPromptSubmit', { session_id: e.thread?.id ?? '' }); });
+  amp.on('tool.call',     (e: any) => { forward('PreToolUse',       { session_id: e.thread?.id ?? '', tool_name: e.tool?.name ?? '' }); return { action: 'allow' }; });
+  amp.on('tool.result',   (e: any) => { forward('PostToolUse',      { session_id: e.thread?.id ?? '' }); });
+  amp.on('agent.end',     (e: any) => { forward('Stop',             { session_id: e.thread?.id ?? '' }); });
+}
 """
     }
 
     func previewAmpPlugin(install: Bool) throws -> String {
         let url = Self.ampPluginURL
+        let exists = FileManager.default.fileExists(atPath: url.path)
         if !install {
-            guard FileManager.default.fileExists(atPath: url.path) else {
+            guard exists else {
                 throw NSError(domain: "CoucouNoop", code: 0, userInfo: [
                     NSLocalizedDescriptionKey: "No Amp plugin to remove."
                 ])
             }
+            let current = (try? Data(contentsOf: url)) ?? Data()
+            _pendingAmpFingerprint = sha256Hex(current)
+            _pendingAmpContent = nil
             return "(will delete \(url.path))"
         }
-        return buildAmpPluginContent()
+        let current = exists ? (try? Data(contentsOf: url)) ?? Data() : Data()
+        _pendingAmpFingerprint = sha256Hex(current)
+        let content = buildAmpPluginContent()
+        _pendingAmpContent = content
+        return content
     }
 
     func writeAmpPlugin() throws {
+        guard let fp = _pendingAmpFingerprint else { return }
         let url = Self.ampPluginURL
-        let content = buildAmpPluginContent()
+        let current = (try? Data(contentsOf: url)) ?? Data()
+        guard sha256Hex(current) == fp else {
+            throw NSError(domain: "Coucou", code: 1, userInfo: [
+                NSLocalizedDescriptionKey: "~/.config/amp/plugins/coucou.ts changed since preview. Refresh and try again."
+            ])
+        }
+        guard let content = _pendingAmpContent else {
+            // Uninstall path: checked by removeAmpPlugin
+            return
+        }
         let fm = FileManager.default
         if fm.fileExists(atPath: url.path) {
             let fmt = DateFormatter()
@@ -2213,11 +2316,19 @@ export default {
         }
         try fm.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
         try content.write(to: url, atomically: true, encoding: .utf8)
+        _pendingAmpContent = nil
+        _pendingAmpFingerprint = nil
     }
 
     func removeAmpPlugin() throws {
         let url = Self.ampPluginURL
         guard FileManager.default.fileExists(atPath: url.path) else { return }
+        let content = (try? String(contentsOf: url, encoding: .utf8)) ?? ""
+        guard content.contains("generated by Coucou") else {
+            throw NSError(domain: "Coucou", code: 3, userInfo: [
+                NSLocalizedDescriptionKey: "~/.config/amp/plugins/coucou.ts was not generated by Coucou — not deleting it."
+            ])
+        }
         try FileManager.default.removeItem(at: url)
     }
 
@@ -2245,11 +2356,27 @@ private let nbHookShellWrapper = """
 #!/bin/sh
 # Coucou hook relay — always exits 0, never blocks Claude Code
 HOOK_DIR="$(dirname "$0")"
+out=""
 if xcode-select -p >/dev/null 2>&1; then
     out=$(/usr/bin/python3 "$HOOK_DIR/nb-hook.py" "$@" 2>/dev/null)
     rc=$?
-    if [ "$rc" -eq 0 ] && [ -n "$out" ]; then
-        printf '%s\\n' "$out"
+    if [ "$rc" -ne 0 ] || [ -z "$out" ]; then
+        out=""
+    fi
+fi
+if [ -n "$out" ]; then
+    printf '%s\\n' "$out"
+else
+    # Copilot is fail-closed on permissionRequest — must always output valid JSON.
+    _cop=0; _perm=0
+    for _a in "$@"; do
+        case "$_a" in
+            copilot) _cop=1 ;;
+            permissionRequest|PermissionRequest) _perm=1 ;;
+        esac
+    done
+    if [ "$_cop" -eq 1 ] && [ "$_perm" -eq 1 ]; then
+        printf '{"permissionDecision":"ask"}\\n'
     fi
 fi
 exit 0
@@ -2272,26 +2399,38 @@ def normalize_event(name):
         'PreInvocation': 'UserPromptSubmit', 'PostInvocation': 'PostToolUse',
         'pre_tool_use': 'PreToolUse', 'post_tool_use': 'PostToolUse',
         'user_prompt_submit': 'UserPromptSubmit', 'session_start': 'SessionStart',
-        'session_end': 'SessionEnd',
+        'session_end': 'SessionEnd', 'stop': 'Stop',
+        'sessionStart': 'SessionStart', 'userPromptSubmitted': 'UserPromptSubmit',
+        'agentStop': 'Stop', 'notification': 'Notification',
     }
     return mapping.get(name, name)
 
 def normalize_tool_fields(payload):
-    if 'tool_name' in payload:
-        return
-    tool = payload.get('toolCall')
-    if not isinstance(tool, dict):
-        tool = {}
-    name = tool.get('name') or payload.get('tool', '')
-    if name:
-        payload['tool_name'] = name
-    if 'tool_input' not in payload and isinstance(tool.get('args'), dict):
-        flat = dict(tool['args'])
-        for src, dst in [('CommandLine', 'command'), ('FilePath', 'file_path'),
-                         ('Path', 'path'), ('Url', 'url'), ('Query', 'query'), ('Pattern', 'pattern')]:
-            if src in flat:
-                flat[dst] = flat[src]
-        payload['tool_input'] = flat
+    if 'tool_name' not in payload:
+        # Copilot sends toolName directly; other agents nest in toolCall
+        if payload.get('toolName'):
+            payload['tool_name'] = payload['toolName']
+        else:
+            tool = payload.get('toolCall')
+            if not isinstance(tool, dict):
+                tool = {}
+            name = tool.get('name') or payload.get('tool', '')
+            if name:
+                payload['tool_name'] = name
+    if 'tool_input' not in payload:
+        # Copilot sends toolArgs directly
+        tool_args = payload.get('toolArgs')
+        if isinstance(tool_args, dict):
+            payload['tool_input'] = tool_args
+        else:
+            tool = payload.get('toolCall') or {}
+            if isinstance(tool.get('args'), dict):
+                flat = dict(tool['args'])
+                for src, dst in [('CommandLine', 'command'), ('FilePath', 'file_path'),
+                                 ('Path', 'path'), ('Url', 'url'), ('Query', 'query'), ('Pattern', 'pattern')]:
+                    if src in flat:
+                        flat[dst] = flat[src]
+                payload['tool_input'] = flat
     if 'session_id' not in payload:
         for k in ['conversationId', 'conversation_id', 'sessionId', 'GEMINI_SESSION_ID']:
             if payload.get(k):
@@ -2301,6 +2440,9 @@ def normalize_tool_fields(payload):
             sid = os.environ.get('GEMINI_SESSION_ID', '')
             if sid:
                 payload['session_id'] = sid
+    # Copilot sends workdir for the current working directory
+    if not payload.get('cwd') and payload.get('workdir'):
+        payload['cwd'] = payload['workdir']
 
 def main():
     raw = b''
@@ -2468,26 +2610,25 @@ def main():
                     decision = resp_obj.get('permissionDecision', '')
                 except Exception:
                     decision = ''
-                if decision == 'allow':
-                    out = {'hookSpecificOutput': {'hookEventName': 'PermissionRequest', 'decision': {'behavior': 'allow'}}}
-                    sys.stdout.write(json.dumps(out) + '\\n')
-                    sys.stdout.flush()
-                    sys.exit(0)
-                elif decision == 'always' and agent != 'codex':
-                    # Let Claude Code persist the rule via updatedPermissions
-                    suggestions = payload.get('permission_suggestions', [])
-                    out = {'hookSpecificOutput': {'hookEventName': 'PermissionRequest', 'decision': {'behavior': 'allow', 'updatedPermissions': suggestions}}}
-                    sys.stdout.write(json.dumps(out) + '\\n')
-                    sys.stdout.flush()
-                    sys.exit(0)
-                elif decision == 'always':
-                    # Codex rejects updatedPermissions — answer a plain allow instead
-                    out = {'hookSpecificOutput': {'hookEventName': 'PermissionRequest', 'decision': {'behavior': 'allow'}}}
+                if decision in ('allow', 'always'):
+                    # Copilot/Muse use {"permissionDecision":"allow"} directly
+                    if agent in ('copilot', 'muse'):
+                        out = {'permissionDecision': 'allow'}
+                    elif decision == 'always' and agent != 'codex':
+                        # Let Claude Code persist the rule via updatedPermissions
+                        suggestions = payload.get('permission_suggestions', [])
+                        out = {'hookSpecificOutput': {'hookEventName': 'PermissionRequest', 'decision': {'behavior': 'allow', 'updatedPermissions': suggestions}}}
+                    else:
+                        # Claude Code / Codex plain allow
+                        out = {'hookSpecificOutput': {'hookEventName': 'PermissionRequest', 'decision': {'behavior': 'allow'}}}
                     sys.stdout.write(json.dumps(out) + '\\n')
                     sys.stdout.flush()
                     sys.exit(0)
                 elif decision == 'deny':
-                    out = {'hookSpecificOutput': {'hookEventName': 'PermissionRequest', 'decision': {'behavior': 'deny', 'message': 'Denied from Coucou'}}}
+                    if agent in ('copilot', 'muse'):
+                        out = {'permissionDecision': 'deny'}
+                    else:
+                        out = {'hookSpecificOutput': {'hookEventName': 'PermissionRequest', 'decision': {'behavior': 'deny', 'message': 'Denied from Coucou'}}}
                     sys.stdout.write(json.dumps(out) + '\\n')
                     sys.stdout.flush()
                     sys.exit(0)
@@ -2519,12 +2660,15 @@ def main():
     except Exception:
         pass  # Always exit cleanly — never block the agent
 
-    # Gemini CLI, Antigravity and Muse Code expect a JSON response on stdout (empty = no decision)
-    if agent in ('gemini', 'antigravity', 'muse'):
+    # Gemini CLI, Antigravity, Muse Code and Copilot CLI expect {} on stdout (empty = no decision)
+    if agent in ('gemini', 'antigravity', 'muse', 'copilot'):
         sys.stdout.write('{}\\n')
         sys.stdout.flush()
 
-main()
+try:
+    main()
+except Exception:
+    pass
 sys.exit(0)
 """
 
@@ -2545,26 +2689,38 @@ def normalize_event(name):
         'PreInvocation': 'UserPromptSubmit', 'PostInvocation': 'PostToolUse',
         'pre_tool_use': 'PreToolUse', 'post_tool_use': 'PostToolUse',
         'user_prompt_submit': 'UserPromptSubmit', 'session_start': 'SessionStart',
-        'session_end': 'SessionEnd',
+        'session_end': 'SessionEnd', 'stop': 'Stop',
+        'sessionStart': 'SessionStart', 'userPromptSubmitted': 'UserPromptSubmit',
+        'agentStop': 'Stop', 'notification': 'Notification',
     }
     return mapping.get(name, name)
 
 def normalize_tool_fields(payload):
-    if 'tool_name' in payload:
-        return
-    tool = payload.get('toolCall')
-    if not isinstance(tool, dict):
-        tool = {}
-    name = tool.get('name') or payload.get('tool', '')
-    if name:
-        payload['tool_name'] = name
-    if 'tool_input' not in payload and isinstance(tool.get('args'), dict):
-        flat = dict(tool['args'])
-        for src, dst in [('CommandLine', 'command'), ('FilePath', 'file_path'),
-                         ('Path', 'path'), ('Url', 'url'), ('Query', 'query'), ('Pattern', 'pattern')]:
-            if src in flat:
-                flat[dst] = flat[src]
-        payload['tool_input'] = flat
+    if 'tool_name' not in payload:
+        # Copilot sends toolName directly; other agents nest in toolCall
+        if payload.get('toolName'):
+            payload['tool_name'] = payload['toolName']
+        else:
+            tool = payload.get('toolCall')
+            if not isinstance(tool, dict):
+                tool = {}
+            name = tool.get('name') or payload.get('tool', '')
+            if name:
+                payload['tool_name'] = name
+    if 'tool_input' not in payload:
+        # Copilot sends toolArgs directly
+        tool_args = payload.get('toolArgs')
+        if isinstance(tool_args, dict):
+            payload['tool_input'] = tool_args
+        else:
+            tool = payload.get('toolCall') or {}
+            if isinstance(tool.get('args'), dict):
+                flat = dict(tool['args'])
+                for src, dst in [('CommandLine', 'command'), ('FilePath', 'file_path'),
+                                 ('Path', 'path'), ('Url', 'url'), ('Query', 'query'), ('Pattern', 'pattern')]:
+                    if src in flat:
+                        flat[dst] = flat[src]
+                payload['tool_input'] = flat
     if 'session_id' not in payload:
         for k in ['conversationId', 'conversation_id', 'sessionId', 'GEMINI_SESSION_ID']:
             if payload.get(k):
@@ -2574,6 +2730,9 @@ def normalize_tool_fields(payload):
             sid = os.environ.get('GEMINI_SESSION_ID', '')
             if sid:
                 payload['session_id'] = sid
+    # Copilot sends workdir for the current working directory
+    if not payload.get('cwd') and payload.get('workdir'):
+        payload['cwd'] = payload['workdir']
 
 def main():
     raw = b''
@@ -2740,26 +2899,25 @@ def main():
                     decision = resp_obj.get('permissionDecision', '')
                 except Exception:
                     decision = ''
-                if decision == 'allow':
-                    out = {'hookSpecificOutput': {'hookEventName': 'PermissionRequest', 'decision': {'behavior': 'allow'}}}
-                    sys.stdout.write(json.dumps(out) + '\\n')
-                    sys.stdout.flush()
-                    sys.exit(0)
-                elif decision == 'always' and agent != 'codex':
-                    # Let Claude Code persist the rule via updatedPermissions
-                    suggestions = payload.get('permission_suggestions', [])
-                    out = {'hookSpecificOutput': {'hookEventName': 'PermissionRequest', 'decision': {'behavior': 'allow', 'updatedPermissions': suggestions}}}
-                    sys.stdout.write(json.dumps(out) + '\\n')
-                    sys.stdout.flush()
-                    sys.exit(0)
-                elif decision == 'always':
-                    # Codex rejects updatedPermissions — answer a plain allow instead
-                    out = {'hookSpecificOutput': {'hookEventName': 'PermissionRequest', 'decision': {'behavior': 'allow'}}}
+                if decision in ('allow', 'always'):
+                    # Copilot/Muse use {"permissionDecision":"allow"} directly
+                    if agent in ('copilot', 'muse'):
+                        out = {'permissionDecision': 'allow'}
+                    elif decision == 'always' and agent != 'codex':
+                        # Let Claude Code persist the rule via updatedPermissions
+                        suggestions = payload.get('permission_suggestions', [])
+                        out = {'hookSpecificOutput': {'hookEventName': 'PermissionRequest', 'decision': {'behavior': 'allow', 'updatedPermissions': suggestions}}}
+                    else:
+                        # Claude Code / Codex plain allow
+                        out = {'hookSpecificOutput': {'hookEventName': 'PermissionRequest', 'decision': {'behavior': 'allow'}}}
                     sys.stdout.write(json.dumps(out) + '\\n')
                     sys.stdout.flush()
                     sys.exit(0)
                 elif decision == 'deny':
-                    out = {'hookSpecificOutput': {'hookEventName': 'PermissionRequest', 'decision': {'behavior': 'deny', 'message': 'Denied from Coucou'}}}
+                    if agent in ('copilot', 'muse'):
+                        out = {'permissionDecision': 'deny'}
+                    else:
+                        out = {'hookSpecificOutput': {'hookEventName': 'PermissionRequest', 'decision': {'behavior': 'deny', 'message': 'Denied from Coucou'}}}
                     sys.stdout.write(json.dumps(out) + '\\n')
                     sys.stdout.flush()
                     sys.exit(0)
@@ -2790,11 +2948,14 @@ def main():
     except Exception:
         pass  # Always exit cleanly — never block the agent
 
-    # Gemini CLI, Antigravity and Muse Code expect a JSON response on stdout (empty = no decision)
-    if agent in ('gemini', 'antigravity', 'muse'):
+    # Gemini CLI, Antigravity, Muse Code and Copilot CLI expect {} on stdout (empty = no decision)
+    if agent in ('gemini', 'antigravity', 'muse', 'copilot'):
         sys.stdout.write('{}\\n')
         sys.stdout.flush()
 
-main()
+try:
+    main()
+except Exception:
+    pass
 sys.exit(0)
 """

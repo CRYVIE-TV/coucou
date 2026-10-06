@@ -889,7 +889,7 @@ struct UploadingView: View {
                             .foregroundColor(Color(hex: "#34D399"))
                             .lineLimit(1).truncationMode(.middle)
                     } else {
-                        Text("Uploading \(state.droppedFile?.name ?? "file")")
+                        Text(String(format: String(localized: "Uploading %@"), state.droppedFile?.name ?? "file"))
                             .font(.system(size: 12.5))
                             .foregroundColor(Color(hex: "#A9ADB5"))
                             .lineLimit(1).truncationMode(.middle)
@@ -977,7 +977,7 @@ struct MailView: View {
                 }
 
                 HStack(spacing: 8) {
-                    PrimaryButton(isSending ? "Sending…" : "Send") {
+                    PrimaryButton(verbatim: isSending ? String(localized: "Sending…") : String(localized: "Send")) {
                         guard !isSending else { return }
                         sendMail()
                     }
@@ -992,7 +992,7 @@ struct MailView: View {
     }
 
     private func sendMail() {
-        guard !to.isEmpty else { statusMsg = "Missing recipient."; return }
+        guard !to.isEmpty else { statusMsg = String(localized: "Missing recipient."); return }
         let subj = subject.isEmpty ? (state.droppedFile?.name ?? "File") : subject
 
         // Prefer Resend if API key + sender address are configured
@@ -1057,7 +1057,7 @@ struct MailView: View {
         #if APPSTORE
         // App Store: no AppleScript — use NSSharingService to compose (user sends manually)
         guard let service = NSSharingService(named: .composeEmail) else {
-            statusMsg = "Mail not available."
+            statusMsg = String(localized: "Mail not available.")
             return
         }
         var items: [Any] = [bodyText.isEmpty ? " " : bodyText]
@@ -1204,7 +1204,7 @@ struct PromptView: View {
                 .padding(.horizontal, 10)
 
                 HStack(spacing: 8) {
-                    TextField(state.chatHistory.isEmpty ? "Ask me anything…" : "Continue…", text: $text)
+                    TextField(state.chatHistory.isEmpty ? String(localized: "Ask me anything…") : String(localized: "Continue…"), text: $text)
                         .textFieldStyle(.plain)
                         .font(.system(size: 13))
                         .focused($focused)
@@ -1755,7 +1755,7 @@ struct IntegrationCardView: View {
         #if !APPSTORE
         if task.id == "integration_music" {
             if appState.musicAutomationDenied { return String(localized: "Automation not allowed") }
-            if appState.musicPlaying { return "Playing · \(MusicController.shared.trackTitle ?? "Unknown")" }
+            if appState.musicPlaying { return String(format: String(localized: "Playing · %@"), MusicController.shared.trackTitle ?? String(localized: "Unknown")) }
             return String(localized: "Not playing")
         }
         #endif
@@ -1952,7 +1952,7 @@ struct IntegrationCardView: View {
                         #endif
                     } else if let provider = ChatProvider(pillID: task.id) {
                         if isConfigured {
-                            Button("Chat with \(task.name)") {
+                            Button(String(format: String(localized: "Chat with %@"), task.name)) {
                                 switchChatProvider(provider)
                             }
                             .font(.system(size: 11, weight: .medium))
@@ -2421,7 +2421,7 @@ struct GitHubPulseCardView: View {
                 }()
                 GitHubStatRow(
                     icon: "arrow.triangle.pull", iconColor: ciColor(prWorst),
-                    label: "My PRs", value: prValue
+                    label: String(localized: "My PRs"), value: prValue
                 ) { onTapSection(.myPRs) }
 
                 // To review
@@ -2429,7 +2429,7 @@ struct GitHubPulseCardView: View {
                 GitHubStatRow(
                     icon: "eye",
                     iconColor: reviewCount > 0 ? "#8AB4F8" : "#6B7079",
-                    label: "To review",
+                    label: String(localized: "To review"),
                     value: "\(reviewCount)"
                 ) { onTapSection(.toReview) }
 
@@ -2509,10 +2509,10 @@ struct GitHubDetailView: View {
 
     private var title: String {
         switch section {
-        case .myPRs:    return "My PRs"
-        case .toReview: return "To review"
+        case .myPRs:    return String(localized: "My PRs")
+        case .toReview: return String(localized: "To review")
         case .mainCI:   return "Default branch CI"
-        case .activity: return "Activity"
+        case .activity: return String(localized: "Activity")
         }
     }
 
@@ -2649,7 +2649,7 @@ private struct GitHubActivityDetailContent: View {
         if let day = hoveredDay {
             let label: String
             switch day.count {
-            case 0:  label = "No contributions"
+            case 0:  label = String(localized: "No contributions")
             case 1:  label = "1 contribution"
             default: label = "\(day.count) contributions"
             }
@@ -3378,7 +3378,7 @@ struct N8nDetailView: View {
 
     private var success: Bool  { task.state == .finished }
     private var accent: Color  { success ? Color(hex: "#22C55E") : Color(hex: "#F4505E") }
-    private var statusLabel: String { success ? "Success" : "Failed" }
+    private var statusLabel: String { success ? String(localized: "Success") : String(localized: "Failed") }
     private var detail: String? { task.steps.dropFirst().first }
 
     var body: some View {
@@ -3425,7 +3425,7 @@ struct N8nDetailView: View {
                 }
                 .frame(maxHeight: 88)
             } else {
-                Text(success ? "Completed successfully." : "No error details available.")
+                Text(success ? String(localized: "Completed successfully.") : String(localized: "No error details available."))
                     .font(.system(size: 11))
                     .foregroundColor(Color(hex: "#6B7079"))
             }
@@ -4678,7 +4678,7 @@ struct SettingsIslandView: View {
                         .font(.system(size: 12))
                         .foregroundColor(Color(hex: "#8E939C"))
                         .frame(width: 16)
-                    Text("Auto-close · \(Int(state.autoCloseInterval))s")
+                    Text(String(format: String(localized: "Auto-close · %llds"), Int64(state.autoCloseInterval)))
                         .font(.system(size: 12))
                         .foregroundColor(Color(hex: "#C5C8CD"))
                     Spacer()

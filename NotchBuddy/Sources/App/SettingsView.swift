@@ -361,7 +361,7 @@ struct SettingsView: View {
                         let pid = ProcessInfo.processInfo.processIdentifier
                         let task = Process()
                         task.executableURL = URL(fileURLWithPath: "/bin/sh")
-                        task.arguments = ["-c", "while kill -0 \(pid) 2>/dev/null; do sleep 0.2; done; open \"\(appPath)\""]
+                        task.arguments = ["-c", "while kill -0 \(pid) 2>/dev/null; do sleep 0.2; done; open \"$1\"", "--", appPath]
                         try? task.run()
                         NSApp.terminate(nil)
                     }
@@ -1162,9 +1162,9 @@ struct SettingsView: View {
                 state.fetchedProviderModels[.lmstudio] = nil
                 state.providerModelFetchError[.lmstudio] = nil
             }
-            statusMessage = models.count == 1 ? String(format: String(localized: "status.local.connected %lld"), Int64(models.count)) : String(format: String(localized: "status.local.connected.plural %lld"), Int64(models.count))
+            statusMessage = String(localized: "status.local.connected \(models.count)")
         case .failure:
-            statusMessage = String(format: String(localized: "status.local.unreachable %@ %@"), name, normalised)
+            statusMessage = String(format: String(localized: "status.local.unreachable %1$@ %2$@"), name, normalised)
         }
     }
 
@@ -1687,7 +1687,7 @@ struct IntegrationFilterRow: View {
                 }
                 .padding(.leading, 4)
                 if !filter.isEmpty {
-                    Text("Watching \(filter.count) of \(items.count)")
+                    Text(String(format: String(localized: "Watching %lld of %lld"), Int64(filter.count), Int64(items.count)))
                         .font(.system(size: 10))
                         .foregroundColor(.secondary)
                 }

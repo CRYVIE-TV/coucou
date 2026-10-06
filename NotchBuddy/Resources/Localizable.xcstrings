@@ -769,6 +769,134 @@
         }
       }
     },
+    "Ask me anything…": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اسألني أي شيء…"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "যেকোনো কিছু জিজ্ঞেস করুন…"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ask me anything…"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pregúntame algo…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demande-moi n'importe quoi…"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "कुछ भी पूछें…"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tanyakan apa saja…"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pergunte qualquer coisa…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Спроси меня о чём угодно…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "问我任何事…"
+          }
+        }
+      }
+    },
+    "Auto-close · %llds": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "إغلاق تلقائي · %lldث"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "স্বয়ংক্রিয়-বন্ধ · %lldস"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auto-close · %llds"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cierre automático · %llds"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fermeture auto · %llds"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ऑटो-क्लोज़ · %lldस"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tutup otomatis · %llddt"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fechar auto · %llds"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Автозакрытие · %lld с"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自动关闭 · %lld 秒"
+          }
+        }
+      }
+    },
     "Automation not allowed": {
       "localizations": {
         "ar": {
@@ -1025,6 +1153,70 @@
         }
       }
     },
+    "Chat with %@": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الدردشة مع %@"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@-এর সাথে চ্যাট"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chat with %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chatear con %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discuter avec %@"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ के साथ चैट"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chat dengan %@"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conversar com %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Чат с %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "与 %@ 聊天"
+          }
+        }
+      }
+    },
     "Choose the tools you use. Coucou only shows what you declare here.": {
       "localizations": {
         "ar": {
@@ -1078,7 +1270,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Выберите инструменты, которые используете. Coucou показывает только то, что вы объявите здесь."
+            "value": "Выбери инструменты, которые ты используешь. Coucou показывает только то, что ты здесь объявишь."
           }
         },
         "zh-Hans": {
@@ -1665,6 +1857,70 @@
         }
       }
     },
+    "Completed successfully.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اكتمل بنجاح."
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "সফলভাবে সম্পন্ন।"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Completed successfully."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Completado con éxito."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terminé avec succès."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सफलतापूर्वक पूर्ण हुआ।"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selesai dengan berhasil."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concluído com sucesso."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Завершено успешно."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已成功完成。"
+          }
+        }
+      }
+    },
     "Connected": {
       "localizations": {
         "ar": {
@@ -1853,6 +2109,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "已连接 · 加载中…"
+          }
+        }
+      }
+    },
+    "Continue…": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "متابعة…"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "চালিয়ে যান…"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continue…"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuar…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuer…"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "जारी रखें…"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lanjutkan…"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuar…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Продолжить…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "继续…"
           }
         }
       }
@@ -2230,7 +2550,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Перетащите файл или окно, или спросите меня что угодно."
+            "value": "Брось файл или окно, или спроси меня о чём угодно."
           }
         },
         "zh-Hans": {
@@ -2429,6 +2749,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "启用声音"
+          }
+        }
+      }
+    },
+    "Failed": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "فشل"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ব্যর্থ"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fallido"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Échoué"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "विफल"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gagal"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Falhou"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ошибка"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "失败"
           }
         }
       }
@@ -3457,6 +3841,70 @@
         }
       }
     },
+    "Mail not available.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "البريد غير متاح."
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "মেইল পাওয়া যাচ্ছে না।"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mail not available."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Correo no disponible."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Messagerie non disponible."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "मेल उपलब्ध नहीं है।"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mail tidak tersedia."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "E-mail não disponível."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Почта недоступна."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "邮件不可用。"
+          }
+        }
+      }
+    },
     "Main": {
       "localizations": {
         "ar": {
@@ -3517,6 +3965,134 @@
           "stringUnit": {
             "state": "translated",
             "value": "主要"
+          }
+        }
+      }
+    },
+    "Missing recipient.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "المستلم مفقود."
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "প্রাপক অনুপস্থিত।"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Missing recipient."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Falta el destinatario."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Destinataire manquant."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "प्राप्तकर्ता गुम है।"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Penerima tidak ada."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Destinatário ausente."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Получатель не указан."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "收件人缺失。"
+          }
+        }
+      }
+    },
+    "My PRs": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "طلبات السحب"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "আমার PR"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "My PRs"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mis PRs"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mes PRs"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "मेरे PR"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PR saya"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meus PRs"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Мои PR"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "我的 PR"
           }
         }
       }
@@ -3773,6 +4349,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "没有变更"
+          }
+        }
+      }
+    },
+    "No contributions": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لا مساهمات"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "কোনো অবদান নেই"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No contributions"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin contribuciones"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune contribution"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "कोई योगदान नहीं"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tidak ada kontribusi"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem contribuições"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нет вкладов"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有贡献"
           }
         }
       }
@@ -4157,6 +4797,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "打开"
+          }
+        }
+      }
+    },
+    "Open %@": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "فتح %@"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ খুলুন"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvrir %@"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ खोलें"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buka %@"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открыть %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开 %@"
           }
         }
       }
@@ -4861,6 +5565,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "付款"
+          }
+        }
+      }
+    },
+    "Playing · %@": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "قيد التشغيل · %@"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "চালু আছে · %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playing · %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reproduciendo · %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lecture · %@"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "चल रहा है · %@"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memutar · %@"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tocando · %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Играет · %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在播放 · %@"
           }
         }
       }
@@ -5697,6 +6465,70 @@
         }
       }
     },
+    "Sending…": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "جارٍ الإرسال…"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "পাঠানো হচ্ছে…"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sending…"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enviando…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Envoi en cours…"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "भेज रहा है…"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mengirim…"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enviando…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отправка…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "发送中…"
+          }
+        }
+      }
+    },
     "Session finished": {
       "localizations": {
         "ar": {
@@ -6337,6 +7169,70 @@
         }
       }
     },
+    "Success": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "نجاح"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "সফল"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Success"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Éxito"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Réussi"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सफलता"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Berhasil"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sucesso"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Успешно"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "成功"
+          }
+        }
+      }
+    },
     "System": {
       "localizations": {
         "ar": {
@@ -6465,6 +7361,70 @@
         }
       }
     },
+    "To review": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "للمراجعة"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "পর্যালোচনার জন্য"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To review"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Para revisar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "À relire"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "समीक्षा के लिए"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Untuk ditinjau"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Para revisar"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На ревью"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "待审查"
+          }
+        }
+      }
+    },
     "Too many hits at once.": {
       "localizations": {
         "ar": {
@@ -6525,6 +7485,134 @@
           "stringUnit": {
             "state": "translated",
             "value": "一次点击太多次了。"
+          }
+        }
+      }
+    },
+    "Unknown": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "غير معروف"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "অজানা"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unknown"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desconocido"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inconnu"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "अज्ञात"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tidak diketahui"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desconhecido"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Неизвестно"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未知"
+          }
+        }
+      }
+    },
+    "Uploading %@": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "جارٍ رفع %@"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ আপলোড হচ্ছে"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uploading %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subiendo %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Envoi de %@ en cours"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ अपलोड हो रहा है"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mengunggah %@"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enviando %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Загружается %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在上传 %@"
           }
         }
       }
@@ -6653,6 +7741,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "衣橱"
+          }
+        }
+      }
+    },
+    "Watching %lld of %lld": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مشاهدة %lld من %lld"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld টির মধ্যে %lld টি দেখছেন"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watching %lld of %lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Viendo %lld de %lld"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld sur %lld surveillés"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld में से %lld देख रहे हैं"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Melihat %lld dari %lld"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Observando %lld de %lld"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Наблюдение: %lld из %lld"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "监控 %lld / %lld"
           }
         }
       }
@@ -6878,7 +8030,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Votre réponse…"
+            "value": "Ta réponse…"
           }
         },
         "hi": {
@@ -6902,7 +8054,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ваш ответ…"
+            "value": "Твой ответ…"
           }
         },
         "zh-Hans": {
@@ -8094,7 +9246,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pour utiliser Google Gemini ou OpenAI depuis le chat. Les clés sont stockées dans le Keychain."
+            "value": "Pour utiliser Google Gemini ou OpenAI depuis le chat. Les clés sont stockées dans le Trousseau."
           }
         },
         "hi": {
@@ -9118,7 +10270,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hooks obsolètes — mets-les à jour pour répondre aux questions de Claude depuis l'encoché"
+            "value": "Hooks obsolètes — mets-les à jour pour répondre aux questions de Claude depuis l'encoche"
           }
         },
         "hi": {
@@ -9142,7 +10294,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Хуки устарели — обнови их, чтобы отвечать на вопросы Claude из нотча"
+            "value": "Хуки устарели — обнови их, чтобы отвечать на вопросы Claude из ноча"
           }
         },
         "zh-Hans": {
@@ -9718,7 +10870,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Разрешить iPhone отправлять инструкции в Claude Code"
+            "value": "Позволять iPhone отправлять инструкции в Claude Code"
           }
         },
         "zh-Hans": {
@@ -9846,7 +10998,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Перемещать Mochi на Dynamic Island iPhone, когда Mac заблокирован"
+            "value": "Переносить Mochi на Dynamic Island моего iPhone, когда Mac заблокирован"
           }
         },
         "zh-Hans": {
@@ -9974,7 +11126,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Показывать мои сессии агентов на iPhone"
+            "value": "Показывать мои сессии агента на iPhone"
           }
         },
         "zh-Hans": {
@@ -11678,7 +12830,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "appuyez → l'île s'ouvre"
+            "value": "appuie → l'île s'ouvre"
           }
         },
         "hi": {
@@ -15812,127 +16964,183 @@
     "status.local.connected %lld": {
       "localizations": {
         "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "✓ متصل · نموذج %lld"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "✓ متصل · نموذج %lld"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "✓ متصل · %lld نماذج"
+                }
+              }
+            }
           }
         },
         "bn": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "✓ সংযুক্ত · %lld টি মডেল"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "✓ সংযুক্ত · %lld টি মডেল"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "✓ সংযুক্ত · %lld টি মডেল"
+                }
+              }
+            }
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "✓ Connected · %lld model"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "✓ Connected · %lld model"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "✓ Connected · %lld models"
+                }
+              }
+            }
           }
         },
         "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "✓ Conectado · %lld modelo"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "✓ Conectado · %lld modelo"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "✓ Conectado · %lld modelos"
+                }
+              }
+            }
           }
         },
         "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "✓ Connecté · %lld modèle"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "✓ Connecté · %lld modèle"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "✓ Connecté · %lld modèles"
+                }
+              }
+            }
           }
         },
         "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "✓ कनेक्ट हो गया · %lld मॉडल"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "✓ कनेक्ट हो गया · %lld मॉडल"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "✓ कनेक्ट हो गया · %lld मॉडल"
+                }
+              }
+            }
           }
         },
         "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "✓ Terhubung · %lld model"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "✓ Terhubung · %lld model"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "✓ Terhubung · %lld model"
+                }
+              }
+            }
           }
         },
         "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "✓ Conectado · %lld modelo"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "✓ Conectado · %lld modelo"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "✓ Conectado · %lld modelos"
+                }
+              }
+            }
           }
         },
         "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "✓ Подключено · %lld модель"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "✓ Подключено · %lld модель"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "✓ Подключено · %lld модели"
+                }
+              }
+            }
           }
         },
         "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "✓ 已连接 · %lld 个模型"
-          }
-        }
-      }
-    },
-    "status.local.connected.plural %lld": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "✓ متصل · %lld نماذج"
-          }
-        },
-        "bn": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "✓ সংযুক্ত · %lld টি মডেল"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "✓ Connected · %lld models"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "✓ Conectado · %lld modelos"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "✓ Connecté · %lld modèles"
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "✓ कनेक्ट हो गया · %lld मॉडल"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "✓ Terhubung · %lld model"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "✓ Conectado · %lld modelos"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "✓ Подключено · %lld модели"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "✓ 已连接 · %lld 个模型"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "✓ 已连接 · %lld 个模型"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "✓ 已连接 · %lld 个模型"
+                }
+              }
+            }
           }
         }
       }
@@ -16030,7 +17238,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aucun modèle pour l'instant — télécharge-en un dans %@ d'abord."
+            "value": "Aucun modèle pour l'instant — télécharges-en un dans %@ d'abord."
           }
         },
         "hi": {
@@ -16054,7 +17262,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Моделей пока нет — сначала скачай одну в %@."
+            "value": "Нет моделей — скачай одну в %@ сначала."
           }
         },
         "zh-Hans": {
@@ -16129,66 +17337,66 @@
         }
       }
     },
-    "status.local.unreachable %@ %@": {
+    "status.local.unreachable %1$@ %2$@": {
       "localizations": {
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "تعذَّر الوصول إلى %@ على %@. هل هو قيد التشغيل؟"
+            "value": "تعذَّر الوصول إلى %1$@ على %2$@. هل هو قيد التشغيل؟"
           }
         },
         "bn": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ কে %@ তে পৌঁছানো যাচ্ছে না। এটি কি চলছে?"
+            "value": "%1$@ কে %2$@ তে পৌঁছানো যাচ্ছে না। এটি কি চলছে?"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Can't reach %@ at %@. Is it running?"
+            "value": "Can't reach %1$@ at %2$@. Is it running?"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "No se pudo contactar con %@ en %@. ¿Está en ejecución?"
+            "value": "No se pudo contactar con %1$@ en %2$@. ¿Está en ejecución?"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Impossible d'atteindre %@ sur %@. Est-il en cours d'exécution ?"
+            "value": "Impossible d'atteindre %1$@ sur %2$@. Est-il en cours d'exécution ?"
           }
         },
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ को %@ पर नहीं पहुंचा जा सका। क्या यह चल रहा है?"
+            "value": "%1$@ को %2$@ पर नहीं पहुंचा जा सका। क्या यह चल रहा है?"
           }
         },
         "id": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tidak dapat menjangkau %@ di %@. Apakah sedang berjalan?"
+            "value": "Tidak dapat menjangkau %1$@ di %2$@. Apakah sedang berjalan?"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Não foi possível alcançar %@ em %@. Ele está em execução?"
+            "value": "Não foi possível alcançar %1$@ em %2$@. Ele está em execução?"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Не удалось подключиться к %@ по адресу %@. Он запущен?"
+            "value": "Не удалось подключиться к %1$@ по адресу %2$@. Он запущен?"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "无法访问 %@（%@）。它正在运行吗？"
+            "value": "无法访问 %1$@（%2$@）。它正在运行吗？"
           }
         }
       }
@@ -17246,7 +18454,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cherche"
+            "value": "Recherche"
           }
         },
         "hi": {
@@ -17597,6 +18805,71 @@
           "stringUnit": {
             "state": "translated",
             "value": "附带"
+          }
+        }
+      }
+    },
+    "No error details available.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No error details available."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لا توجد تفاصيل للخطأ."
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "কোনো ত্রুটির বিবরণ পাওয়া যায়নি।"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay detalles del error disponibles."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun détail d'erreur disponible."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "कोई त्रुटि विवरण उपलब्ध नहीं है।"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tidak ada detail kesalahan yang tersedia."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhum detalhe de erro disponível."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нет подробностей об ошибке."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无错误详情。"
           }
         }
       }

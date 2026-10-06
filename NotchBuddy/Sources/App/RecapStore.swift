@@ -46,7 +46,7 @@ struct WeeklySummary {
     var longestSessionMinutes: Int
 }
 
-// MARK: - In-progress turn draft
+// MARK: - In-progress turn draft (keyed by sessionId)
 
 private struct TurnDraft {
     var pillId: String
@@ -66,6 +66,7 @@ final class RecapStore {
     static let shared = RecapStore()
 
     private var data = RecapData()
+    /// Keyed by sessionId so concurrent sessions from the same agent are tracked separately.
     private var drafts: [String: TurnDraft] = [:]
 
     private static let storageURL: URL = {
@@ -77,39 +78,45 @@ final class RecapStore {
 
     // MARK: - Event recording
 
-    func userPromptSubmit(pillId: String, project: String) {
+    func userPromptSubmit(sessionId: String, pillId: String, project: String) {
         guard isEnabled else { return }
-        if drafts[pillId] == nil {
-            drafts[pillId] = TurnDraft(pillId: pillId, project: project, start: .now)
+        pruneStale()
+        if drafts[sessionId] == nil {
+            drafts[sessionId] = TurnDraft(pillId: pillId, project: project, start: .now)
         }
     }
 
-    func preToolUse(pillId: String, tool: String) {
-        guard isEnabled, var draft = drafts[pillId] else { return }
+    func preToolUse(sessionId: String, tool: String) {
+        guard isEnabled, var draft = drafts[sessionId] else { return }
         switch tool {
         case "Bash", "Execute", "mcp__ide__executeCode":
             draft.commandsRun += 1
-        case "AskUserQuestion":
-            draft.questions += 1
         default:
             break
         }
-        drafts[pillId] = draft
+        drafts[sessionId] = draft
     }
 
     /// Called after a file diff is computed in PostToolUse.
-    func recordFileDiff(pillId: String, path: String, added: Int, removed: Int) {
-        guard isEnabled, var draft = drafts[pillId] else { return }
+    func recordFileDiff(sessionId: String, path: String, added: Int, removed: Int) {
+        guard isEnabled, var draft = drafts[sessionId] else { return }
         draft.changedPaths.insert(path)
         draft.linesAdded += added
         draft.linesRemoved += removed
-        drafts[pillId] = draft
+        drafts[sessionId] = draft
     }
 
-    func stop(pillId: String) {
-        guard isEnabled, let draft = drafts.removeValue(forKey: pillId) else { return }
+    /// Called when the user sends answers from the notch (not when the question is asked).
+    func recordQuestionAnswered(sessionId: String) {
+        guard isEnabled, var draft = drafts[sessionId] else { return }
+        draft.questions += 1
+        drafts[sessionId] = draft
+    }
+
+    func stop(sessionId: String) {
+        guard isEnabled, let draft = drafts.removeValue(forKey: sessionId) else { return }
         let turn = RecapTurn(
-            pillId: pillId,
+            pillId: draft.pillId,
             project: draft.project,
             start: draft.start,
             end: .now,
@@ -124,8 +131,8 @@ final class RecapStore {
         save()
     }
 
-    func sessionEnd(pillId: String) {
-        drafts.removeValue(forKey: pillId)
+    func sessionEnd(sessionId: String) {
+        drafts.removeValue(forKey: sessionId)
     }
 
     func recordDecision(pillId: String, decision: String) {
@@ -137,17 +144,18 @@ final class RecapStore {
 
     // MARK: - Query
 
-    /// Returns a summary for the last completed week (Mon–Sun).
+    /// Returns a summary for the last completed week (Mon–Sun, ISO 8601).
     /// Pass a custom `weekStart` (Monday 00:00 local) to query a different week.
     func weeklySummary(for weekStart: Date? = nil) -> WeeklySummary? {
-        let cal = Calendar.current
+        // ISO 8601 calendar: weeks start on Monday regardless of locale.
+        let cal = Calendar(identifier: .iso8601)
         let start: Date
         if let ws = weekStart {
             start = ws
         } else {
             // Previous Monday 00:00 local
             var comps = cal.dateComponents([.yearForWeekOfYear, .weekOfYear], from: Date())
-            comps.weekday = 2
+            comps.weekday = 2   // Monday (weekday 2 in Gregorian/ISO, Sunday=1)
             let thisMonday = cal.date(from: comps)!
             start = cal.date(byAdding: .weekOfYear, value: -1, to: thisMonday)!
         }
@@ -157,7 +165,8 @@ final class RecapStore {
         let decisions = data.decisions.filter { $0.date >= start && $0.date < end }
         guard !turns.isEmpty else { return nil }
 
-        let totalSecs = turns.reduce(0.0) { $0 + $1.end.timeIntervalSince($1.start) }
+        // Merge overlapping intervals to avoid double-counting parallel sessions.
+        let totalSecs = mergedTotalSeconds(turns)
         let allowed = decisions.filter { $0.decision == "allow" || $0.decision == "always" }.count
         let denied  = decisions.filter { $0.decision == "deny" }.count
 
@@ -213,13 +222,23 @@ final class RecapStore {
     }
 
     private func load() {
-        guard let raw = try? Data(contentsOf: Self.storageURL),
-              let decoded = try? JSONDecoder().decode(RecapData.self, from: raw) else { return }
-        data = decoded
-        prune()
+        guard let raw = try? Data(contentsOf: Self.storageURL) else { return }
+        do {
+            data = try JSONDecoder().decode(RecapData.self, from: raw)
+            prune()
+        } catch {
+            // Rename corrupt file so it's not silently lost, then start fresh.
+            let fmt = DateFormatter()
+            fmt.locale = Locale(identifier: "en_US_POSIX")
+            fmt.dateFormat = "yyyyMMdd-HHmmss"
+            let corrupt = Self.storageURL.deletingPathExtension()
+                .appendingPathExtension("corrupt-\(fmt.string(from: Date()))")
+            try? FileManager.default.moveItem(at: Self.storageURL, to: corrupt)
+        }
     }
 
     private func save() {
+        pruneStale()
         let dir = Self.storageURL.deletingLastPathComponent()
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         if let encoded = try? JSONEncoder().encode(data) {
@@ -231,5 +250,36 @@ final class RecapStore {
         guard let cutoff = Calendar.current.date(byAdding: .weekOfYear, value: -12, to: .now) else { return }
         data.turns     = data.turns.filter     { $0.start >= cutoff }
         data.decisions = data.decisions.filter { $0.date  >= cutoff }
+    }
+
+    /// Removes drafts that have been open for more than 2 hours (agent crashed or forgot to Stop).
+    private func pruneStale() {
+        let cutoff = Date().addingTimeInterval(-2 * 3600)
+        drafts = drafts.filter { $0.value.start >= cutoff }
+    }
+
+    // MARK: - Interval merging (prevents double-counting parallel sessions)
+
+    private func mergedTotalSeconds(_ turns: [RecapTurn]) -> Double {
+        let sorted = turns.filter { $0.end > $0.start }.sorted { $0.start < $1.start }
+        var total: Double = 0
+        var segStart: Date? = nil
+        var segEnd: Date? = nil
+        for t in sorted {
+            if let end = segEnd {
+                if t.start <= end {
+                    segEnd = max(end, t.end)
+                } else {
+                    total += segEnd!.timeIntervalSince(segStart!)
+                    segStart = t.start
+                    segEnd = t.end
+                }
+            } else {
+                segStart = t.start
+                segEnd = t.end
+            }
+        }
+        if let e = segEnd, let s = segStart { total += e.timeIntervalSince(s) }
+        return total
     }
 }

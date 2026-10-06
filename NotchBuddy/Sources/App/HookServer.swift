@@ -43,6 +43,7 @@ final class HookServer: @unchecked Sendable {
     private var pendingQuestionFD: Int32 = -1         // held open while user answers AskUserQuestion
     private var questionFDSource: (any DispatchSourceRead)? = nil  // monitors pendingQuestionFD
     private var questionPillId: String = ""           // pill that owns the pending question
+    private var questionSessionId: String = ""        // sessionId for the pending question (recap tracking)
     private var focusBeforeQuestion: String? = nil    // saved focus to restore after question
     private var activeSessionId: String? = nil        // current Claude Code session
     private var focusBeforeApproval: String? = nil    // saved focus to restore after approval
@@ -127,6 +128,8 @@ final class HookServer: @unchecked Sendable {
         pendingQuestionFD = -1
         let source = questionFDSource
         questionFDSource = nil
+        let sid = questionSessionId
+        questionSessionId = ""
         if fd >= 0, let data = try? JSONSerialization.data(withJSONObject: ["permissionDecision": "answer", "answers": answers], options: .withoutEscapingSlashes),
            let json = String(data: data, encoding: .utf8) {
             Task.detached { [weak self] in
@@ -136,6 +139,7 @@ final class HookServer: @unchecked Sendable {
         } else {
             source?.cancel()
         }
+        if !sid.isEmpty { RecapStore.shared.recordQuestionAnswered(sessionId: sid) }
         dismissQuestionCard(note: "")
     }
 
@@ -421,6 +425,7 @@ final class HookServer: @unchecked Sendable {
             if isExternalAgent { upsertExternalAgent(id: agentId, name: validAgent!) } else { upsertWorkspaceTask(id: agentId, projectName: projectName, cwd: cwd) }
             if let idx = state.tasks.firstIndex(where: { $0.id == agentId }) { state.tasks[idx].finalLine = nil }
             nbLog("SessionStart \(isExternalAgent ? agentId : projectName) (\(sessionId.prefix(8)))")
+            NotificationCenter.default.post(name: .checkMondayRecap, object: nil)
             if state.isPresent { expandIfNeeded(to: .overview) }
             SoundEngine.shared.play("work")
 
@@ -432,14 +437,15 @@ final class HookServer: @unchecked Sendable {
             if let prompt = payload["prompt"] as? String, !prompt.isEmpty {
                 appendStep(id: agentId, step: String(prompt.prefix(60)))
             }
-            RecapStore.shared.userPromptSubmit(pillId: agentId, project: projectName)
+            RecapStore.shared.userPromptSubmit(sessionId: sessionId, pillId: agentId, project: projectName)
+            NotificationCenter.default.post(name: .checkMondayRecap, object: nil)
             if state.isPresent { expandIfNeeded(to: .overview) }
 
         case "PreToolUse":
             activeSessionId = sessionId
             let tool = payload["tool_name"] as? String ?? "Tool"
             if let idx = state.tasks.firstIndex(where: { $0.id == agentId }) { state.tasks[idx].finalLine = nil }
-            RecapStore.shared.preToolUse(pillId: agentId, tool: tool)
+            RecapStore.shared.preToolUse(sessionId: sessionId, tool: tool)
             // AskUserQuestion is handled via the dedicated --ask hook.
             // Skip state/step update here to avoid flickering over the question card.
             guard tool != "AskUserQuestion" else { break }
@@ -459,7 +465,7 @@ final class HookServer: @unchecked Sendable {
                 let idx = state.appendSessionDiff(diff, for: agentId)
                 let step = String.makeDiffStep(filename: diff.name, added: diff.added, removed: diff.removed, diffId: idx)
                 appendStep(id: agentId, step: step)
-                RecapStore.shared.recordFileDiff(pillId: agentId, path: diff.name, added: diff.added, removed: diff.removed)
+                RecapStore.shared.recordFileDiff(sessionId: sessionId, path: diff.name, added: diff.added, removed: diff.removed)
             }
 
         case "PostToolUseFailure":
@@ -488,7 +494,7 @@ final class HookServer: @unchecked Sendable {
                     state.tasks[idx].finalLine = finalText
                 }
             }
-            RecapStore.shared.stop(pillId: agentId)
+            RecapStore.shared.stop(sessionId: sessionId)
             SoundEngine.shared.play("finish")
             if focused {
                 expandIfNeeded(to: .finished)
@@ -505,6 +511,7 @@ final class HookServer: @unchecked Sendable {
             }
 
         case "StopFailure":
+            RecapStore.shared.stop(sessionId: sessionId)
             state.updateTask(id: agentId, state: .error)
             SoundEngine.shared.play("error")
             if focused {
@@ -515,6 +522,7 @@ final class HookServer: @unchecked Sendable {
 
         case "Interrupt":
             // Codex: user stopped the turn
+            RecapStore.shared.stop(sessionId: sessionId)
             activeSessionId = nil
             state.updateTask(id: agentId, state: .idle)
             clearPillBadge(id: agentId)
@@ -524,7 +532,7 @@ final class HookServer: @unchecked Sendable {
             if let idx = state.tasks.firstIndex(where: { $0.id == agentId }) { state.tasks[idx].finalLine = nil }
             state.clearSessionDiffs(for: agentId)
             state.removeTask(id: agentId)
-            RecapStore.shared.sessionEnd(pillId: agentId)
+            RecapStore.shared.sessionEnd(sessionId: sessionId)
 
         case "SubagentStart":
             appendStep(id: agentId, step: "+ subagent")
@@ -838,6 +846,7 @@ final class HookServer: @unchecked Sendable {
         pendingQuestionFD = fd
         activeSessionId = sessionId
         questionPillId = pillId
+        questionSessionId = sessionId
 
         upsertWorkspaceTask(id: pillId, projectName: projectName, cwd: cwd)
         state.updateTask(id: pillId, state: .question)

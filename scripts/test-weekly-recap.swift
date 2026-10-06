@@ -118,7 +118,6 @@ data.decisions += fakeDecisions
 // MARK: - Write
 
 let encoder = JSONEncoder()
-encoder.dateEncodingStrategy = .iso8601
 encoder.outputFormatting = .prettyPrinted
 
 try FileManager.default.createDirectory(at: recapURL.deletingLastPathComponent(),

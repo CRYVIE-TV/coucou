@@ -190,6 +190,9 @@ struct RecapShareImageView: View {
     let summary: WeeklySummary
     let hideProjects: Bool
 
+    // Static BotEngine for the Mochi snapshot — idle state, no animation needed.
+    @StateObject private var mochiEngine = BotEngine()
+
     var body: some View {
         ZStack {
             Color(hex: "#0B0C0E")
@@ -204,6 +207,14 @@ struct RecapShareImageView: View {
             )
             VStack(spacing: 0) {
                 Spacer()
+
+                // Mochi character
+                Canvas { context, size in
+                    mochiEngine.draw(context: context, size: size)
+                }
+                .frame(width: 200, height: 200)
+                .padding(.bottom, 20)
+
                 Text("Coucou")
                     .font(.system(size: 52, weight: .black, design: .rounded))
                     .foregroundColor(Color(hex: "#F1F2F4"))
@@ -243,6 +254,19 @@ struct RecapShareImageView: View {
                 .padding(.top, 56)
                 .padding(.horizontal, 40)
 
+                // Lines added / removed
+                if summary.linesAdded + summary.linesRemoved > 0 {
+                    HStack(spacing: 24) {
+                        Text("+\(summary.linesAdded)")
+                            .font(.system(size: 28, weight: .semibold, design: .monospaced))
+                            .foregroundColor(Color(hex: "#4ADE80"))
+                        Text("−\(summary.linesRemoved)")
+                            .font(.system(size: 28, weight: .semibold, design: .monospaced))
+                            .foregroundColor(Color(hex: "#F87171"))
+                    }
+                    .padding(.top, 24)
+                }
+
                 // Badges
                 VStack(spacing: 16) {
                     if let agent = summary.topAgent {
@@ -269,7 +293,7 @@ struct RecapShareImageView: View {
 
                 Spacer()
 
-                Text("github.com/Louis-CFM/coucou")
+                Text("Coucou · github.com/Louis-CFM/coucou")
                     .font(.system(size: 20, weight: .medium, design: .monospaced))
                     .foregroundColor(Color(hex: "#8E939C").opacity(0.6))
                     .padding(.bottom, 60)

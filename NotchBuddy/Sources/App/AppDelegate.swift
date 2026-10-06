@@ -104,11 +104,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Weekly recap trigger
 
     /// On Monday ≥ 8 am, show the recap card once (if there is activity to display).
-    private func checkMondayRecap() {
-        let cal = Calendar.current
+    /// Called from greetComplete, SessionStart/UserPromptSubmit hooks, and on wake.
+    func checkMondayRecap() {
+        let cal = Calendar(identifier: .iso8601)
         let now = Date()
-        guard cal.component(.weekday, from: now) == 2,   // Monday
+        // weekday in ISO 8601 calendar: 2 = Monday
+        guard cal.component(.weekday, from: now) == 2,
               cal.component(.hour,    from: now) >= 8 else { return }
+        // Don't interrupt a pending approval or question
+        let s = AppState.shared
+        guard s.pendingApproval == nil, s.pendingQuestion == nil else { return }
         let weekYear = cal.component(.yearForWeekOfYear, from: now)
         let weekNum  = cal.component(.weekOfYear,        from: now)
         let weekKey  = weekYear * 100 + weekNum
@@ -140,6 +145,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // After the greeting ends, fly Mochi back to the desktop if it was there at last quit
         NotificationCenter.default.addObserver(forName: .greetComplete, object: nil, queue: .main) { [weak self] _ in
             DesktopMochiController.shared.launchFlyIfNeeded()
+            self?.checkMondayRecap()
+        }
+        // Check for Monday recap on wake and when a new session/prompt arrives
+        NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.didWakeNotification,
+                                                          object: nil, queue: .main) { [weak self] _ in
+            self?.checkMondayRecap()
+        }
+        NotificationCenter.default.addObserver(forName: .checkMondayRecap, object: nil, queue: .main) { [weak self] _ in
             self?.checkMondayRecap()
         }
         #if !APPSTORE

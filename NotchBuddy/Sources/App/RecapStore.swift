@@ -52,6 +52,7 @@ private struct TurnDraft {
     var pillId: String
     var project: String
     var start: Date
+    var lastEvent: Date
     var changedPaths: Set<String> = []
     var linesAdded: Int = 0
     var linesRemoved: Int = 0
@@ -82,12 +83,15 @@ final class RecapStore {
         guard isEnabled else { return }
         pruneStale()
         if drafts[sessionId] == nil {
-            drafts[sessionId] = TurnDraft(pillId: pillId, project: project, start: .now)
+            drafts[sessionId] = TurnDraft(pillId: pillId, project: project, start: .now, lastEvent: .now)
+        } else {
+            drafts[sessionId]?.lastEvent = .now
         }
     }
 
     func preToolUse(sessionId: String, tool: String) {
         guard isEnabled, var draft = drafts[sessionId] else { return }
+        draft.lastEvent = .now
         switch tool {
         case "Bash", "Execute", "mcp__ide__executeCode":
             draft.commandsRun += 1
@@ -100,6 +104,7 @@ final class RecapStore {
     /// Called after a file diff is computed in PostToolUse.
     func recordFileDiff(sessionId: String, path: String, added: Int, removed: Int) {
         guard isEnabled, var draft = drafts[sessionId] else { return }
+        draft.lastEvent = .now
         draft.changedPaths.insert(path)
         draft.linesAdded += added
         draft.linesRemoved += removed
@@ -109,6 +114,7 @@ final class RecapStore {
     /// Called when the user sends answers from the notch (not when the question is asked).
     func recordQuestionAnswered(sessionId: String) {
         guard isEnabled, var draft = drafts[sessionId] else { return }
+        draft.lastEvent = .now
         draft.questions += 1
         drafts[sessionId] = draft
     }
@@ -252,10 +258,27 @@ final class RecapStore {
         data.decisions = data.decisions.filter { $0.date  >= cutoff }
     }
 
-    /// Removes drafts that have been open for more than 2 hours (agent crashed or forgot to Stop).
+    /// Finalises drafts with no events for 2+ hours (agent crashed or forgot to Stop).
+    /// Instead of discarding them, persists them as completed turns so they count in the recap.
     private func pruneStale() {
         let cutoff = Date().addingTimeInterval(-2 * 3600)
-        drafts = drafts.filter { $0.value.start >= cutoff }
+        var staleKeys: [String] = []
+        for (key, draft) in drafts where draft.lastEvent < cutoff {
+            let turn = RecapTurn(
+                pillId: draft.pillId,
+                project: draft.project,
+                start: draft.start,
+                end: draft.lastEvent,
+                filesChanged: draft.changedPaths.count,
+                linesAdded: draft.linesAdded,
+                linesRemoved: draft.linesRemoved,
+                commandsRun: draft.commandsRun,
+                questions: draft.questions
+            )
+            data.turns.append(turn)
+            staleKeys.append(key)
+        }
+        for key in staleKeys { drafts.removeValue(forKey: key) }
     }
 
     // MARK: - Interval merging (prevents double-counting parallel sessions)

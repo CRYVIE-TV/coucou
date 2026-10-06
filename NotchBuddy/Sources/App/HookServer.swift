@@ -406,7 +406,8 @@ final class HookServer: @unchecked Sendable {
 
         // While a permission request is pending, dismiss when the resolving event arrives,
         // then continue normal processing. Only skip normal processing when unresolved.
-        if let pending = state.pendingApproval, agentId == pending.pillId {
+        if let pending = state.pendingApproval, agentId == pending.pillId,
+           pending.sessionId != "demo_session" {
             let handledNote: String
             switch pending.pillId {
             case "agent_cursor":  handledNote = "Handled in Cursor."

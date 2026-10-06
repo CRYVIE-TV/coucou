@@ -28,7 +28,9 @@ final class DemoEngine: ObservableObject {
     private var approvalContinuation: CheckedContinuation<String, Never>? = nil
     private var questionContinuation: CheckedContinuation<Void, Never>? = nil
 
+    private var generation: Int = 0                   // incremented on each start() to orphan stale closures
     private var demoInjectedTaskIds: [String] = []   // integration task IDs added by demo
+    private var realTaskIdsAtStart: Set<String> = [] // real task IDs that existed before demo
     private var demoDiffIds: [String: [Int]] = [:]   // [pillId: [diffId]]
     private var lastApprovalDecision: String = "allow"
     private var lastQuestionAnswer: String? = nil
@@ -74,8 +76,12 @@ final class DemoEngine: ObservableObject {
         guard !isActive else { return }
         isActive = true
         DemoEngine.isPollerPaused = true
+        generation += 1
 
         let s = AppState.shared
+
+        // Record which tasks are real (not demo-injected) before demo starts
+        realTaskIdsAtStart = Set(s.tasks.map { $0.id })
 
         snapshot = Snapshot(
             tasks:               s.tasks,
@@ -136,8 +142,9 @@ final class DemoEngine: ObservableObject {
         // Open island immediately on the demo session
         NotificationCenter.default.post(name: .hookExpand, object: IslandView.overview)
 
+        let gen = generation
         demoTask = Task { @MainActor [weak self] in
-            await self?.runDemoLoop()
+            await self?.runDemoLoop(gen: gen)
         }
     }
 
@@ -147,6 +154,7 @@ final class DemoEngine: ObservableObject {
         guard isActive else { return }
         isActive = false
         DemoEngine.isPollerPaused = false
+        GithubPoller.shared.triggerPulseNow()
 
         demoTask?.cancel()
         demoTask = nil
@@ -205,12 +213,24 @@ final class DemoEngine: ObservableObject {
         s.notionPages          = snap.notionPages
         s.notionLoaded         = snap.notionLoaded
 
-        // Restore tasks: keep real tasks that arrived during the demo, discard demo-only ones
+        // Restore tasks: keep real tasks that arrived during the demo, discard demo-only ones.
+        // For tasks that existed before the demo (realTaskIdsAtStart), use the CURRENT version
+        // from AppState (real Claude Code events may have updated them during demo).
         let demoIds: Set<String> = Set(demoInjectedTaskIds + ["demo_codex"])
+        let currentTasksById = Dictionary(uniqueKeysWithValues: s.tasks.map { ($0.id, $0) })
         let realNewTasks = s.tasks.filter { task in
             !snap.tasks.contains(where: { $0.id == task.id }) && !demoIds.contains(task.id)
         }
-        s.tasks = snap.tasks + realNewTasks
+        let restoredSnapTasks = snap.tasks.map { snapTask -> AgentTask in
+            // If this was a real task (not demo-injected) and it still exists in current state,
+            // preserve the current version (may have received real updates during demo).
+            if realTaskIdsAtStart.contains(snapTask.id), !demoIds.contains(snapTask.id),
+               let current = currentTasksById[snapTask.id] {
+                return current
+            }
+            return snapTask
+        }
+        s.tasks = restoredSnapTasks + realNewTasks
 
         // Remove only demo diffs; leave real diffs untouched
         for (pillId, ids) in demoDiffIds {
@@ -223,6 +243,7 @@ final class DemoEngine: ObservableObject {
         }
         demoDiffIds = [:]
         demoInjectedTaskIds = []
+        realTaskIdsAtStart = []
         lastApprovalDecision = "allow"
         lastQuestionAnswer = nil
 
@@ -350,17 +371,28 @@ final class DemoEngine: ObservableObject {
         s.notionLoaded = true
 
         // Add integration tasks directly (never touch activeIntegrations → no UserDefaults write)
-        let demoIntegrationIds = [
-            "integration_github", "integration_stripe", "integration_vercel",
-            "integration_resend", "integration_calcom", "integration_n8n", "integration_notion"
+        // Cap at 4 non-main pills to stay within the notch display limit.
+        // GitHub, Stripe, Vercel are injected with default idle state.
+        let idleIntegrationIds = [
+            "integration_github", "integration_stripe", "integration_vercel"
         ]
         var injected: [String] = []
-        for id in demoIntegrationIds {
+        for id in idleIntegrationIds {
             guard !s.tasks.contains(where: { $0.id == id }),
                   let def = PillCatalog.available.first(where: { $0.id == id }) else { continue }
             s.tasks.append(AgentTask(id: def.id, name: def.name, color: def.color,
                                      state: .idle, steps: [], source: def.source, isIntegration: true))
             injected.append(id)
+        }
+        // n8n: inject with visible steps showing the last successful execution (4th pill).
+        let n8nId = "integration_n8n"
+        if !s.tasks.contains(where: { $0.id == n8nId }),
+           let n8nDef = PillCatalog.available.first(where: { $0.id == n8nId }) {
+            s.tasks.append(AgentTask(id: n8nDef.id, name: n8nDef.name, color: n8nDef.color,
+                                     state: .finished,
+                                     steps: ["Notify on new Stripe payment", "3 nodes executed", "Workflow success"],
+                                     source: n8nDef.source, isIntegration: true))
+            injected.append(n8nId)
         }
         demoInjectedTaskIds = injected
         s.syncMode()
@@ -368,15 +400,16 @@ final class DemoEngine: ObservableObject {
 
     // MARK: Demo loop
 
-    private func runDemoLoop() async {
+    private func runDemoLoop(gen: Int) async {
         while !Task.isCancelled {
-            await runOneDemoCycle()
-            guard !Task.isCancelled, isActive else { break }
+            guard self.generation == gen else { return }
+            await runOneDemoCycle(gen: gen)
+            guard !Task.isCancelled, isActive, self.generation == gen else { break }
             try? await Task.sleep(nanoseconds: 2_000_000_000)
         }
     }
 
-    private func runOneDemoCycle() async {
+    private func runOneDemoCycle(gen: Int) async {
         guard isActive else { return }
         let s = AppState.shared
         let mainPillId = s.mainPillId
@@ -573,9 +606,7 @@ final class DemoEngine: ObservableObject {
     }
 
     func handleQuestionAnswered(answers: [String: Any]) {
-        if let picked = answers["answers"] as? [String], let first = picked.first {
-            lastQuestionAnswer = first
-        }
+        lastQuestionAnswer = answers.values.first as? String
         let c = questionContinuation
         questionContinuation = nil
         c?.resume()
@@ -631,11 +662,13 @@ final class DemoEngine: ObservableObject {
     }
 
     private func waitForApprovalOrTimeout(seconds: Double) async -> String {
+        let gen = self.generation
         return await withCheckedContinuation { continuation in
             self.approvalContinuation = continuation
             let ns = UInt64(seconds * 1_000_000_000)
             Task { @MainActor in
                 try? await Task.sleep(nanoseconds: ns)
+                guard self.generation == gen else { return }
                 guard self.isActive else { return }
                 guard let c = self.approvalContinuation else { return }
                 self.approvalContinuation = nil
@@ -652,11 +685,13 @@ final class DemoEngine: ObservableObject {
     }
 
     private func waitForQuestionOrTimeout(seconds: Double) async {
+        let gen = self.generation
         await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
             self.questionContinuation = continuation
             let ns = UInt64(seconds * 1_000_000_000)
             Task { @MainActor in
                 try? await Task.sleep(nanoseconds: ns)
+                guard self.generation == gen else { return }
                 guard self.isActive else { return }
                 guard let c = self.questionContinuation else { return }
                 self.questionContinuation = nil

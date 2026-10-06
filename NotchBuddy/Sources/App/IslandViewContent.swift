@@ -311,8 +311,11 @@ struct ApprovalView: View {
                     PrimaryButton("Allow") {
                         HookServer.shared.sendApprovalDecision("allow")
                     }
-                    // Codex rejects updatedPermissions, so "Always" is not offered
-                    if approval?.pillId != "agent_codex" {
+                    // Codex, Copilot CLI and Muse Code do not support updatedPermissions
+                    let hideAlways = approval?.pillId == "agent_codex"
+                        || approval?.pillId == "agent_copilot"
+                        || approval?.pillId == "agent_muse"
+                    if !hideAlways {
                         SecondaryButton("Always") {
                             HookServer.shared.sendApprovalDecision("always")
                         }

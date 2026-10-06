@@ -391,9 +391,11 @@ final class HookServer: @unchecked Sendable {
         if let pending = state.pendingApproval, agentId == pending.pillId {
             let handledNote: String
             switch pending.pillId {
-            case "agent_cursor": handledNote = "Handled in Cursor."
-            case "agent_codex":  handledNote = "Handled in Codex."
-            default:             handledNote = "Handled in VS Code."
+            case "agent_cursor":  handledNote = "Handled in Cursor."
+            case "agent_codex":   handledNote = "Handled in Codex."
+            case "agent_copilot": handledNote = "Handled in Copilot CLI."
+            case "agent_muse":    handledNote = "Handled in Muse Code."
+            default:              handledNote = "Handled in VS Code."
             }
             var resolved = false
             switch name {
@@ -640,12 +642,14 @@ final class HookServer: @unchecked Sendable {
         // Other external agents (any other coucou_agent) answer immediately with "ask"
         // so the agent re-asks in its own terminal — they do not get a notch card.
         #if !APPSTORE
-        let isCodexRequest = rawAgent == "codex"
-        #else
-        let isCodexRequest = false
-        #endif
+        let isCodexRequest   = rawAgent == "codex"
         let isCopilotRequest = rawAgent == "copilot"
         let isMuseRequest    = rawAgent == "muse"
+        #else
+        let isCodexRequest   = false
+        let isCopilotRequest = false
+        let isMuseRequest    = false
+        #endif
         if !isCodexRequest && !isCopilotRequest && !isMuseRequest && Self.validateAgent(rawAgent) != nil {
             Task.detached { [weak self] in
                 self?.sendLine(fd: fd, text: #"{"permissionDecision":"ask"}"#)
@@ -741,10 +745,12 @@ final class HookServer: @unchecked Sendable {
         source.resume()
         approvalFDSource = source
 
-        // 115s safety timeout — show a note and cancel without sending a decision.
+        // Safety timeout — show a note and cancel without sending a decision.
         // nb-hook reads EOF from the cancel handler's close and exits; Claude Code / Codex re-asks.
+        // Copilot/Muse use 110s (their relay waits 118s but their hook timeout is 120s, leaving little margin).
+        let waitTimeout: Double = (isCopilotRequest || isMuseRequest) ? 110 : 115
         let captured = fd
-        DispatchQueue.main.asyncAfter(deadline: .now() + 115) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + waitTimeout) { [weak self] in
             guard let self, self.pendingApprovalFD == captured else { return }
             let note: String
             switch capturedPillId {
@@ -2158,14 +2164,16 @@ const EVENT_MAP = {
 
 export const CoucouPlugin = async (_ctx) => ({
   event: async ({ event }) => {
-    const hook_event_name = EVENT_MAP[event.type] || event.type;
+    const hook_event_name = EVENT_MAP[event.type];
+    if (!hook_event_name) return;
+    const props = event.properties || {};
     const payload = {
       hook_event_name,
-      session_id: event.sessionID || event.session_id || '',
-      cwd: event.cwd || event.directory || '',
+      session_id: event.sessionID || event.session_id || props.sessionID || props.session_id || '',
+      cwd: event.cwd || event.directory || props.cwd || props.directory || '',
     };
-    if (event.tool && event.tool.name) payload.tool_name = event.tool.name;
-    if (event.input != null) payload.tool_input = event.input;
+    if (typeof props.tool === 'string') payload.tool_name = props.tool;
+    if (props.input != null) payload.tool_input = props.input;
     const p = spawn('/bin/sh', [HOOK, '--agent', 'opencode'],
                     { stdio: ['pipe', 'ignore', 'ignore'], detached: true });
     p.on('error', () => {});
@@ -2279,7 +2287,7 @@ function forward(event_name: string, fields: Record<string, unknown>): void {
 export default function (amp: any): void {
   amp.on('session.start', (e: any) => { forward('SessionStart',     { session_id: e.thread?.id ?? '' }); });
   amp.on('agent.start',   (e: any) => { forward('UserPromptSubmit', { session_id: e.thread?.id ?? '' }); });
-  amp.on('tool.call',     (e: any) => { forward('PreToolUse',       { session_id: e.thread?.id ?? '', tool_name: e.tool?.name ?? '' }); return { action: 'allow' }; });
+  amp.on('tool.call',     (e: any) => { try { forward('PreToolUse', { session_id: e.thread?.id ?? '', tool_name: typeof e.tool === 'string' ? e.tool : '' }); } finally { return { action: 'allow' }; } });
   amp.on('tool.result',   (e: any) => { forward('PostToolUse',      { session_id: e.thread?.id ?? '' }); });
   amp.on('agent.end',     (e: any) => { forward('Stop',             { session_id: e.thread?.id ?? '' }); });
 }
@@ -2382,7 +2390,7 @@ fi
 if [ -n "$out" ]; then
     printf '%s\\n' "$out"
 else
-    # Copilot is fail-closed on permissionRequest — must always output valid JSON.
+    # Copilot is fail-closed — must always output valid JSON even when python3 is absent or crashes.
     _cop=0; _perm=0
     for _a in "$@"; do
         case "$_a" in
@@ -2390,8 +2398,12 @@ else
             permissionRequest|PermissionRequest) _perm=1 ;;
         esac
     done
-    if [ "$_cop" -eq 1 ] && [ "$_perm" -eq 1 ]; then
-        printf '{"permissionDecision":"ask"}\\n'
+    if [ "$_cop" -eq 1 ]; then
+        if [ "$_perm" -eq 1 ]; then
+            printf '{"permissionDecision":"ask"}\\n'
+        else
+            printf '{}\\n'
+        fi
     fi
 fi
 exit 0
@@ -2417,6 +2429,8 @@ def normalize_event(name):
         'session_end': 'SessionEnd', 'stop': 'Stop',
         'sessionStart': 'SessionStart', 'userPromptSubmitted': 'UserPromptSubmit',
         'agentStop': 'Stop', 'notification': 'Notification',
+        'preToolUse': 'PreToolUse', 'postToolUse': 'PostToolUse',
+        'permissionRequest': 'PermissionRequest', 'sessionEnd': 'SessionEnd',
     }
     return mapping.get(name, name)
 
@@ -2707,6 +2721,8 @@ def normalize_event(name):
         'session_end': 'SessionEnd', 'stop': 'Stop',
         'sessionStart': 'SessionStart', 'userPromptSubmitted': 'UserPromptSubmit',
         'agentStop': 'Stop', 'notification': 'Notification',
+        'preToolUse': 'PreToolUse', 'postToolUse': 'PostToolUse',
+        'permissionRequest': 'PermissionRequest', 'sessionEnd': 'SessionEnd',
     }
     return mapping.get(name, name)
 

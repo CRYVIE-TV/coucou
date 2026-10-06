@@ -136,6 +136,25 @@ windows/
 `%LOCALAPPDATA%\Coucou\coucou.log` — hook events, permission decisions, poller
 problems. It stays on your machine.
 
+## Supported agents
+
+The relay (`coucou-hook.exe`) works with any tool that can run a command on hook events. Pass `--agent <name>` to create a named pill.
+
+| Agent | How to connect | Config file |
+|---|---|---|
+| Claude Code | **Settings → Claude Code → Install hooks** | `%USERPROFILE%\.claude\settings.json` |
+| Gemini CLI | `--agent gemini` positional arg | `%USERPROFILE%\.gemini\settings.json` |
+| Antigravity | `--agent antigravity` positional arg | `%USERPROFILE%\.config\antigravity\hooks.json` |
+| Cursor | hooks installed automatically | `%USERPROFILE%\.claude\settings.json` |
+| Codex | `--agent codex` positional arg | `%USERPROFILE%\.codex\hooks.json` |
+| Copilot CLI | `--agent copilot` positional arg + camelCase events | `%USERPROFILE%\.copilot\hooks\coucou.json` |
+| Muse Code | `--agent muse` positional arg | `%USERPROFILE%\.config\muse\settings.json` |
+| OpenCode | JS plugin (`coucou.js`) | `%USERPROFILE%\.config\opencode\plugins\coucou.js` |
+| Amp | TypeScript plugin (`coucou.ts`) | `%USERPROFILE%\.config\amp\plugins\coucou.ts` |
+| Any other | `--agent <name>` positional arg | your tool's hook config |
+
+OpenCode and Amp use a plugin model on both Mac and Windows; the plugin is installed via **Settings → OpenCode Plugin** and **Settings → Amp Plugin** on the Mac side. On Windows, drop the generated plugin file into the path shown above.
+
 ## What's different from the Mac version
 
 - No notch, so the island lives at the top centre of the screen and retracts into

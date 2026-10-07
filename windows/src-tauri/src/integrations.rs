@@ -39,6 +39,9 @@ pub struct IntegrationEvent {
     pub success: bool,
     pub label: String,
     pub detail: Option<String>,
+    /// Overrides the default finish/error sound. GitHub review requests use `question`.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sound: Option<String>,
 }
 
 fn emit(app: &AppHandle, update: IntegrationUpdate) {
@@ -68,7 +71,10 @@ pub fn start(app: AppHandle) {
     spawn(app.clone(), "integration_resend", 6, 60, poll_resend);
     spawn(app.clone(), "integration_github", 7, 300, poll_github);
     spawn(app.clone(), "integration_calcom", 8, 300, poll_calcom);
-    spawn(app, "integration_notion", 9, 300, poll_notion);
+    spawn(app.clone(), "integration_notion", 9, 300, poll_notion);
+    let pulse_app = app.clone();
+    tauri::async_runtime::spawn(async move { github_pulse_loop(pulse_app).await });
+    tauri::async_runtime::spawn(async move { github_activity_loop(app).await });
 }
 
 /// True when the user has this integration switched on in settings.
@@ -107,7 +113,7 @@ where
 pub async fn poll_once(app: AppHandle, id: &str) {
     match id {
         "integration_stripe" => poll_stripe(app).await,
-        "integration_github" => poll_github(app).await,
+        "integration_github" => poll_github_now(app).await,
         "integration_vercel" => poll_vercel(app).await,
         "integration_n8n" => poll_n8n(app).await,
         "integration_resend" => poll_resend(app).await,
@@ -249,7 +255,7 @@ async fn poll_stripe(app: AppHandle) {
                 let cents = payments[0].get("amount").and_then(Value::as_i64).unwrap_or(0);
                 format!("{:.2}", cents as f64 / 100.0)
             });
-        Some(IntegrationEvent { success: true, label, detail: None })
+        Some(IntegrationEvent { success: true, label, detail: None, sound: None })
     } else {
         None
     };
@@ -263,6 +269,15 @@ async fn poll_stripe(app: AppHandle) {
 }
 
 // ── GitHub ────────────────────────────────────────────────────────────────────
+
+fn emit_github(app: &AppHandle, event: Option<IntegrationEvent>) {
+    emit(app, IntegrationUpdate {
+        id: "integration_github",
+        data: crate::github::snapshot(),
+        error: None,
+        event,
+    });
+}
 
 async fn poll_github(app: AppHandle) {
     let Some(token) = secrets::get("github-token") else { return };
@@ -315,12 +330,95 @@ async fn poll_github(app: AppHandle) {
         _ => 0,
     };
 
-    emit(&app, IntegrationUpdate {
-        id: "integration_github",
-        data: json!({ "totalRepos": public + private, "totalStars": stars }),
-        error: None,
-        event: None,
+    crate::github::remember_stats(public + private, stars);
+    emit_github(&app, None);
+}
+
+/// Refresh from the island button: stats, open pull requests and the contribution calendar.
+async fn poll_github_now(app: AppHandle) {
+    poll_github(app.clone()).await;
+    poll_github_pulse(&app).await;
+    poll_github_activity(&app).await;
+}
+
+async fn github_pulse_loop(app: AppHandle) {
+    tokio::time::sleep(Duration::from_secs(10)).await;
+    loop {
+        let pending = if PAUSED.load(Ordering::Relaxed) || !enabled(&app, "integration_github") {
+            false
+        } else {
+            poll_github_pulse(&app).await
+        };
+        let wait = if pending { 60 } else { 300 };
+        tokio::time::sleep(Duration::from_secs(wait)).await;
+    }
+}
+
+async fn github_activity_loop(app: AppHandle) {
+    tokio::time::sleep(Duration::from_secs(15)).await;
+    loop {
+        if !PAUSED.load(Ordering::Relaxed) && enabled(&app, "integration_github") {
+            poll_github_activity(&app).await;
+        }
+        tokio::time::sleep(Duration::from_secs(1800)).await;
+    }
+}
+
+async fn github_graphql(token: &str, query: &str) -> Option<Value> {
+    let response = client()
+        .post("https://api.github.com/graphql")
+        .timeout(Duration::from_secs(15))
+        .header("Authorization", format!("Bearer {token}"))
+        .header("Accept", "application/json")
+        .header("User-Agent", "Coucou")
+        .json(&json!({ "query": query }))
+        .send()
+        .await;
+    let Ok(response) = response else {
+        log::line("github graphql: no response".to_string());
+        return None;
+    };
+    let status = response.status();
+    if !status.is_success() {
+        log::line(format!("github graphql HTTP {}", status.as_u16()));
+        return None;
+    }
+    let root: Value = response.json().await.ok()?;
+    if root.get("data").map(|data| !data.is_null()).unwrap_or(false) {
+        if let Some(errors) = root.get("errors").and_then(Value::as_array) {
+            if !errors.is_empty() {
+                log::line(format!("github graphql errors: {}", errors.len()));
+            }
+        }
+        Some(root)
+    } else {
+        log::line("github graphql: empty data".to_string());
+        None
+    }
+}
+
+async fn poll_github_pulse(app: &AppHandle) -> bool {
+    let Some(token) = secrets::get("github-token") else { return false };
+    let Some(root) = github_graphql(&token, crate::github::PULSE_QUERY).await else { return false };
+    let Some(pulse) = crate::github::parse_pulse(&root) else { return false };
+    let pending = pulse.has_pending();
+    let found = crate::github::remember_pulse(pulse);
+    let event = crate::github::primary_alert(&found).map(|alert| IntegrationEvent {
+        success: alert.success,
+        label: alert.label,
+        detail: None,
+        sound: Some(alert.sound.to_string()),
     });
+    emit_github(app, event);
+    pending
+}
+
+async fn poll_github_activity(app: &AppHandle) {
+    let Some(token) = secrets::get("github-token") else { return };
+    let Some(root) = github_graphql(&token, crate::github::ACTIVITY_QUERY).await else { return };
+    let Some(activity) = crate::github::parse_activity(&root) else { return };
+    crate::github::remember_activity(activity);
+    emit_github(app, None);
 }
 
 // ── Vercel ────────────────────────────────────────────────────────────────────
@@ -384,6 +482,7 @@ async fn poll_vercel(app: AppHandle) {
             success,
             label: latest.get("projectName")?.as_str()?.to_string(),
             detail: None,
+            sound: None,
         })
     });
 
@@ -691,7 +790,7 @@ async fn poll_n8n(app: AppHandle) {
         id: "integration_n8n",
         data: json!({ "workflow": name, "status": status }),
         error: None,
-        event: Some(IntegrationEvent { success, label: name, detail }),
+        event: Some(IntegrationEvent { success, label: name, detail, sound: None }),
     });
 }
 

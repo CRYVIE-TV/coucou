@@ -1,8 +1,11 @@
 // Coucou for Windows — app wiring and the commands the island calls.
 
 mod claude;
+mod cursor_chat;
 mod files;
+mod github;
 mod hooks;
+mod hotkeys;
 mod integrations;
 mod island;
 mod log;
@@ -17,7 +20,9 @@ use std::sync::atomic::Ordering;
 use std::sync::{Arc, Mutex};
 
 use serde::Serialize;
-use tauri::{AppHandle, Emitter, Manager, State, WebviewUrl, WebviewWindowBuilder};
+use tauri::{AppHandle, Emitter, Manager, State, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
+use windows::Win32::Foundation::HWND;
+use windows::Win32::UI::WindowsAndMessaging::{ShowWindow, SW_HIDE};
 use tauri_plugin_autostart::{ManagerExt, MacosLauncher};
 
 use claude::{Chat, ChatContext, ChatReply};
@@ -47,8 +52,8 @@ pub struct BootInfo {
 #[tauri::command]
 fn boot(app: AppHandle, shared: State<Shared>) -> BootInfo {
     let mut settings = shared.settings.lock().unwrap().clone();
-    // The real state of ~/.claude/settings.json wins over whatever we stored.
-    settings.hooks_installed = hooks::status().installed;
+    // Cursor's hooks.json is what this install actually uses.
+    settings.hooks_installed = cursor_hooks_installed();
     let screen = island::screen_info(&app, &settings.screen);
     BootInfo {
         settings,
@@ -184,6 +189,53 @@ fn hooks_status() -> HookStatus {
     hooks::status()
 }
 
+/// What the settings window shows for the Cursor agent: model, key, hooks.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct AgentStatus {
+    model: String,
+    context: String,
+    effort: String,
+    fast: bool,
+    key_present: bool,
+    hooks_installed: bool,
+    hooks_path: String,
+    relay_ready: bool,
+    relay_path: String,
+}
+
+fn cursor_hooks_installed() -> bool {
+    let hooks_path = std::env::var_os("USERPROFILE")
+        .map(std::path::PathBuf::from)
+        .unwrap_or_else(|| std::path::PathBuf::from("."))
+        .join(".cursor")
+        .join("hooks.json");
+    std::fs::read_to_string(hooks_path)
+        .map(|text| text.contains("coucou-cursor"))
+        .unwrap_or(false)
+}
+
+#[tauri::command]
+fn agent_status() -> AgentStatus {
+    let hooks_path = std::env::var_os("USERPROFILE")
+        .map(std::path::PathBuf::from)
+        .unwrap_or_else(|| std::path::PathBuf::from("."))
+        .join(".cursor")
+        .join("hooks.json");
+    let relay = settings::hook_exe_path();
+    AgentStatus {
+        model: "Grok 4.7".into(),
+        context: "256K".into(),
+        effort: "Extra High".into(),
+        fast: true,
+        key_present: secrets::present("cursor-api-key"),
+        hooks_installed: cursor_hooks_installed(),
+        hooks_path: hooks_path.display().to_string(),
+        relay_ready: relay.is_file(),
+        relay_path: relay.display().to_string(),
+    }
+}
+
 /// Returns the diff the user has to look at before anything is written.
 #[tauri::command]
 fn hooks_preview(install: bool) -> Result<HookPreview, String> {
@@ -236,18 +288,31 @@ fn approval_decline(app: AppHandle, request_id: String) {
 /// One chat turn. The API key and any file bytes stay on the Rust side.
 #[tauri::command]
 async fn chat_send(
+    app: AppHandle,
     shared: State<'_, Shared>,
     chat: State<'_, Chat>,
     query: String,
     context: Option<ChatContext>,
 ) -> Result<ChatReply, String> {
-    let model = shared.settings.lock().unwrap().model.clone();
-    claude::send(&chat, &model, query, context).await
+    let _ = shared;
+    let _ = chat;
+    cursor_chat::send(app, query, context).await
 }
 
 #[tauri::command]
 fn chat_reset(chat: State<Chat>) {
     chat.reset();
+    cursor_chat::reset();
+}
+
+#[tauri::command]
+fn chat_history_load() -> Vec<cursor_chat::StoredTurn> {
+    cursor_chat::load_history()
+}
+
+#[tauri::command]
+fn chat_history_save(messages: Vec<cursor_chat::StoredTurn>) {
+    cursor_chat::save_history(messages);
 }
 
 /// Copies a dropped file into the inbox and reports its name back.
@@ -335,7 +400,12 @@ fn create_settings_window(app: &AppHandle) {
             win.on_window_event(move |event| {
                 if let tauri::WindowEvent::CloseRequested { api, .. } = event {
                     api.prevent_close();
-                    let _ = hidden.hide();
+                    let hidden = hidden.clone();
+                    std::thread::spawn(move || {
+                        std::thread::sleep(std::time::Duration::from_millis(40));
+                        let again = hidden.clone();
+                        let _ = hidden.run_on_main_thread(move || hide_settings(&again));
+                    });
                 }
             });
         }
@@ -356,6 +426,29 @@ pub fn show_settings_window(app: &AppHandle) {
 #[tauri::command]
 fn open_settings_window(app: AppHandle) {
     show_settings_window(&app);
+}
+
+/// Hides the settings window without destroying its webview.
+fn hide_settings(win: &WebviewWindow) {
+    if let Err(err) = win.hide() {
+        log::line(format!("settings hide: {err}"));
+    }
+    if let Ok(raw) = win.hwnd() {
+        let hwnd = HWND(raw.0 as *mut std::ffi::c_void);
+        unsafe {
+            let _ = ShowWindow(hwnd, SW_HIDE);
+        }
+    }
+}
+
+#[tauri::command]
+fn close_settings_window(app: AppHandle) {
+    let app2 = app.clone();
+    let _ = app.run_on_main_thread(move || {
+        if let Some(win) = app2.get_webview_window("settings") {
+            hide_settings(&win);
+        }
+    });
 }
 
 pub fn run() {
@@ -385,6 +478,7 @@ pub fn run() {
             open_in_vscode,
             quit_app,
             hooks_status,
+            agent_status,
             hooks_preview,
             hooks_apply,
             approval_decision,
@@ -393,6 +487,8 @@ pub fn run() {
             log_line,
             chat_send,
             chat_reset,
+            chat_history_load,
+            chat_history_save,
             ingest_file,
             secret_present,
             secret_set,
@@ -400,6 +496,7 @@ pub fn run() {
             refresh_integration,
             open_n8n,
             open_settings_window,
+            close_settings_window,
             set_paused,
         ])
         .setup(move |app| {
@@ -425,6 +522,7 @@ pub fn run() {
             log::line(format!("--- Coucou {} started ---", env!("CARGO_PKG_VERSION")));
             hooks::ensure_hook_exe(&handle);
             pipe::start(handle.clone());
+            hotkeys::start(handle.clone());
             integrations::start(handle.clone());
             Ok(())
         })

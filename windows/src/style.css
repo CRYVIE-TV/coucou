@@ -1,10 +1,12 @@
 /* Coucou for Windows — same palette, sizes and type scale as the macOS island.
    Every colour below is copied from the Swift views. */
 
+@import "./fonts/fonts.css";
+
 :root {
   color-scheme: dark;
 
-  --font: system-ui, "Segoe UI Variable Text", "Segoe UI", "Segoe UI Emoji", sans-serif;
+  --font: "Coucou Sans", "Segoe UI Emoji", sans-serif;
   --mono: "Cascadia Mono", "Consolas", ui-monospace, monospace;
 
   --ink: #f5f6f8;        /* primary text */
@@ -271,9 +273,7 @@ body {
   transition: opacity 0.3s ease-out 0.16s, transform 0.3s cubic-bezier(0.3, 1.2, 0.4, 1) 0.16s;
 }
 
-/* A view that is not on is only transparent, not gone: an infinite animation
-   inside it (the drop frame's marching dashes) would keep the webview
-   repainting every frame for as long as the app runs, island hidden or not. */
+/* A hidden view must not keep animating, or the webview repaints forever. */
 .view:not(.on) * {
   animation-play-state: paused;
 }
@@ -396,6 +396,76 @@ body {
   flex: 1 1 auto;
 }
 
+/* ── Wardrobe ───────────────────────────────────────────────────────────── */
+
+.wardrobe {
+  height: 100%;
+  padding: 0 14px 0 118px;
+}
+
+.wardrobe .card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+}
+
+.wardrobe-title {
+  font: 600 12px var(--font);
+  color: #f5f6f8;
+}
+
+.wardrobe-name {
+  font: 400 11px var(--font);
+  color: #8e939c;
+  min-height: 14px;
+}
+
+.wardrobe-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.wardrobe-pill {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+}
+
+.wardrobe-pill canvas {
+  width: 30px;
+  height: 30px;
+  display: block;
+  pointer-events: none;
+}
+
+.wardrobe-pill.hot {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.wardrobe-pill.on {
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.wardrobe-auto {
+  position: absolute;
+  left: 1px;
+  right: 1px;
+  bottom: 1px;
+  font: 700 7px var(--font);
+  letter-spacing: 0.02em;
+  color: #f5f6f8;
+  text-align: center;
+  pointer-events: none;
+}
+
 .card-body {
   position: relative;
   z-index: 1;
@@ -442,29 +512,26 @@ body {
 
 .ticker {
   position: relative;
-  height: 44px;
+  height: 22px;
   margin: 6px 12px 0 108px;
   overflow: hidden;
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    #000 12%,
-    #000 85%,
-    transparent 100%
-  );
-  mask-image: linear-gradient(to bottom, transparent 0%, #000 12%, #000 85%, transparent 100%);
+}
+
+.ticker-track {
+  display: flex;
+  flex-direction: column;
+  will-change: transform;
 }
 
 .ticker-row {
-  position: absolute;
-  left: 0;
-  right: 0;
+  position: relative;
   height: 22px;
+  flex: 0 0 22px;
   display: flex;
   align-items: center;
   gap: 6px;
+  overflow: hidden;
   transform-origin: left center;
-  will-change: transform, opacity;
 }
 
 .ticker-row .tick-icon {
@@ -476,33 +543,26 @@ body {
 }
 
 .ticker-row .tick-text {
-  font: 500 13px var(--font);
+  font: 500 13px/22px var(--font);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* Shimmer sweep, 2.2 s — same as TickerShimmerText / ShimmeringText */
+/* A colour pulse, not a clipped gradient. background-clip: text cuts the
+   stroke off ł and the accent off ć, so the ticker was drawing them broken. */
 .shimmer {
-  background: linear-gradient(
-    90deg,
-    #7c818a 0%,
-    #f2f3f5 40%,
-    #7c818a 70%
-  );
-  background-size: 260% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: shimmer 2.2s linear infinite;
+  color: #b7bcc4;
+  animation: shimmer 1.6s ease-in-out infinite;
 }
 
 @keyframes shimmer {
-  from {
-    background-position: 130% 0;
+  0%,
+  100% {
+    color: #7c818a;
   }
-  to {
-    background-position: -130% 0;
+  50% {
+    color: #f5f6f8;
   }
 }
 
@@ -757,7 +817,7 @@ input[type="range"]::-webkit-slider-thumb {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 12px 16px 14px 84px;
+  padding: 12px 16px 14px;
 }
 
 .chip-row:empty {
@@ -793,6 +853,7 @@ input[type="range"]::-webkit-slider-thumb {
 .chat-log {
   flex: 1 1 auto;
   min-height: 0;
+  padding-left: 68px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -812,21 +873,98 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 .bubble {
+  max-width: 88%;
   background: rgba(255, 255, 255, 0.13);
   border-radius: 12px;
   padding: 6px 10px;
   font: 400 12.5px var(--font);
   color: var(--ink-2);
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
   user-select: text;
 }
 
 .reply {
-  font: 400 12.5px var(--font);
-  color: #b0b5be;
-  white-space: pre-wrap;
-  padding-right: 8px;
+  min-width: 0;
+  font: 400 13px/1.45 var(--font);
+  color: #e7e9ee;
+  padding-right: 4px;
+  overflow-wrap: anywhere;
   user-select: text;
+}
+
+.reply-code {
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.35);
+  font: 400 11.5px/1.4 var(--mono);
+  color: #d7dbe3;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  user-select: text;
+}
+
+.reply p {
+  margin: 0 0 8px;
+}
+
+.reply p:last-child,
+.reply .reply-list:last-child {
+  margin-bottom: 0;
+}
+
+.reply-list {
+  margin: 0 0 8px;
+  padding-left: 16px;
+}
+
+.reply li {
+  margin: 2px 0;
+}
+
+.reply strong {
+  color: #fff;
+  font-weight: 600;
+}
+
+.chat-live {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chat-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.chat-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+  font: 400 12px/1.35 var(--font);
+  color: #c5cad3;
+}
+
+.chat-step span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.chat-step i {
+  width: 6px;
+  height: 6px;
+  margin-top: 5px;
+  border-radius: 50%;
+  background: #8aa4ff;
+  flex: 0 0 auto;
+}
+
+.chat-step:last-child i {
+  animation: typing 0.9s ease-in-out infinite;
 }
 
 .typing {
@@ -859,6 +997,7 @@ input[type="range"]::-webkit-slider-thumb {
 .chat-bar {
   display: flex;
   align-items: center;
+  flex: 0 0 auto;
   gap: 8px;
   padding: 6px 10px;
   background: rgba(255, 255, 255, 0.07);
@@ -1364,4 +1503,68 @@ input[type="range"]::-webkit-slider-thumb {
 
 .int-card.detail {
   padding-top: 8px;
+}
+
+button.int-stat {
+  border: 0;
+  background: transparent;
+  width: 100%;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: default;
+}
+
+.gh-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.gh-stars,
+.gh-days,
+.gh-total {
+  border: 0;
+  background: transparent;
+  color: var(--dim-2);
+  font: 400 11px var(--font);
+  cursor: default;
+  padding: 0;
+}
+
+.gh-days {
+  display: flex;
+  gap: 2px;
+}
+
+.gh-day {
+  display: block;
+  border-radius: 1.5px;
+  flex: 0 0 auto;
+}
+
+.gh-list {
+  max-height: 132px;
+  overflow: auto;
+}
+
+.gh-list .int-row {
+  cursor: default;
+}
+
+.gh-activity {
+  padding-top: 8px;
+}
+
+.gh-grid {
+  display: flex;
+  gap: 1.5px;
+  padding-top: 6px;
+}
+
+.gh-week {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5px;
 }

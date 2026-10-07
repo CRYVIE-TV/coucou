@@ -60,22 +60,26 @@ function lastPathComponent(p: string): string {
   return idx >= 0 ? cleaned.slice(idx + 1) : cleaned;
 }
 
-/** frenchStep() — same labels as the macOS app. */
+/** Short step names on the ticker, in Polish. */
 const TOOL_LABELS: Record<string, string> = {
-  Bash: "Exécute",
-  Read: "Lit",
-  Write: "Écrit",
-  Edit: "Modifie",
-  Glob: "Cherche",
-  Grep: "Recherche",
-  WebSearch: "Recherche web",
-  WebFetch: "Récupère",
-  TodoWrite: "Tâches",
+  Bash: "Wykonuje",
+  Shell: "Wykonuje",
+  Read: "Czyta",
+  Write: "Zapisuje",
+  Edit: "Zmienia",
+  Glob: "Szuka",
+  Grep: "Szuka",
+  WebSearch: "Szuka w sieci",
+  WebFetch: "Pobiera",
+  TodoWrite: "Zadania",
   Task: "Agent",
-  LS: "Liste",
-  MultiEdit: "Modifie",
-  NotebookEdit: "Notebook",
-  PowerShell: "Exécute",
+  LS: "Lista",
+  MultiEdit: "Zmienia",
+  NotebookEdit: "Notatnik",
+  PowerShell: "Wykonuje",
+  Delete: "Usuwa",
+  Thought: "Myśli",
+  MCP: "Narzędzie",
 };
 
 function stepLabel(tool: string, input: Record<string, unknown>): string {
@@ -132,7 +136,7 @@ function clearSession() {
   if (!t) return;
   t.steps = [];
   t.stepIndex = 0;
-  t.name = "VS Code";
+  t.name = "Cursor";
   t.pillBadge = null;
 }
 
@@ -214,7 +218,7 @@ function handleHook(island: Island, payload: HookPayload) {
 
     case "PostToolUseFailure":
       State.updateTask(agentId, "working");
-      State.appendStep(agentId, "⚠ failed");
+      State.appendStep(agentId, "⚠ nieudane");
       break;
 
     case "Notification": {
@@ -263,11 +267,11 @@ function handleHook(island: Island, payload: HookPayload) {
       break;
 
     case "SubagentStart":
-      State.appendStep(agentId, "+ subagent");
+      State.appendStep(agentId, "+ podagent");
       break;
 
     case "SubagentStop":
-      State.appendStep(agentId, "• subagent done");
+      State.appendStep(agentId, "• podagent skończył");
       break;
 
     case "PermissionRequest": {

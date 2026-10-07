@@ -9,7 +9,7 @@
 
 import { h, svg } from "./dom";
 import { ICONS } from "./icons";
-import { cubicBezier, clamp, lerp } from "../core/anim";
+import { cubicBezier, clamp } from "../core/anim";
 import type { AgentTask } from "../core/state";
 
 const ROW_H = 22;
@@ -17,7 +17,6 @@ const ROW_H = 22;
 const DURATION = 380;
 /** Beyond this many queued steps we stop trying to show them all. */
 const MAX_QUEUE = 4;
-const COMPLETED_SCALE = 11.5 / 13; // 0.885 — the completed font size
 const EASE = cubicBezier(0.4, 0, 0.2, 1);
 
 interface Row {
@@ -38,13 +37,18 @@ function makeRow(): Row {
   const shimmer = h("span", { class: "tick-text shimmer" });
   const dim = h("span", {
     class: "tick-text",
-    style: "position:absolute;left:0;right:0;color:#6b7079",
+    style: "position:absolute;left:0;right:0;top:0;color:#6b7079",
   });
   const el = h(
     "div",
     { class: "ticker-row" },
     h("span", { class: "tick-icon", style: "position:relative" }, chevron, check),
-    h("span", { style: "position:relative;flex:1 1 auto;min-width:0" }, shimmer, dim),
+    h(
+      "span",
+      { style: "position:relative;flex:1 1 auto;min-width:0;height:22px" },
+      shimmer,
+      dim,
+    ),
   );
   return { el, chevron, check, shimmer, dim, text: "" };
 }
@@ -60,18 +64,23 @@ function setText(row: Row, text: string) {
  * Places a row. `phase` 0 = current (shimmering, full size), 1 = completed
  * (dim, shifted up-left and scaled down) — same crossfades as the Swift view.
  */
-function place(row: Row, y: number, phase: number, opacity: number) {
-  const scale = 1 - phase * (1 - COMPLETED_SCALE);
-  row.el.style.transform = `translate(${-phase * 10}px, ${y}px) scale(${scale})`;
+function place(row: Row, phase: number, opacity: number) {
+  // No per-row translate or scale. Those shifts let the finished line paint
+  // on top of the live one. The track moves; each row stays in its own slot.
+  row.el.style.transform = "none";
   row.el.style.opacity = String(opacity);
-  row.chevron.style.opacity = String(clamp(1 - phase * 2, 0, 1));
-  row.check.style.opacity = String(clamp(phase * 2 - 1, 0, 1));
-  row.shimmer.style.opacity = String(clamp(1 - phase * 1.6, 0, 1));
-  row.dim.style.opacity = String(clamp(phase * 2 - 0.4, 0, 1));
+  // Hard switch: the shimmer and the dim copy are the same words. Crossfading
+  // them paints both at once and reads as two texts on top of each other.
+  const done = phase >= 0.45;
+  row.chevron.style.opacity = done ? "0" : "1";
+  row.check.style.opacity = done ? "1" : "0";
+  row.shimmer.style.visibility = done ? "hidden" : "visible";
+  row.dim.style.visibility = done ? "visible" : "hidden";
 }
 
 export class Ticker {
   readonly el: HTMLElement;
+  private track: HTMLElement;
   private a = makeRow(); // completed
   private b = makeRow(); // current
   private c = makeRow(); // incoming
@@ -80,15 +89,20 @@ export class Ticker {
   private displayIndex = -1;
 
   constructor() {
-    this.el = h("div", { class: "ticker" }, this.a.el, this.b.el, this.c.el);
+    this.track = h("div", { class: "ticker-track" }, this.a.el, this.b.el, this.c.el);
+    this.el = h("div", { class: "ticker" }, this.track);
     this.rest();
   }
 
-  /** The state between transitions: completed on top, current below. */
+  /**
+   * One line on screen: the live step. The finished step sits in the slot
+   * above the clip, so it cannot rest on top of the live text.
+   */
   private rest() {
-    place(this.a, 0, 1, 1);
-    place(this.b, ROW_H, 0, 1);
-    place(this.c, ROW_H * 2, 0, 0);
+    this.track.style.transform = `translateY(${-ROW_H}px)`;
+    place(this.a, 1, 1);
+    place(this.b, 0, 1);
+    place(this.c, 0, 0);
   }
 
   get animating(): boolean {
@@ -131,17 +145,18 @@ export class Ticker {
     if (this.startMs == null) {
       if (this.queue.length === 0) return;
       setText(this.c, this.queue[0]);
-      place(this.c, ROW_H * 2, 0, 0);
+      place(this.c, 0, 0);
       this.startMs = nowMs;
     }
 
     const p = clamp((nowMs - this.startMs) / DURATION, 0, 1);
     const e = EASE(p);
 
-    // A leaves upwards and fades a little faster than it moves, as on macOS.
-    place(this.a, lerp(0, -ROW_H, e), 1, clamp(1 - p * 1.35, 0, 1));
-    place(this.b, lerp(ROW_H, 0, e), e, 1);
-    place(this.c, lerp(ROW_H * 2, ROW_H, e), 0, e);
+    // Slide the live line out and the next line into the same one-line window.
+    this.track.style.transform = `translateY(${-(1 + e) * ROW_H}px)`;
+    place(this.a, 1, 0);
+    place(this.b, e, clamp(1 - p * 1.35, 0, 1));
+    place(this.c, 0, e);
 
     if (p < 1) return;
 

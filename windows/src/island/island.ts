@@ -12,6 +12,7 @@ import {
 import { Sound } from "../core/sound";
 import { State } from "../core/state";
 import { BotEngine, hexToRGB } from "../mochi/engine";
+import { parseOutfit, resolveOutfit } from "../mochi/outfits";
 import { Greeting } from "../mochi/greeting";
 import { createMiniBot, pruneMiniBots, syncMiniBotStates, tickMiniBots } from "../mochi/minibots";
 import { UploadCanvas } from "../upload/canvas";
@@ -167,6 +168,19 @@ export class Island {
       },
       openSettingsWindow: () => void Bridge.openSettingsWindow(),
       blip: () => Sound.play("blip"),
+      dress: (id) => {
+        State.settings.mochiOutfit = id;
+        State.wardrobeHover = null;
+        void Bridge.saveSettings(State.settings);
+        Sound.play("pop");
+        this.engine.triggerEmote("proud");
+        State.notify();
+      },
+      previewDress: (id) => {
+        if (State.wardrobeHover === id) return;
+        State.wardrobeHover = id;
+        State.notify();
+      },
     };
 
     this.wakeStrip = h("div", { id: "wake-strip" });
@@ -237,10 +251,14 @@ export class Island {
           if (from === "coucou") State.view = State.defaultView();
           if (!this.wasInIsland) this.fsm.mouseLeft();
           break;
-        case "home":
-          this.expand(State.defaultView());
-          if (!this.wasInIsland) this.fsm.mouseLeft();
+        case "home": {
+          // Reopening must bring the conversation back. A click used to force
+          // the overview, so the chat looked like it had vanished.
+          const view = State.view === "prompt" ? "prompt" : State.defaultView();
+          this.expand(view);
+          if (view !== "prompt" && !this.wasInIsland) this.fsm.mouseLeft();
           break;
+        }
         case "coucou":
           this.expand("greeting");
           this.greeting.start();
@@ -298,20 +316,86 @@ export class Island {
     State.notify();
   }
 
+  /** The conversation stays up until the user leaves it or presses Escape. */
+  private chatHoldsOpen(): boolean {
+    return State.view === "prompt";
+  }
+
   setView(view: IslandViewName) {
+    if (view !== "wardrobe") State.wardrobeHover = null;
     this.stopSequenceIfLeaving(view);
+    const leavingChat = State.view === "prompt" && view !== "prompt";
     if (State.mode !== "expanded") {
       this.fsm.forceHome();
       State.view = view;
+      if (view === "prompt") {
+        this.homeCollapseAt = null;
+        this.fsm.mouseEntered();
+      }
       this.animateGeometry(false);
       State.notify();
       return;
     }
-    const grew = VIEW_LAYOUTS[view].height >= VIEW_LAYOUTS[State.view].height;
+    const grew = (view === "prompt" ? this.chatHeight : VIEW_LAYOUTS[view].height)
+      >= (State.view === "prompt" ? this.chatHeight : VIEW_LAYOUTS[State.view].height);
     State.view = view;
     State.lastActivity = performance.now();
     this.animateGeometry(!grew);
+    if (view === "prompt") {
+      this.homeCollapseAt = null;
+      this.fsm.mouseEntered();
+    } else if (leavingChat && !this.wasInIsland && !State.isPinned) {
+      this.fsm.mouseLeft();
+      this.homeCollapseAt = performance.now() + State.settings.autoCloseInterval * 1000;
+    }
     State.notify();
+  }
+
+  /** Coucou 0.1.7 shortcuts. Ctrl+Alt+Shift, so AltGr can still type Polish. */
+  onShortcut(action: string) {
+    switch (action) {
+      case "toggle":
+        if (State.mode === "expanded") this.collapse();
+        else this.expand("overview");
+        break;
+      case "chat":
+        this.expand("prompt");
+        break;
+      case "alert":
+        if (State.pendingApproval) this.expand("approval");
+        else if (State.focusTask?.state === "question") this.expand("question");
+        else this.expand("overview");
+        break;
+      case "terminal":
+        void Bridge.openInVSCode(State.focusTask?.sessionCwd ?? null);
+        break;
+      case "next":
+      case "prev":
+        this.cyclePill(action === "next" ? 1 : -1);
+        break;
+      case "mute":
+        State.settings.soundEnabled = !State.settings.soundEnabled;
+        Sound.setEnabled(State.settings.soundEnabled);
+        void Bridge.saveSettings(State.settings);
+        State.notify();
+        break;
+      case "wardrobe":
+        if (State.mode === "expanded" && State.view === "wardrobe") this.setView("overview");
+        else this.expand("wardrobe");
+        break;
+      default:
+        break;
+    }
+  }
+
+  private cyclePill(delta: number) {
+    const ids = State.tasks.map((t) => t.id);
+    if (ids.length === 0) return;
+    const at = Math.max(0, ids.indexOf(State.focusId ?? ids[0]));
+    const next = ids[(at + delta + ids.length) % ids.length];
+    State.setFocus(next);
+    if (State.mode !== "expanded") this.expand("overview");
+    else State.notify();
   }
 
   collapse() {
@@ -532,6 +616,7 @@ export class Island {
     });
 
     this.islandEl.addEventListener("mousedown", (e) => {
+      if (e.button !== 0) return;
       Sound.resume();
       State.lastActivity = performance.now();
       if (State.mode !== "expanded") {
@@ -544,8 +629,20 @@ export class Island {
       }
     });
 
+    this.islandEl.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+      if (State.mode === "hidden") return;
+      if (!this.isBotHit(e.clientX, e.clientY, State.mode === "compact" ? 12 : 0)) return;
+      Sound.resume();
+      if (State.mode === "expanded" && State.view === "wardrobe") this.setView("overview");
+      else this.expand("wardrobe");
+    });
+
     window.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && State.mode === "expanded" && !State.isPinned) this.collapse();
+      if (e.key === "Escape" && State.mode === "expanded" && !State.isPinned) {
+        if (State.view === "wardrobe") this.setView("overview");
+        else this.collapse();
+      }
       State.lastActivity = performance.now();
     });
 
@@ -558,9 +655,7 @@ export class Island {
 
   /**
    * Takes the cursor from the page's own mouse events instead of Rust's poll.
-   * Used where the OS has no global cursor position (Wayland): the events only
-   * fire while the pointer is over the island, so leaving the window is
-   * reported as a cursor far away, which is what the poll would have said.
+   * Used where the OS has no global cursor position (Wayland).
    */
   followPageCursor() {
     window.addEventListener("mousemove", (e) => this.onCursor(e.clientX, e.clientY));
@@ -590,7 +685,7 @@ export class Island {
       this.fsm.mouseEntered();
       this.homeCollapseAt = null;
     }
-    if (!inIsland && this.wasInIsland) {
+    if (!inIsland && this.wasInIsland && !this.chatHoldsOpen()) {
       this.fsm.mouseLeft();
       if (this.fsm.state === "home" && !State.isPinned) {
         this.homeCollapseAt = performance.now() + State.settings.autoCloseInterval * 1000;
@@ -614,11 +709,11 @@ export class Island {
     this.ensureRunning();
   }
 
-  private isBotHit(x: number, y: number): boolean {
+  private isBotHit(x: number, y: number, pad = 0): boolean {
     const rect = this.islandRect();
     const cx = rect.x + this.botCx.value;
     const cy = rect.y + this.botCy.value;
-    const radius = this.botSize.value / 2;
+    const radius = this.botSize.value / 2 + pad;
     return (x - cx) ** 2 + (y - cy) ** 2 <= radius * radius;
   }
 
@@ -717,7 +812,8 @@ export class Island {
     this.viewsEl.classList.toggle("hidden-by-upload", uploadActive);
 
     tickMiniBots(dt);
-    this.views.get(State.view)?.tick?.(nowMs);
+    const activeView = this.views.get(State.view);
+    activeView?.tick?.(nowMs);
     if (UploadSeq.isActive) this.stepSequence();
     this.updateCountdown(nowMs);
 
@@ -733,7 +829,8 @@ export class Island {
       ? settling
       : settling ||
         !this.botCx.settled || !this.botCy.settled || !this.botSize.settled ||
-        greetingActive || this.engine.busy || UploadSeq.isActive;
+        greetingActive || this.engine.busy || UploadSeq.isActive ||
+        (activeView?.busy?.() ?? false);
 
     if (busy) {
       requestAnimationFrame(this.frame);
@@ -792,6 +889,7 @@ export class Island {
     this.engine.particleOverhang = BOT_OVERHANG;
     this.engine.lookX = this.lookX();
     this.engine.lookY = this.lookY();
+    this.applyOutfit();
     if (this.engine.morph > 0.3) {
       this.engine.slotHTarget = State.fileDragOver ? 0.2 : 0;
     } else {
@@ -805,6 +903,20 @@ export class Island {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, hCss);
     this.engine.draw(ctx, w, hCss);
+  }
+
+  /**
+   * Coucou 0.1.5: only the main Mochi wears an outfit, and only while the
+   * Cursor pill (or nothing) is focused. The wardrobe previews on hover.
+   */
+  private applyOutfit() {
+    const wardrobe = State.mode === "expanded" && State.view === "wardrobe";
+    const main = State.focusId == null || State.focusId === "integration_claude";
+    const show = main || State.mode !== "expanded" || wardrobe;
+    const picked = wardrobe && State.wardrobeHover
+      ? parseOutfit(State.wardrobeHover)
+      : parseOutfit(State.settings.mochiOutfit);
+    this.engine.setOutfit(show ? resolveOutfit(picked, new Date()) : "none", !wardrobe);
   }
 
   /** BotCanvasView.lookX / lookY — tanh of the distance to the bot. */

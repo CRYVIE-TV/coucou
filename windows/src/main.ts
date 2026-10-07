@@ -19,12 +19,14 @@ async function main() {
   const boot = await Bridge.boot();
   if (boot) {
     State.settings = { ...State.settings, ...boot.settings };
+    State.cursorReady = (await Bridge.secretPresent("cursor-api-key")) ?? false;
   }
   island.applySettings();
   State.loadIntegrationTasks();
-  if (boot && !boot.cursorPoll) island.followPageCursor();
+  if (boot && boot.cursorPoll === false) island.followPageCursor();
 
   await onEvent<{ x: number; y: number }>("cursor", ({ x, y }) => island.onCursor(x, y));
+  await onEvent<string>("shortcut", (action) => island.onShortcut(action));
 
   /** Pause has to reach Rust too, or the pollers keep calling out. */
   const setPaused = (on: boolean) => {

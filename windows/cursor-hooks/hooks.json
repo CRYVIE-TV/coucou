@@ -1,0 +1,113 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "hooks/coucou-cursor.cmd",
+        "timeout": 10
+      }
+    ],
+    "sessionEnd": [
+      {
+        "command": "hooks/coucou-cursor.cmd",
+        "timeout": 10
+      }
+    ],
+    "beforeSubmitPrompt": [
+      {
+        "command": "hooks/coucou-cursor.cmd",
+        "timeout": 10
+      }
+    ],
+    "preToolUse": [
+      {
+        "command": "hooks/coucou-cursor.cmd",
+        "timeout": 10
+      }
+    ],
+    "postToolUse": [
+      {
+        "command": "hooks/coucou-cursor.cmd",
+        "timeout": 10
+      }
+    ],
+    "postToolUseFailure": [
+      {
+        "command": "hooks/coucou-cursor.cmd",
+        "timeout": 10
+      }
+    ],
+    "subagentStart": [
+      {
+        "command": "hooks/coucou-cursor.cmd",
+        "timeout": 10
+      }
+    ],
+    "subagentStop": [
+      {
+        "command": "hooks/coucou-cursor.cmd",
+        "timeout": 10
+      }
+    ],
+    "beforeShellExecution": [
+      {
+        "command": "hooks/coucou-cursor.cmd",
+        "timeout": 10
+      }
+    ],
+    "afterShellExecution": [
+      {
+        "command": "hooks/coucou-cursor.cmd",
+        "timeout": 10
+      }
+    ],
+    "beforeMCPExecution": [
+      {
+        "command": "hooks/coucou-cursor.cmd",
+        "timeout": 10
+      }
+    ],
+    "afterMCPExecution": [
+      {
+        "command": "hooks/coucou-cursor.cmd",
+        "timeout": 10
+      }
+    ],
+    "beforeReadFile": [
+      {
+        "command": "hooks/coucou-cursor.cmd",
+        "timeout": 10
+      }
+    ],
+    "afterFileEdit": [
+      {
+        "command": "hooks/coucou-cursor.cmd",
+        "timeout": 10
+      }
+    ],
+    "preCompact": [
+      {
+        "command": "hooks/coucou-cursor.cmd",
+        "timeout": 10
+      }
+    ],
+    "stop": [
+      {
+        "command": "hooks/coucou-cursor.cmd",
+        "timeout": 10
+      }
+    ],
+    "afterAgentResponse": [
+      {
+        "command": "hooks/coucou-cursor.cmd",
+        "timeout": 10
+      }
+    ],
+    "afterAgentThought": [
+      {
+        "command": "hooks/coucou-cursor.cmd",
+        "timeout": 10
+      }
+    ]
+  }
+}

@@ -58,7 +58,7 @@ const task = (
 
 /** AgentTask.integrationAgents — same ids, names and colours as macOS. */
 export const INTEGRATION_AGENTS: AgentTask[] = [
-  task("integration_claude", "VS Code", "#F5F6F8", "claudeCode"),
+  task("integration_claude", "Cursor", "#F5F6F8", "claudeCode"),
   task("integration_resend", "Resend", "#22C55E", "n8n"),
   task("integration_n8n", "n8n", "#F29B38", "n8n"),
   task("integration_vercel", "Vercel", "#7C5CFF", "n8n"),
@@ -90,8 +90,10 @@ export interface Settings {
   screen: "primary" | "cursor";
   autostart: boolean;
   hooksInstalled: boolean;
-  /** Claude model used by the chat. */
+  /** Chat model. Coucou runs Grok 4.7 at 256K, Extra High, Fast. */
   model: string;
+  /** Wardrobe selection. `auto` follows the season. */
+  mochiOutfit: string;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -105,7 +107,8 @@ export const DEFAULT_SETTINGS: Settings = {
   screen: "primary",
   autostart: false,
   hooksInstalled: false,
-  model: "claude-opus-5",
+  model: "grok-4.7",
+  mochiOutfit: "auto",
 };
 
 type Listener = () => void;
@@ -136,11 +139,20 @@ class AppState {
   noteMessage: string | null = null;
   searchResult: SearchResult | null = null;
   chatHistory: ChatMessage[] = [];
+  /** What the assistant is doing during the current turn. */
+  chatSteps: string[] = [];
+  /** Answer text streamed in before the turn finishes. */
+  chatDraft = "";
   pendingApproval: ApprovalInfo | null = null;
 
   integrations: Record<string, IntegrationInfo> = {};
 
   lastActivity = performance.now();
+
+  cursorReady = false;
+
+  /** Pill under the pointer in the wardrobe. Null shows the saved outfit. */
+  wardrobeHover: string | null = null;
 
   settings: Settings = { ...DEFAULT_SETTINGS };
 

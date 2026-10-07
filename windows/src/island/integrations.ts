@@ -32,11 +32,11 @@ export async function refreshConfigured() {
     const info = State.integrations[id] ?? { data: {}, error: null, loaded: false, configured: false };
     State.integrations[id] = { ...info, configured: present };
   }
-  const hooks = State.settings.hooksInstalled;
+  const cursorKey = (await Bridge.secretPresent("cursor-api-key")) ?? false;
   const claude = State.integrations.integration_claude ?? {
     data: {}, error: null, loaded: false, configured: false,
   };
-  State.integrations.integration_claude = { ...claude, configured: hooks };
+  State.integrations.integration_claude = { ...claude, configured: cursorKey };
   State.notify();
 }
 
@@ -61,7 +61,7 @@ function handle(island: Island, update: IntegrationUpdate) {
       if (State.focusId !== update.id) {
         task.pillBadge = event.success ? "finished" : "error";
       }
-      Sound.play(event.success ? "finish" : "error");
+      Sound.play(event.sound || (event.success ? "finish" : "error"));
       // Same as the Swift pollers: show the compact island so the badge is seen,
       // but never steal the screen for a successful deploy.
       island.reveal();

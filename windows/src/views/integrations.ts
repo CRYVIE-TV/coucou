@@ -211,22 +211,248 @@ function statRow(icon: string, color: string, label: string, value: string): HTM
   );
 }
 
-function githubCard(): HTMLElement {
+type GhSection = "myPRs" | "toReview" | "mainCI" | "activity";
+
+let githubSection: GhSection | null = null;
+
+const GH_LEVEL = ["rgba(255,255,255,0.06)", "#0E4429", "#006D32", "#26A641", "#39D353"];
+
+function ghCount(n: number): string {
+  return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
+}
+
+function ciColor(ci: unknown): string {
+  if (ci === "failure") return "#F4505E";
+  if (ci === "pending") return "#F5A524";
+  if (ci === "success") return "#22C55E";
+  return "#6B7079";
+}
+
+function worstCi(items: Record<string, unknown>[]): string {
+  if (items.some((item) => item.ci === "failure")) return "failure";
+  if (items.some((item) => item.ci === "pending")) return "pending";
+  if (items.some((item) => item.ci === "success")) return "success";
+  return "unknown";
+}
+
+/** Only https://github.com/ links leave the island. */
+function githubUrl(raw: unknown): string | null {
+  try {
+    const url = new URL(String(raw));
+    if (url.protocol === "https:" && url.hostname === "github.com") return url.toString();
+  } catch {
+    /* not a URL */
+  }
+  return null;
+}
+
+function githubLoginUrl(login: unknown): string | null {
+  if (typeof login !== "string" || !/^[A-Za-z0-9-]+$/.test(login)) return null;
+  return `https://github.com/${login}`;
+}
+
+function activityWeeks(): Record<string, unknown>[][] {
+  const weeks = get("integration_github").activity;
+  if (!weeks || typeof weeks !== "object") return [];
+  const raw = (weeks as { weeks?: unknown }).weeks;
+  if (!Array.isArray(raw)) return [];
+  return raw.filter(Array.isArray) as Record<string, unknown>[][];
+}
+
+function activityDays(): Record<string, unknown>[] {
+  return activityWeeks().flat();
+}
+
+function daySquare(day: Record<string, unknown>, size: number): HTMLElement {
+  const level = Math.max(0, Math.min(4, Number(day.level ?? 0)));
+  const count = Number(day.count ?? 0);
+  const label = count === 1 ? "1 contribution" : count > 0 ? `${count} contributions` : "No contributions";
+  return h("i", {
+    class: "gh-day",
+    title: `${day.date ?? ""} · ${label}`,
+    style: `width:${size}px;height:${size}px;background:${GH_LEVEL[level]}`,
+  });
+}
+
+function githubHeadExtra(open: (section: GhSection) => void): HTMLElement | undefined {
   const d = get("integration_github");
-  const stars = Number(d.totalStars ?? 0);
-  const repos = Number(d.totalRepos ?? 0);
-  const fmt = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n));
+  const stars = d.totalStars != null ? ghCount(Number(d.totalStars)) : null;
+  const days = activityDays().slice(-7);
+  if (stars == null && days.length === 0) return undefined;
+  const extra = h("div", { class: "gh-head" });
+  if (stars != null) {
+    extra.append(
+      h("button", {
+        class: "gh-stars",
+        text: `★ ${stars}`,
+        onclick: () => open("activity"),
+      }),
+    );
+  }
+  if (days.length > 0) {
+    const row = h("button", { class: "gh-days", title: "Activity", onclick: () => open("activity") });
+    for (const day of days) row.append(daySquare(day, 7));
+    extra.append(row);
+  }
+  return extra;
+}
+
+function ghStat(color: string, label: string, value: string, onClick: () => void): HTMLElement {
+  return h(
+    "button",
+    { class: "int-stat", onclick: onClick },
+    h("i", { class: "int-stat-icon" }, dot(color, 6)),
+    h("span", { class: "int-stat-label", text: label }),
+    h("span", { class: "int-stat-value", text: value }),
+  );
+}
+
+function githubCard(openDetail: () => void): HTMLElement {
+  const d = get("integration_github");
+  const open = (section: GhSection) => {
+    githubSection = section;
+    openDetail();
+  };
+  const pulse = Array.isArray(d.myPRs);
+  if (!pulse) {
+    const stars = Number(d.totalStars ?? 0);
+    const repos = Number(d.totalRepos ?? 0);
+    return h(
+      "div",
+      { class: "int-card" },
+      header("#F4505E", "GitHub", "Overview"),
+      h(
+        "div",
+        { class: "int-stats" },
+        statRow(ICONS.star, "#F5A524", "Total stars", ghCount(stars)),
+        statRow(ICONS.stack, "#6B7079", "Repositories", String(repos)),
+      ),
+    );
+  }
+
+  const mine = arr("integration_github", "myPRs");
+  const review = arr("integration_github", "toReview");
+  const main = arr("integration_github", "mainCI");
+  const failing = mine.filter((pr) => pr.ci === "failure").length;
+  const pending = mine.filter((pr) => pr.ci === "pending").length;
+  const prValue = mine.length === 0
+    ? "0"
+    : failing > 0
+      ? `${mine.length} · ${failing} failing`
+      : pending > 0
+        ? `${mine.length} · running`
+        : String(mine.length);
+  const mainWorst = worstCi(main);
+  const mainFailing = main.filter((repo) => repo.ci === "failure").length;
+  const mainValue = mainWorst === "failure"
+    ? `${mainFailing} failing`
+    : mainWorst === "pending"
+      ? "running"
+      : mainWorst === "success"
+        ? "all green"
+        : main.length === 0
+          ? "no repos"
+          : "unknown";
+
+  const extra = githubHeadExtra(open);
   return h(
     "div",
     { class: "int-card" },
-    header("#F4505E", "GitHub", "Overview"),
+    header("#F4505E", "GitHub", extra ? "" : "Overview", extra),
     h(
       "div",
       { class: "int-stats" },
-      statRow(ICONS.star, "#F5A524", "Total stars", fmt(stars)),
-      statRow(ICONS.stack, "#6B7079", "Repositories", String(repos)),
+      ghStat(ciColor(worstCi(mine)), "My PRs", prValue, () => open("myPRs")),
+      ghStat(review.length > 0 ? "#8AB4F8" : "#6B7079", "To review", String(review.length), () => open("toReview")),
+      ghStat(ciColor(mainWorst), "Default branch", mainValue, () => open("mainCI")),
     ),
   );
+}
+
+function githubDetail(onBack: () => void): HTMLElement {
+  const section = githubSection ?? "myPRs";
+  const titles: Record<GhSection, string> = {
+    myPRs: "My PRs",
+    toReview: "To review",
+    mainCI: "Default branch",
+    activity: "Activity",
+  };
+  const body = section === "activity" ? githubActivityBody() : githubListBody(section);
+  return h(
+    "div",
+    { class: "int-card detail" },
+    h(
+      "div",
+      { class: "int-detail-head" },
+      h("button", { class: "int-back", onclick: onBack }, svg(ICONS.chevronLeft, 10, { stroke: 2.4 })),
+      dot("#F4505E", 6),
+      h("b", { text: titles[section] }),
+    ),
+    body,
+  );
+}
+
+function githubListBody(section: "myPRs" | "toReview" | "mainCI"): HTMLElement {
+  const rows = h("div", { class: "int-rows gh-list" });
+  if (section === "mainCI") {
+    const repos = arr("integration_github", "mainCI");
+    if (repos.length === 0) rows.append(h("div", { class: "int-empty", text: "No repositories" }));
+    repos.forEach((repo, i) => {
+      const name = String(repo.repo ?? "").split("/").pop() || String(repo.repo ?? "");
+      const row = listRow(
+        ciColor(repo.ci),
+        i === 0,
+        h("span", { class: "int-name", text: name }),
+        h("span", { class: "int-sub", text: String(repo.branch ?? "") }),
+      );
+      const url = githubUrl(repo.url);
+      if (url) row.addEventListener("click", () => void Bridge.openUrl(url));
+      rows.append(row);
+    });
+    return rows;
+  }
+  const items = arr("integration_github", section);
+  if (items.length === 0) {
+    rows.append(h("div", { class: "int-empty", text: section === "toReview" ? "Nothing to review" : "No open pull requests" }));
+  }
+  items.forEach((pr, i) => {
+    const repo = String(pr.repo ?? "").split("/").pop() || String(pr.repo ?? "");
+    const title = pr.isDraft ? `${pr.title ?? ""} · Draft` : String(pr.title ?? "");
+    const row = listRow(
+      ciColor(pr.ci),
+      i === 0,
+      h("span", { class: "int-name", text: `${repo}#${pr.number ?? ""}` }),
+      h("span", { class: "int-sub", text: title }),
+    );
+    const url = githubUrl(pr.url);
+    if (url) row.addEventListener("click", () => void Bridge.openUrl(url));
+    rows.append(row);
+  });
+  return rows;
+}
+
+function githubActivityBody(): HTMLElement {
+  const activity = get("integration_github").activity as { total?: number } | undefined;
+  const weeks = activityWeeks().slice(-18);
+  const wrap = h("div", { class: "gh-activity" });
+  const total = Number(activity?.total ?? 0);
+  const login = githubLoginUrl(get("integration_github").login);
+  const caption = h("button", {
+    class: "gh-total",
+    text: `${total.toLocaleString("en-US")} past year`,
+    onclick: () => {
+      if (login) void Bridge.openUrl(login);
+    },
+  });
+  wrap.append(caption);
+  const grid = h("div", { class: "gh-grid" });
+  for (const week of weeks) {
+    const col = h("div", { class: "gh-week" });
+    for (const day of week) col.append(daySquare(day, 7));
+    grid.append(col);
+  }
+  wrap.append(grid);
+  return wrap;
 }
 
 // ── Stripe ────────────────────────────────────────────────────────────────────
@@ -391,7 +617,7 @@ export function hasIntegrationData(id: string): boolean {
     case "integration_resend":
       return arr(id, "emails").length > 0;
     case "integration_github":
-      return get(id).totalRepos != null;
+      return get(id).totalRepos != null || Array.isArray(get(id).myPRs) || get(id).activity != null;
     case "integration_stripe":
       return info.loaded;
     case "integration_notion":
@@ -419,7 +645,9 @@ export function renderIntegrationCard(task: AgentTask, hooks: IntegrationCardHoo
     case "integration_resend":
       return resendCard();
     case "integration_github":
-      return githubCard();
+      return hooks.detailOpen && githubSection
+        ? githubDetail(hooks.closeDetail)
+        : githubCard(hooks.openDetail);
     case "integration_stripe":
       return stripeCard();
     case "integration_notion":

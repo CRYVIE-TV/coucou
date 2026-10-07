@@ -7,7 +7,7 @@ export const SOUND_NAMES = [
   "peek", "open", "close", "hover", "blip", "slap", "annoyed", "dizzy", "greet",
   "work", "finish", "error", "approval", "question", "approve", "gulp", "tick",
   "send", "love", "pop", "proud", "wink", "yawn", "attach", "think", "search",
-  "rate", "sleep",
+  "rate", "sleep", "greeting",
 ] as const;
 
 export type SoundName = (typeof SOUND_NAMES)[number];
@@ -21,6 +21,7 @@ class SoundEngine {
   private buffers = new Map<string, AudioBuffer>();
   private loading: Promise<void> | null = null;
   private idleTimer: number | null = null;
+  private live = new Map<string, { src: AudioBufferSourceNode; gain: GainNode }>();
 
   /** Creates the context and decodes every WAV. Safe to call more than once. */
   preload(): Promise<void> {
@@ -95,10 +96,38 @@ class SoundEngine {
       this.idleTimer = null;
     }
     if (ctx.state === "suspended") void ctx.resume();
+    this.stopLive(name);
+    const gain = ctx.createGain();
+    gain.connect(master);
     const src = ctx.createBufferSource();
     src.buffer = buf;
-    src.connect(master);
+    src.connect(gain);
+    src.onended = () => {
+      if (this.live.get(name)?.src === src) this.live.delete(name);
+    };
+    this.live.set(name, { src, gain });
     src.start();
+  }
+
+  /** Eases a playing sound out. Used when the launch greeting is dismissed. */
+  fadeOut(name: string, duration: number) {
+    const live = this.live.get(name);
+    const ctx = this.ctx;
+    if (!live || !ctx) return;
+    this.live.delete(name);
+    const now = ctx.currentTime;
+    const g = live.gain.gain;
+    g.cancelScheduledValues(now);
+    g.setValueAtTime(g.value, now);
+    g.linearRampToValueAtTime(0, now + duration);
+    try { live.src.stop(now + duration + 0.05); } catch { /* already ended */ }
+  }
+
+  private stopLive(name: string) {
+    const prev = this.live.get(name);
+    if (!prev) return;
+    this.live.delete(name);
+    try { prev.src.stop(); } catch { /* already ended */ }
   }
 }
 

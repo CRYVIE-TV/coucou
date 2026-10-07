@@ -16,10 +16,17 @@ pub struct Settings {
     pub screen: String,
     pub autostart: bool,
     pub hooks_installed: bool,
-    /// Claude model used by the chat. Changeable in the settings window.
+    /// Model id shown in settings. The chat runs Grok 4.7 through Cursor.
     /// Defaulted explicitly so a settings.json written by an older build still loads.
     #[serde(default = "default_model")]
     pub model: String,
+    /// Wardrobe id: auto, none, or an outfit.
+    #[serde(default = "default_outfit")]
+    pub mochi_outfit: String,
+}
+
+fn default_outfit() -> String {
+    "auto".into()
 }
 
 fn default_model() -> String {
@@ -43,6 +50,7 @@ impl Default for Settings {
             autostart: false,
             hooks_installed: false,
             model: default_model(),
+            mochi_outfit: default_outfit(),
         }
     }
 }

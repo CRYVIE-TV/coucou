@@ -26,7 +26,7 @@ export interface BootInfo {
   screen: { x: number; y: number; width: number; height: number; scale: number };
   version: string;
   hookPath: string;
-  /** False where the OS has no global cursor (Wayland): see Island.followPageCursor. */
+  /** False where the OS has no global cursor (Wayland). */
   cursorPoll: boolean;
 }
 
@@ -58,12 +58,15 @@ export const Bridge = {
   quit: () => call<void>("quit_app"),
 
   openSettingsWindow: () => call<void>("open_settings_window"),
+  /** Hides the settings window. The webview stays alive so it can open again. */
+  closeSettingsWindow: () => call<void>("close_settings_window"),
 
   /** Writes to %LOCALAPPDATA%\Coucou\coucou.log, next to the Rust lines. */
   log: (message: string) => call<void>("log_line", { message }),
 
   // ── Claude Code hooks ─────────────────────────────────────────────────────
   hooksStatus: () => call<HookStatus>("hooks_status"),
+  agentStatus: () => call<AgentStatus>("agent_status"),
   /** Diff to show before anything is written. `install: false` previews removal. */
   hooksPreview: (install: boolean) => callOrThrow<HookPreview>("hooks_preview", { install }),
   /**
@@ -85,6 +88,10 @@ export const Bridge = {
   chatSend: (query: string, context: ChatContext | null) =>
     callOrThrow<{ text: string }>("chat_send", { query, context }),
   chatReset: () => call<void>("chat_reset"),
+  chatHistoryLoad: () =>
+    call<{ role: string; content: string }[]>("chat_history_load"),
+  chatHistorySave: (messages: { role: string; content: string }[]) =>
+    call<void>("chat_history_save", { messages }),
   /** Copies a dropped file into the inbox. */
   ingestFile: (path: string) => callOrThrow<DroppedFile>("ingest_file", { path }),
   /** Only ever tells you whether a key exists — never its value. */
@@ -105,7 +112,7 @@ export interface IntegrationUpdate {
   id: string;
   data: Record<string, unknown>;
   error: string | null;
-  event: { success: boolean; label: string; detail: string | null } | null;
+  event: { success: boolean; label: string; detail: string | null; sound?: string | null } | null;
 }
 
 export type ChatContext =
@@ -116,6 +123,18 @@ export interface DroppedFile {
   name: string;
   path: string;
   size: number;
+}
+
+export interface AgentStatus {
+  model: string;
+  context: string;
+  effort: string;
+  fast: boolean;
+  keyPresent: boolean;
+  hooksInstalled: boolean;
+  hooksPath: string;
+  relayReady: boolean;
+  relayPath: string;
 }
 
 export interface HookStatus {

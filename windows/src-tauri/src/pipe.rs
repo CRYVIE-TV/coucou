@@ -188,6 +188,7 @@ async fn handle(app: AppHandle, mut pipe: impl Relay) {
     if !payload.is_object() {
         return;
     }
+    repair_strings(&mut payload);
 
     let event = payload
         .get("hook_event_name")
@@ -294,4 +295,70 @@ pub fn answer(app: &AppHandle, request_id: &str, decision: &str) {
     };
     log::line(format!("decision id={request_id} {word}"));
     send(app, request_id, Reply::Decision(word.to_string()), false);
+}
+
+/// Byte for a character produced by decoding a byte as Windows-1252.
+fn cp1252_byte(ch: char) -> Option<u8> {
+    let c = ch as u32;
+    if c < 0x80 || (0xA0..0x100).contains(&c) {
+        return Some(c as u8);
+    }
+    Some(match c {
+        0x20AC => 0x80,
+        0x201A => 0x82,
+        0x0192 => 0x83,
+        0x201E => 0x84,
+        0x2026 => 0x85,
+        0x2020 => 0x86,
+        0x2021 => 0x87,
+        0x02C6 => 0x88,
+        0x2030 => 0x89,
+        0x0160 => 0x8A,
+        0x2039 => 0x8B,
+        0x0152 => 0x8C,
+        0x017D => 0x8E,
+        0x2018 => 0x91,
+        0x2019 => 0x92,
+        0x201C => 0x93,
+        0x201D => 0x94,
+        0x2022 => 0x95,
+        0x2013 => 0x96,
+        0x2014 => 0x97,
+        0x02DC => 0x98,
+        0x2122 => 0x99,
+        0x0161 => 0x9A,
+        0x203A => 0x9B,
+        0x0153 => 0x9C,
+        0x017E => 0x9E,
+        0x0178 => 0x9F,
+        _ => return None,
+    })
+}
+
+fn repair_mojibake(text: &str) -> String {
+    let mut bytes = Vec::with_capacity(text.len());
+    for ch in text.chars() {
+        match cp1252_byte(ch) {
+            Some(b) => bytes.push(b),
+            None => return text.to_string(),
+        }
+    }
+    let Ok(decoded) = String::from_utf8(bytes) else {
+        return text.to_string();
+    };
+    let polish = decoded.chars().any(|c| "ąćęłńóśźżĄĆĘŁŃÓŚŹŻ".contains(c));
+    if decoded != text && polish && decoded.chars().count() < text.chars().count() {
+        decoded
+    } else {
+        text.to_string()
+    }
+}
+
+fn repair_strings(value: &mut Value) {
+    match value {
+        Value::String(s) => *s = repair_mojibake(s),
+        Value::Array(items) => items.iter_mut().for_each(repair_strings),
+        Value::Object(map) => map.values_mut().for_each(repair_strings),
+        _ => {}
+    }
 }

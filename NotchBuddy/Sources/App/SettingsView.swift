@@ -82,6 +82,7 @@ struct SettingsView: View {
     @State private var showHermesConfigDiff: Bool = false
     @State private var pendingHermesConfigContent: String = ""
     @AppStorage("hermesApprovalsEnabled") private var hermesApprovalsEnabled: Bool = false
+    @State private var hermesSupportsApprovals: Bool = HookServer.hermesSupportsApprovalTransport()
     #endif
 
     // Multi-provider chat keys
@@ -804,12 +805,20 @@ struct SettingsView: View {
                     Divider()
                     Toggle(String(localized: "plugin.hermes.approvals"), isOn: $hermesApprovalsEnabled)
                         .onChange(of: hermesApprovalsEnabled) { _, _ in triggerHermesConfigPreview() }
-                    Text(hermesApprovalsEnabled
-                         ? String(localized: "plugin.hermes.approvals.enabled")
-                         : String(localized: "plugin.hermes.approvals.disabled"))
-                        .font(.system(size: 11))
-                        .foregroundColor(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
+                        .disabled(!hermesSupportsApprovals)
+                    if !hermesSupportsApprovals {
+                        Text("Requires a newer version of Hermes — run: hermes update")
+                            .font(.caption)
+                            .foregroundColor(.orange)
+                            .fixedSize(horizontal: false, vertical: true)
+                    } else {
+                        Text(hermesApprovalsEnabled
+                             ? String(localized: "plugin.hermes.approvals.enabled")
+                             : String(localized: "plugin.hermes.approvals.disabled"))
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                     if showHermesConfigDiff {
                         ScrollView {
                             Text(pendingHermesConfigContent)

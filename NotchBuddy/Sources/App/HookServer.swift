@@ -2586,8 +2586,19 @@ def register(ctx) -> None:
         sid = kwargs.get('session_id', '')
         with _lock:
             _sessions.pop(sid, None)
-        event = 'StopFailure' if kwargs.get('interrupted') else 'Stop'
-        _fire({'hook_event_name': event, 'session_id': sid})
+        # Stop is sent by post_llm_call (which has the last assistant message).
+        # Only send StopFailure here when the session was interrupted abnormally.
+        if kwargs.get('interrupted'):
+            _fire({'hook_event_name': 'StopFailure', 'session_id': sid})
+
+    def post_llm_call(**kwargs) -> None:
+        sid = kwargs.get('session_id', '') or _current_session_id
+        response = kwargs.get('assistant_response', '')
+        _fire({
+            'hook_event_name': 'Stop',
+            'session_id': sid,
+            'last_assistant_message': response,
+        })
 
     def pre_tool_call(**kwargs) -> None:
         sid = kwargs.get('session_id', '') or _current_session_id
@@ -2608,6 +2619,7 @@ def register(ctx) -> None:
 
     ctx.register_hook('on_session_start', on_session_start)
     ctx.register_hook('on_session_end',   on_session_end)
+    ctx.register_hook('post_llm_call',    post_llm_call)
     ctx.register_hook('pre_tool_call',    pre_tool_call)
     ctx.register_hook('post_tool_call',   post_tool_call)
 

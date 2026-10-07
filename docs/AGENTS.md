@@ -213,7 +213,7 @@ via the gateway), `post_llm_call` (sends the final response), and a `pre_approva
 observer hook that fires a `⏳ Approval pending in Hermes` step in the notch.
 Approving from the notch requires `register_approval_transport`, which is not yet available
 in Hermes 0.15.x; the Approvals toggle activates automatically once Hermes exposes it.
-If the app is closed or unreachable, the plugin answers `ask` so Hermes handles approvals natively.
+Every event is fire-and-forget: if the app is closed or unreachable, nothing is sent and Hermes carries on, handling approvals itself.
 
 | Hermes event | Canonical event |
 |---|---|

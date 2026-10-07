@@ -82,7 +82,7 @@ struct SettingsView: View {
     @State private var showHermesConfigDiff: Bool = false
     @State private var pendingHermesConfigContent: String = ""
     @AppStorage("hermesApprovalsEnabled") private var hermesApprovalsEnabled: Bool = false
-    @State private var hermesSupportsApprovals: Bool = HookServer.hermesSupportsApprovalTransport()
+    @State private var hermesSupportsApprovals: Bool = false
     #endif
 
     // Multi-provider chat keys
@@ -839,6 +839,15 @@ struct SettingsView: View {
             }
             .padding(6)
         }
+        #if !APPSTORE
+        .task(id: hermesPluginInstalled) {
+            guard hermesPluginInstalled else { hermesSupportsApprovals = false; return }
+            let result = await Task.detached(priority: .background) {
+                HookServer.hermesSupportsApprovalTransport()
+            }.value
+            await MainActor.run { hermesSupportsApprovals = result }
+        }
+        #endif
 
         GroupBox(String(localized: "plan.title")) {
             VStack(alignment: .leading, spacing: 10) {
@@ -1529,7 +1538,8 @@ struct SettingsView: View {
     private func triggerHermesConfigPreview() {
         do {
             pendingHermesConfigContent = try HookServer.shared.previewHermesConfig(
-                enableApprovals: hermesApprovalsEnabled)
+                enableApprovals: hermesApprovalsEnabled,
+                supportsTransport: hermesSupportsApprovals)
             showHermesConfigDiff = true
         } catch {
             statusMessage = "❌ \(error.localizedDescription)"

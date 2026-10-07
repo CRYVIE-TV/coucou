@@ -414,6 +414,7 @@ final class HookServer: @unchecked Sendable {
             case "agent_codex":   handledNote = "Handled in Codex."
             case "agent_copilot": handledNote = "Handled in Copilot CLI."
             case "agent_muse":    handledNote = "Handled in Muse Code."
+            case "agent_hermes":  handledNote = "Handled in Hermes."
             default:              handledNote = "Handled in VS Code."
             }
             var resolved = false
@@ -449,6 +450,11 @@ final class HookServer: @unchecked Sendable {
             NotificationCenter.default.post(name: .checkMondayRecap, object: nil)
             if state.isPresent { expandIfNeeded(to: .overview) }
             SoundEngine.shared.play("work")
+            if agentId == "agent_hermes", let platform = payload["platform"] as? String,
+               !platform.isEmpty, platform != "cli" {
+                let capitalized = platform.prefix(1).uppercased() + platform.dropFirst()
+                appendStep(id: agentId, step: String(capitalized))
+            }
 
         case "UserPromptSubmit":
             activeSessionId = sessionId
@@ -590,7 +596,12 @@ final class HookServer: @unchecked Sendable {
     private func upsertExternalAgent(id: String, name: String) {
         let state = AppState.shared
         guard state.tasks.firstIndex(where: { $0.id == id }) == nil else { return }
-        let color = IslandConst.colorForProject(name)
+        let color: String
+        if let def = PillCatalog.definition(for: id) {
+            color = def.color
+        } else {
+            color = IslandConst.colorForProject(name)
+        }
         let task = AgentTask(id: id, name: name, color: color, state: .idle, steps: [], source: .agent)
         if let claudeIdx = state.tasks.firstIndex(where: { $0.id == "integration_claude" }) {
             state.tasks.insert(task, at: claudeIdx + 1)
@@ -664,12 +675,15 @@ final class HookServer: @unchecked Sendable {
         let isCodexRequest   = rawAgent == "codex"
         let isCopilotRequest = rawAgent == "copilot"
         let isMuseRequest    = rawAgent == "muse"
+        let isHermesRequest  = rawAgent == "hermes"
+            && UserDefaults.standard.bool(forKey: "hermesApprovalsEnabled")
         #else
         let isCodexRequest   = false
         let isCopilotRequest = false
         let isMuseRequest    = false
+        let isHermesRequest  = false
         #endif
-        if !isCodexRequest && !isCopilotRequest && !isMuseRequest && Self.validateAgent(rawAgent) != nil {
+        if !isCodexRequest && !isCopilotRequest && !isMuseRequest && !isHermesRequest && Self.validateAgent(rawAgent) != nil {
             Task.detached { [weak self] in
                 self?.sendLine(fd: fd, text: #"{"permissionDecision":"ask"}"#)
                 close(fd)
@@ -685,12 +699,14 @@ final class HookServer: @unchecked Sendable {
             pillId = "agent_copilot"
         } else if isMuseRequest {
             pillId = "agent_muse"
+        } else if isHermesRequest {
+            pillId = "agent_hermes"
         } else if isCursorEditor {
             pillId = "agent_cursor"
         } else {
             pillId = "integration_claude"
         }
-        guard isCodexRequest || isCopilotRequest || isMuseRequest || isCursorEditor || isVSCodeEditor else {
+        guard isCodexRequest || isCopilotRequest || isMuseRequest || isHermesRequest || isCursorEditor || isVSCodeEditor else {
             Task.detached { [weak self] in
                 self?.sendLine(fd: fd, text: #"{"permissionDecision":"ask"}"#)
                 close(fd)
@@ -756,6 +772,7 @@ final class HookServer: @unchecked Sendable {
             case "agent_codex":   note = "Handled in Codex."
             case "agent_copilot": note = "Handled in Copilot CLI."
             case "agent_muse":    note = "Handled in Muse Code."
+            case "agent_hermes":  note = "Handled in Hermes."
             default:              note = "Handled in VS Code."
             }
             self.dismissApprovalCard(note: note)
@@ -777,6 +794,7 @@ final class HookServer: @unchecked Sendable {
             case "agent_codex":   note = "Still waiting in Codex."
             case "agent_copilot": note = "Still waiting in Copilot CLI."
             case "agent_muse":    note = "Still waiting in Muse Code."
+            case "agent_hermes":  note = "Still waiting in Hermes."
             default:              note = "Still waiting in VS Code."
             }
             self.dismissApprovalCard(note: note)
@@ -2403,6 +2421,301 @@ export default function (amp: any): void {
         try FileManager.default.removeItem(at: url)
     }
 
+    // MARK: - Hermes plugin installer
+
+    private var _pendingHermesPluginContent: String?
+    private var _pendingHermesPluginFingerprint: String?
+    private var _pendingHermesConfigContent: String?
+    private var _pendingHermesConfigFingerprint: String?
+
+    static var hermesPluginDir: URL {
+        FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent(".hermes/plugins/coucou")
+    }
+    static var hermesInitPyURL: URL { hermesPluginDir.appendingPathComponent("__init__.py") }
+    static var hermesPluginYamlURL: URL { hermesPluginDir.appendingPathComponent("plugin.yaml") }
+    static var hermesConfigURL: URL {
+        FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".hermes/config.yaml")
+    }
+
+    static func hermesPluginInstalled() -> Bool {
+        guard let content = try? String(contentsOf: hermesInitPyURL, encoding: .utf8) else { return false }
+        return content.contains("nb-hook") && content.contains("hermes")
+    }
+
+    private func buildHermesInitPy() -> String {
+        let path = Self.hookScriptPath
+            .replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: "'", with: "\\'")
+        return """
+# Coucou hook plugin for Hermes Agent — generated by Coucou.app
+# Session/tool events → Coucou notch (fire-and-forget, never blocks).
+# Approval transport → sync nb-hook call; raises on failure → Hermes uses transport_fallback: builtin.
+import json, subprocess, threading
+from pathlib import Path
+
+HOOK = Path('\(path)')
+_lock = threading.Lock()
+_current_session_id = ''
+
+
+def _fire(fields: dict) -> None:
+    \"\"\"Non-blocking: spawn nb-hook and return immediately.\"\"\"
+    try:
+        p = subprocess.Popen(
+            [str(HOOK), '--agent', 'hermes'],
+            stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        )
+        p.stdin.write(json.dumps(fields).encode() + b'\\n')
+        p.stdin.close()
+    except Exception:
+        pass
+
+
+def _present(request) -> object:
+    \"\"\"Approval transport — blocking. Raises on any failure so Hermes falls back to builtin.\"\"\"
+    global _current_session_id
+    with _lock:
+        sid = _current_session_id
+    payload = json.dumps({
+        'hook_event_name': 'PermissionRequest',
+        'session_id': sid,
+        'coucou_agent': 'hermes',
+        'tool_name': request.command,
+        'tool_input': {'command': request.command, 'description': request.description},
+    }).encode()
+    result = subprocess.run(
+        [str(HOOK), '--agent', 'hermes'],
+        input=payload,
+        capture_output=True,
+        timeout=max(1.0, request.timeout_seconds - 2.0),
+    )
+    data = json.loads(result.stdout)   # raises ValueError on empty/invalid → fallback
+    choice = data['choice']
+    if choice not in request.allowed_choices:
+        raise ValueError(f'Coucou returned invalid choice: {choice!r}')
+    return request.respond(choice)
+
+
+def register(ctx) -> None:
+    def on_session_start(**kwargs) -> None:
+        global _current_session_id
+        sid = kwargs.get('session_id', '')
+        with _lock:
+            _current_session_id = sid
+        platform = kwargs.get('platform', 'cli') or 'cli'
+        _fire({'hook_event_name': 'SessionStart', 'session_id': sid, 'platform': platform})
+
+    def on_session_end(**kwargs) -> None:
+        event = 'StopFailure' if kwargs.get('interrupted') else 'Stop'
+        _fire({'hook_event_name': event, 'session_id': kwargs.get('session_id', '')})
+
+    def pre_tool_call(**kwargs) -> None:
+        global _current_session_id
+        with _lock:
+            sid = _current_session_id
+        _fire({
+            'hook_event_name': 'PreToolUse',
+            'session_id': sid,
+            'tool_name': kwargs.get('tool_name', ''),
+            'tool_input': kwargs.get('args') or {},
+        })
+
+    def post_tool_call(**kwargs) -> None:
+        global _current_session_id
+        with _lock:
+            sid = _current_session_id
+        _fire({
+            'hook_event_name': 'PostToolUse',
+            'session_id': sid,
+            'tool_name': kwargs.get('tool_name', ''),
+        })
+
+    ctx.register_hook('on_session_start', on_session_start)
+    ctx.register_hook('on_session_end',   on_session_end)
+    ctx.register_hook('pre_tool_call',    pre_tool_call)
+    ctx.register_hook('post_tool_call',   post_tool_call)
+    ctx.register_approval_transport('coucou', _present)
+"""
+    }
+
+    private static let hermesPluginYaml = """
+name: coucou
+version: "1.0"
+description: Coucou notch integration — generated by Coucou.app
+"""
+
+    /// Merges Coucou keys into a Hermes config.yaml string without touching other settings.
+    /// Returns the merged YAML string.
+    static func mergedHermesConfig(_ base: String, enableApprovals: Bool) -> String {
+        var lines = base.components(separatedBy: "\n")
+
+        // --- plugins.enabled ---
+        func ensureCoucouPlugin() {
+            // If already present, no-op
+            if lines.contains(where: { $0.trimmingCharacters(in: .whitespaces) == "- coucou" }) { return }
+
+            // Find `  enabled:` under `plugins:`
+            if let pluginsIdx = lines.firstIndex(where: { $0 == "plugins:" || $0.hasPrefix("plugins:") }) {
+                if let enabledIdx = lines[(pluginsIdx + 1)...].firstIndex(where: { $0.trimmingCharacters(in: .whitespaces).hasPrefix("enabled:") }) {
+                    // enabled: [coucou]  OR  enabled:\n  - item
+                    let enabledLine = lines[enabledIdx]
+                    if enabledLine.contains("[") && enabledLine.contains("]") {
+                        // inline list: enabled: [x, y] → add coucou
+                        lines[enabledIdx] = enabledLine.replacingOccurrences(of: "]", with: ", coucou]")
+                            .replacingOccurrences(of: "[ ,", with: "[")
+                    } else {
+                        // block list: insert - coucou after enabled:
+                        lines.insert("    - coucou", at: enabledIdx + 1)
+                    }
+                } else {
+                    // No enabled: key under plugins: — insert after plugins:
+                    lines.insert("  enabled:", at: pluginsIdx + 1)
+                    lines.insert("    - coucou", at: pluginsIdx + 2)
+                }
+            } else {
+                // No plugins: section — append
+                if lines.last != "" { lines.append("") }
+                lines.append("plugins:")
+                lines.append("  enabled:")
+                lines.append("    - coucou")
+            }
+        }
+
+        // --- security.approval ---
+        func ensureApprovalTransport() {
+            let transportLine  = "    transport: coucou"
+            let fallbackLine   = "    transport_fallback: builtin"
+
+            if let secIdx = lines.firstIndex(where: { $0 == "security:" || $0.hasPrefix("security:") }) {
+                if let approvalIdx = lines[(secIdx + 1)...].firstIndex(where: { $0.trimmingCharacters(in: .whitespaces).hasPrefix("approval:") }) {
+                    var i = approvalIdx + 1
+                    var hasTransport = false; var hasFallback = false
+                    while i < lines.count {
+                        let t = lines[i].trimmingCharacters(in: .whitespaces)
+                        if t.hasPrefix("transport:") && !t.hasPrefix("transport_fallback") { lines[i] = transportLine; hasTransport = true }
+                        else if t.hasPrefix("transport_fallback:") { lines[i] = fallbackLine; hasFallback = true }
+                        else if !t.hasPrefix("#") && !t.hasPrefix(" ") && !t.isEmpty { break }
+                        i += 1
+                    }
+                    if !hasTransport { lines.insert(transportLine, at: approvalIdx + 1) }
+                    if !hasFallback  { lines.insert(fallbackLine,  at: approvalIdx + 2) }
+                } else {
+                    lines.insert("  approval:", at: secIdx + 1)
+                    lines.insert(transportLine, at: secIdx + 2)
+                    lines.insert(fallbackLine,  at: secIdx + 3)
+                }
+            } else {
+                if lines.last != "" { lines.append("") }
+                lines.append("security:")
+                lines.append("  approval:")
+                lines.append(transportLine)
+                lines.append(fallbackLine)
+            }
+        }
+
+        func removeApprovalTransport() {
+            lines.removeAll { $0.trimmingCharacters(in: .whitespaces) == "transport: coucou" }
+            lines.removeAll { $0.trimmingCharacters(in: .whitespaces) == "transport_fallback: builtin" }
+        }
+
+        ensureCoucouPlugin()
+        if enableApprovals { ensureApprovalTransport() } else { removeApprovalTransport() }
+        return lines.joined(separator: "\n")
+    }
+
+    func previewHermesPlugin(install: Bool) throws -> String {
+        if !install {
+            guard FileManager.default.fileExists(atPath: Self.hermesInitPyURL.path) else {
+                throw NSError(domain: "CoucouNoop", code: 0, userInfo: [
+                    NSLocalizedDescriptionKey: "No Hermes plugin to remove."
+                ])
+            }
+            let current = (try? Data(contentsOf: Self.hermesInitPyURL)) ?? Data()
+            _pendingHermesPluginFingerprint = sha256Hex(current)
+            _pendingHermesPluginContent = nil
+            return "(will delete \(Self.hermesInitPyURL.path))"
+        }
+        let current = (try? Data(contentsOf: Self.hermesInitPyURL)) ?? Data()
+        _pendingHermesPluginFingerprint = sha256Hex(current)
+        let content = buildHermesInitPy()
+        _pendingHermesPluginContent = content
+        return content
+    }
+
+    func writeHermesPlugin() throws {
+        guard let fp = _pendingHermesPluginFingerprint else { return }
+        let url = Self.hermesInitPyURL
+        let current = (try? Data(contentsOf: url)) ?? Data()
+        guard sha256Hex(current) == fp else {
+            throw NSError(domain: "Coucou", code: 1, userInfo: [
+                NSLocalizedDescriptionKey: "~/.hermes/plugins/coucou/__init__.py changed since preview. Refresh and try again."
+            ])
+        }
+        let fm = FileManager.default
+        if let content = _pendingHermesPluginContent {
+            try fm.createDirectory(at: Self.hermesPluginDir, withIntermediateDirectories: true)
+            if fm.fileExists(atPath: url.path) {
+                let fmt = DateFormatter()
+                fmt.locale = Locale(identifier: "en_US_POSIX")
+                fmt.dateFormat = "yyyyMMdd-HHmmss"
+                let bak = url.deletingLastPathComponent()
+                    .appendingPathComponent("__init__.py.bak-\(fmt.string(from: Date()))")
+                try fm.copyItem(at: url, to: bak)
+            }
+            try content.write(to: url, atomically: true, encoding: .utf8)
+            try Self.hermesPluginYaml.write(to: Self.hermesPluginYamlURL, atomically: true, encoding: .utf8)
+        }
+        _pendingHermesPluginContent = nil
+        _pendingHermesPluginFingerprint = nil
+    }
+
+    func removeHermesPlugin() throws {
+        let url = Self.hermesInitPyURL
+        guard FileManager.default.fileExists(atPath: url.path) else { return }
+        let content = (try? String(contentsOf: url, encoding: .utf8)) ?? ""
+        guard content.contains("generated by Coucou") else {
+            throw NSError(domain: "Coucou", code: 3, userInfo: [
+                NSLocalizedDescriptionKey: "~/.hermes/plugins/coucou/__init__.py was not generated by Coucou — not deleting it."
+            ])
+        }
+        try FileManager.default.removeItem(at: Self.hermesPluginDir)
+    }
+
+    func previewHermesConfig(enableApprovals: Bool) throws -> String {
+        let base = (try? String(contentsOf: Self.hermesConfigURL, encoding: .utf8)) ?? ""
+        let current = (try? Data(contentsOf: Self.hermesConfigURL)) ?? Data()
+        _pendingHermesConfigFingerprint = sha256Hex(current)
+        let merged = Self.mergedHermesConfig(base, enableApprovals: enableApprovals)
+        _pendingHermesConfigContent = merged
+        return merged
+    }
+
+    func writeHermesConfig() throws {
+        guard let fp = _pendingHermesConfigFingerprint,
+              let content = _pendingHermesConfigContent else { return }
+        let url = Self.hermesConfigURL
+        let current = (try? Data(contentsOf: url)) ?? Data()
+        guard sha256Hex(current) == fp else {
+            throw NSError(domain: "Coucou", code: 1, userInfo: [
+                NSLocalizedDescriptionKey: "~/.hermes/config.yaml changed since preview. Refresh and try again."
+            ])
+        }
+        let fm = FileManager.default
+        if fm.fileExists(atPath: url.path) {
+            let fmt = DateFormatter()
+            fmt.locale = Locale(identifier: "en_US_POSIX")
+            fmt.dateFormat = "yyyyMMdd-HHmmss"
+            let bak = url.deletingLastPathComponent()
+                .appendingPathComponent("config.yaml.bak-\(fmt.string(from: Date()))")
+            try fm.copyItem(at: url, to: bak)
+        }
+        try fm.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try content.write(to: url, atomically: true, encoding: .utf8)
+        _pendingHermesConfigContent = nil
+        _pendingHermesConfigFingerprint = nil
+    }
+
     // MARK: SHA-256 fingerprint
 
     private func sha256Hex(_ data: Data) -> String {
@@ -2687,6 +3000,12 @@ def main():
                     decision = resp_obj.get('permissionDecision', '')
                 except Exception:
                     decision = ''
+                if agent == 'hermes':
+                    hermes_choice = 'once' if decision == 'allow' else decision
+                    if hermes_choice in ('once', 'always', 'deny'):
+                        sys.stdout.write(json.dumps({'choice': hermes_choice}) + '\\n')
+                        sys.stdout.flush()
+                    sys.exit(0)
                 if decision in ('allow', 'always'):
                     # Copilot/Muse use {"permissionDecision":"allow"} directly
                     if agent in ('copilot', 'muse'):
@@ -2722,6 +3041,7 @@ def main():
             pass
         # App unreachable, timed out, or no explicit decision — print nothing
         # Copilot is fail-closed: must always output valid JSON so it re-asks rather than deny
+        # Hermes: no output → json.loads raises in plugin → transport_fallback: builtin activates
         if agent == 'copilot':
             sys.stdout.write('{"permissionDecision":"ask"}\\n')
             sys.stdout.flush()
@@ -2978,6 +3298,12 @@ def main():
                     decision = resp_obj.get('permissionDecision', '')
                 except Exception:
                     decision = ''
+                if agent == 'hermes':
+                    hermes_choice = 'once' if decision == 'allow' else decision
+                    if hermes_choice in ('once', 'always', 'deny'):
+                        sys.stdout.write(json.dumps({'choice': hermes_choice}) + '\\n')
+                        sys.stdout.flush()
+                    sys.exit(0)
                 if decision in ('allow', 'always'):
                     # Copilot/Muse use {"permissionDecision":"allow"} directly
                     if agent in ('copilot', 'muse'):
@@ -3013,6 +3339,7 @@ def main():
             pass
         # App unreachable, timed out, or no explicit decision — print nothing
         # Copilot is fail-closed: must always output valid JSON so it re-asks rather than deny
+        # Hermes: no output → json.loads raises in plugin → transport_fallback: builtin activates
         if agent == 'copilot':
             sys.stdout.write('{"permissionDecision":"ask"}\\n')
             sys.stdout.flush()

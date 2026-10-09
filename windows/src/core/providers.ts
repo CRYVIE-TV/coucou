@@ -6,9 +6,9 @@ import type { Settings } from "./state";
 import { N_ } from "../i18n/i18n";
 
 export type ProviderId =
-  | "anthropic" | "openai" | "google" | "openrouter"
+  | "anthropic" | "cursor" | "openai" | "google" | "openrouter"
   | "ollama" | "lmstudio" | "custom"
-  | "cursor" | "copilot";
+  | "copilot";
 
 export interface ProviderDef {
   id: ProviderId;
@@ -26,19 +26,22 @@ export interface ProviderDef {
 
 export const PROVIDERS: readonly ProviderDef[] = [
   { id: "anthropic", name: "Anthropic", accent: "#E07950", key: "anthropic-api-key", urlField: null, defaultModel: "claude-opus-5", prefer: "opus" },
+  // The Cursor SDK (src-tauri/src/cursor_chat.rs): an agent with web search,
+  // files and commands, not a bare completion. Grok 4.7 at 256K, Extra High, Fast.
+  { id: "cursor", name: "Cursor", accent: "#C0C4CC", key: "cursor-api-key", urlField: null, defaultModel: "grok-4.7", prefer: "grok" },
   { id: "google", name: "Google", accent: "#4285F4", key: "google-api-key", urlField: null, defaultModel: "gemini-2.0-flash", prefer: "flash" },
   { id: "openai", name: "OpenAI", accent: "#10A37F", key: "openai-api-key", urlField: null, defaultModel: "gpt-4o", prefer: "mini" },
   { id: "openrouter", name: "OpenRouter", accent: "#6467F2", key: "openrouter-api-key", urlField: null, defaultModel: "openrouter/auto", prefer: null },
   { id: "ollama", name: "Ollama", accent: "#FACC15", key: null, urlField: "ollamaUrl", defaultModel: "", prefer: null },
   { id: "lmstudio", name: "LM Studio", accent: "#A3E635", key: null, urlField: "lmstudioUrl", defaultModel: "", prefer: null },
   { id: "custom", name: N_("Custom server"), accent: "#C0C4CC", key: null, urlField: "customUrl", defaultModel: "", prefer: null },
-  // Only through the user's own subscription (cli_relay.rs): no key, no address.
-  { id: "cursor", name: "Cursor", accent: "#A1A1AA", key: null, urlField: null, defaultModel: "", prefer: null },
+  // Copilot has no API key here: it answers only through the subscription.
+  // Cursor is the SDK agent (Grok 4.7); its CLI subscription is a switch on top.
   { id: "copilot", name: "GitHub Copilot", accent: "#8B5CF6", key: null, urlField: null, defaultModel: "", prefer: null },
 ];
 
 /** Answered only through the user's subscription, switched on in Settings → Chat. */
-export const SUBSCRIPTION_ONLY: readonly ProviderId[] = ["cursor", "copilot"];
+export const SUBSCRIPTION_ONLY: readonly ProviderId[] = ["copilot"];
 
 /** Credential store entry of the custom server's optional key. */
 export const CUSTOM_SERVER_KEY = "openai-compatible-key";

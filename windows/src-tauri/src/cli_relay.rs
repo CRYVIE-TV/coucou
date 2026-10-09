@@ -113,9 +113,9 @@ pub fn clis_for(provider: &str) -> &'static [Cli] {
     }
 }
 
-/// Cursor and Copilot have no API here: they answer only through the subscription.
+/// Copilot has no API key here. Cursor does: the SDK agent (Grok 4.7).
 pub fn subscription_only(provider: &str) -> bool {
-    matches!(provider, "cursor" | "copilot")
+    matches!(provider, "copilot")
 }
 
 fn key_for(provider: &str) -> Option<&'static str> {
@@ -123,6 +123,7 @@ fn key_for(provider: &str) -> Option<&'static str> {
         "anthropic" => Some(crate::claude::KEY),
         "google" => Some("google-api-key"),
         "openai" => Some("openai-api-key"),
+        "cursor" => Some(crate::cursor_chat::KEY),
         _ => None,
     }
 }
@@ -686,6 +687,10 @@ mod tests {
         assert!(!uses_subscription(&s, "google"));
         s.chat_provider = "cursor".into();
         set(&mut s, "cursor", false);
+        // The SDK agent still answers when the CLI switch is off.
+        assert_eq!(s.chat_provider, "cursor");
+        s.chat_provider = "copilot".into();
+        set(&mut s, "copilot", false);
         assert_eq!(s.chat_provider, "anthropic");
         assert_eq!(status(&s).len(), PROVIDERS.len());
     }

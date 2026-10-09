@@ -13,22 +13,23 @@
 // most European layouts, so a global Ctrl+Alt+E would swallow every € typed on
 // a French or German keyboard. The defaults below were checked against the
 // AltGr layer of the French (AZERTY), German (QWERTZ), Spanish, Italian,
-// Portuguese and Brazilian (ABNT2) layouts, which between them put a character
-// on E, Q, M, W, C and on every digit and most punctuation keys:
+// Portuguese, Brazilian (ABNT2) and Polish (programmers) layouts, which
+// between them put a character on E, Q, M, W, C, A, L, N, O, S, X, Z and on
+// every digit and most punctuation keys:
 //
 //   Ctrl+Alt+Space   open the chat           Ctrl+Alt+→ / ←  next / previous pill
-//   Ctrl+Alt+A       waiting permission      Ctrl+Alt+S      mute Mochi
+//   Ctrl+Alt+P       waiting permission      Ctrl+Alt+H      hush (mute) Mochi
 //   Ctrl+Alt+T       open the terminal       Ctrl+Alt+G      wardrobe
 //   Ctrl+Alt+D       Mochi to the desktop, or home again (the Mac's ⌃⌥D)
-//   Ctrl+Alt+N       open / close the island (off by default, as on the Mac)
+//   Ctrl+Alt+I       open / close the island (off by default, as on the Mac)
 //
 // ⌃⌥[ and ⌃⌥] became the arrows (brackets are AltGr characters almost
-// everywhere) and ⌃⌥M became S (AltGr+M is µ in German). Layouts outside that
-// list can still clash — Polish puts ą on AltGr+A and ś on AltGr+S — so on
-// Windows every Ctrl+Alt combination is also checked against the keyboard
-// layouts actually installed (platform::ctrl_alt_types) and left unregistered,
-// flagged in Settings, when it types a character. The same table lives in
-// src/core/shortcuts.ts; tests/shortcuts.test.mjs keeps the two in step.
+// everywhere), ⌃⌥M became H (AltGr+M is µ in German, AltGr+S is ś in Polish),
+// ⌃⌥A became P (ą) and ⌃⌥N became I (ń). Layouts outside that list can still
+// clash, so on Windows every Ctrl+Alt combination is also checked against the
+// keyboard layouts actually installed (platform::ctrl_alt_types) and left
+// unregistered, flagged in Settings, when it types a character. The same table
+// lives in src/core/shortcuts.ts; tests/shortcuts.test.mjs keeps the two in step.
 
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::str::FromStr;
@@ -58,15 +59,15 @@ const fn action(id: &'static str, keys: &'static str, on: bool, ported: bool) ->
 
 /// Same order as `ShortcutAction.allCases`.
 pub const ACTIONS: &[ActionDef] = &[
-    action("toggleIsland", "Ctrl+Alt+N", false, true),
+    action("toggleIsland", "Ctrl+Alt+I", false, true),
     action("openChat", "Ctrl+Alt+Space", true, true),
-    action("goToAlert", "Ctrl+Alt+A", true, true),
+    action("goToAlert", "Ctrl+Alt+P", true, true),
     action("jumpToTerminal", "Ctrl+Alt+T", true, true),
     // Dragging Mochi onto a window is not in this version.
     action("attachFrontWindow", "Ctrl+Alt+F", true, false),
     action("nextPill", "Ctrl+Alt+Right", true, true),
     action("prevPill", "Ctrl+Alt+Left", true, true),
-    action("muteToggle", "Ctrl+Alt+S", true, true),
+    action("muteToggle", "Ctrl+Alt+H", true, true),
     action("desktopToggle", "Ctrl+Alt+D", true, true),
     action("wardrobeToggle", "Ctrl+Alt+G", true, true),
 ];
@@ -787,7 +788,7 @@ mod tests {
     #[test]
     fn a_combination_used_twice_is_registered_once() {
         let mut stored = Bindings::new();
-        let same = Binding { keys: "Ctrl+Alt+A".into(), enabled: true };
+        let same = Binding { keys: "Ctrl+Alt+P".into(), enabled: true };
         stored.insert("jumpToTerminal".into(), same.clone());
         let plan = plan(&stored, never);
         let alert = plan.iter().find(|(d, _)| d.id == "goToAlert").unwrap();
@@ -796,12 +797,12 @@ mod tests {
         assert_eq!(term.1.as_ref().unwrap_err().status, Status::Duplicate);
 
         // Same key, other modifiers: not a duplicate.
-        stored.insert("jumpToTerminal".into(), Binding { keys: "Ctrl+Shift+A".into(), enabled: true });
+        stored.insert("jumpToTerminal".into(), Binding { keys: "Ctrl+Shift+P".into(), enabled: true });
         let plan = super::plan(&stored, never);
         assert!(plan.iter().all(|(d, o)| o.is_ok() || !d.ported || d.id == "toggleIsland"));
 
         // A disabled action doesn't hold its keys.
-        stored.insert("goToAlert".into(), Binding { keys: "Ctrl+Alt+A".into(), enabled: false });
+        stored.insert("goToAlert".into(), Binding { keys: "Ctrl+Alt+P".into(), enabled: false });
         stored.insert("jumpToTerminal".into(), same);
         let plan = super::plan(&stored, never);
         let term = plan.iter().find(|(d, _)| d.id == "jumpToTerminal").unwrap();
@@ -810,7 +811,8 @@ mod tests {
 
     #[test]
     fn a_combination_that_types_a_character_is_not_registered() {
-        let euro = |s: &Shortcut| (s.key == Code::KeyA).then(|| "ą".to_string());
+        // A layout this build did not check for, where AltGr+P types something.
+        let euro = |s: &Shortcut| (s.key == Code::KeyP).then(|| "ą".to_string());
         let plan = plan(&Bindings::new(), euro);
         let alert = plan.iter().find(|(d, _)| d.id == "goToAlert").unwrap();
         let refused = alert.1.as_ref().unwrap_err();
@@ -826,7 +828,7 @@ mod tests {
         let chat = effective(find("openChat").unwrap(), &stored);
         assert_eq!(chat.keys, "Ctrl+Shift+K");
         let alert = effective(find("goToAlert").unwrap(), &stored);
-        assert_eq!(alert, Binding { keys: "Ctrl+Alt+A".into(), enabled: true });
+        assert_eq!(alert, Binding { keys: "Ctrl+Alt+P".into(), enabled: true });
         let toggle = effective(find("toggleIsland").unwrap(), &stored);
         assert!(!toggle.enabled);
         let plan = plan(&stored, never);

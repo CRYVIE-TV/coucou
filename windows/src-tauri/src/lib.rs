@@ -8,6 +8,7 @@ mod claude_code;
 mod cli_relay;
 mod codex_plan;
 mod config_file;
+mod cursor_chat;
 mod desktop;
 mod files;
 mod flow;
@@ -592,6 +593,8 @@ fn local_set_key(url: String, key: String) -> Result<(), String> {
 #[tauri::command]
 fn chat_reset(chat: State<Chat>) {
     chat.reset();
+    // The Cursor agent keeps its own thread between turns: drop that too.
+    cursor_chat::reset();
 }
 
 /// Copies a dropped file into the inbox and reports its name back.
@@ -768,8 +771,17 @@ fn create_settings_window(app: &AppHandle) {
                 // Closing it must only hide it, or it could never be reopened.
                 tauri::WindowEvent::CloseRequested { api, .. } => {
                     api.prevent_close();
-                    let _ = this.hide();
-                    set_hub_shown(&this, false);
+                    // On WebView2 a hide() from inside CloseRequested is a
+                    // no-op: the window stayed up. Hide it once the event is over.
+                    let hidden = this.clone();
+                    std::thread::spawn(move || {
+                        std::thread::sleep(std::time::Duration::from_millis(40));
+                        let again = hidden.clone();
+                        let _ = hidden.run_on_main_thread(move || {
+                            hide_settings(&again);
+                            set_hub_shown(&again, false);
+                        });
+                    });
                 }
                 // Minimised (a 0×0 resize on Windows) or back from it.
                 tauri::WindowEvent::Resized(_) | tauri::WindowEvent::Focused(true) => {
@@ -804,6 +816,24 @@ pub(crate) fn hub_is_shown() -> bool {
 #[tauri::command]
 fn hub_shown() -> bool {
     HUB_SHOWN.load(Ordering::Relaxed)
+}
+
+/// Hides the settings window without destroying its webview. Tauri's hide()
+/// alone leaves a WebView2 window on screen when called from its own close
+/// event, so Win32 is asked as well.
+fn hide_settings(win: &tauri::WebviewWindow) {
+    if let Err(err) = win.hide() {
+        log::line(format!("settings hide: {err}"));
+    }
+    #[cfg(windows)]
+    if let Ok(raw) = win.hwnd() {
+        use windows::Win32::Foundation::HWND;
+        use windows::Win32::UI::WindowsAndMessaging::{ShowWindow, SW_HIDE};
+        let hwnd = HWND(raw.0 as *mut std::ffi::c_void);
+        unsafe {
+            let _ = ShowWindow(hwnd, SW_HIDE);
+        }
+    }
 }
 
 pub fn show_settings_window(app: &AppHandle) {

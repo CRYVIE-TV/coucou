@@ -22,7 +22,9 @@ const here = dirname(fileURLToPath(import.meta.url));
 const WINDOWS = join(here, "..");
 const MAC = JSON.parse(readFileSync(join(WINDOWS, "src/i18n/strings.json"), "utf8"));
 const EXTRA = JSON.parse(readFileSync(join(WINDOWS, "src/i18n/extra.json"), "utf8"));
-const OTHERS = LANGUAGE_CODES.filter((l) => l !== "en");
+// Polish is not in the Mac's catalog: it lives in its own file, for both tables.
+const PL = JSON.parse(readFileSync(join(WINDOWS, "src/i18n/pl.json"), "utf8"));
+const OTHERS = LANGUAGE_CODES.filter((l) => l !== "en" && l !== "pl");
 
 /** Runs `fn` in `lang`, then puts English back for the other tests. */
 function inLanguage(lang, fn) {
@@ -116,10 +118,19 @@ test("System follows the system's language when Coucou has it, else English", ()
   assert.equal(resolveLanguage("xx", ["bn-IN"]), "bn");
 });
 
-test("the picker offers the Mac's languages, Arabic reads right to left", () => {
-  assert.deepEqual(LANGUAGES.map((l) => l.code), ["en", "zh-Hans", "hi", "es", "ar", "fr", "bn", "pt-BR", "ru", "id", "de", "tr", "ko", "ja"]);
+test("the picker offers the Mac's languages and Polish, Arabic reads right to left", () => {
+  assert.deepEqual(LANGUAGES.map((l) => l.code), ["en", "zh-Hans", "hi", "es", "ar", "fr", "bn", "pt-BR", "ru", "id", "de", "tr", "ko", "ja", "pl"]);
   assert.equal(isRtl("ar"), true);
-  assert.equal(OTHERS.some((l) => l !== "ar" && isRtl(l)), false);
+  assert.equal(LANGUAGE_CODES.some((l) => l !== "ar" && isRtl(l)), false);
+  assert.equal(resolveLanguage("", ["pl-PL", "en-US"]), "pl");
+  inLanguage("pl", () => {
+    assert.equal(t("Allow"), "Zezwól"); // the Mac's catalog, Polish from pl.json
+    assert.equal(t("Open the chat"), "Otwórz czat"); // extra.json, Polish from pl.json
+    assert.equal(tn("{count} repo", "{count} repos", 1), "1 repozytorium");
+    assert.equal(tn("{count} repo", "{count} repos", 3), "3 repozytoria");
+    assert.equal(tn("{count} repo", "{count} repos", 5), "5 repozytoriów");
+    assert.equal(tn("{count} repo", "{count} repos", 22), "22 repozytoria");
+  });
 });
 
 test("German translates both tables, fills placeholders and falls back to English", () => {
@@ -362,15 +373,16 @@ test("extra.json never shadows a string of the Mac's", () => {
 });
 
 test("generated, Rust and Apple language registrations agree with the picker", () => {
-  assert.deepEqual(GENERATED_LANGUAGES, [...LANGUAGE_CODES]);
-  assert.deepEqual(MAC.languages, [...LANGUAGE_CODES]);
+  const macCodes = LANGUAGE_CODES.filter((code) => code !== "pl");
+  assert.deepEqual(GENERATED_LANGUAGES, [...macCodes]);
+  assert.deepEqual(MAC.languages, [...macCodes]);
   const rust = readFileSync(join(WINDOWS, "src-tauri/src/i18n.rs"), "utf8");
   const registered = rust.match(/pub const LANGUAGES: \[&str; (\d+)\] = (\[[^;]+\]);/);
   assert.ok(registered);
   assert.equal(Number(registered[1]), LANGUAGE_CODES.length);
   assert.deepEqual(JSON.parse(registered[2]), [...LANGUAGE_CODES]);
   // The Mac may have languages Windows and Linux don't have yet, never the other way round.
-  // Both Mac targets (Info.plist files and project.yml) declare the same ones.
+  // Polish is ours alone: the Mac catalog has none.
   const apple = [];
   for (const file of ["Info.plist", "InfoAppStore.plist"]) {
     const plist = readFileSync(join(WINDOWS, "../NotchBuddy/Resources", file), "utf8");
@@ -383,9 +395,29 @@ test("generated, Rust and Apple language registrations agree with the picker", (
   assert.equal(arrays.length, 2);
   for (const array of arrays) apple.push([...array[1].matchAll(/- ([^\r\n]+)/g)].map((m) => m[1]).sort());
   for (const list of apple) assert.deepEqual(list, apple[0]);
-  for (const code of LANGUAGE_CODES) assert.ok(apple[0].includes(code), `${code} is not a Mac language`);
+  for (const code of macCodes) assert.ok(apple[0].includes(code), `${code} is not a Mac language`);
   const swift = readFileSync(join(WINDOWS, "../NotchBuddy/Sources/App/SettingsView.swift"), "utf8");
-  for (const { code, name } of LANGUAGES) assert.ok(swift.includes(`Text("${name}").tag("${code}")`), code);
+  for (const { code, name } of LANGUAGES) {
+    if (code === "pl") continue;
+    assert.ok(swift.includes(`Text("${name}").tag("${code}")`), code);
+  }
+});
+
+test("pl.json: Polish for every string of both tables, with the key's placeholders, and nothing else", () => {
+  const known = { ...MAC.strings, ...EXTRA.strings };
+  for (const key of Object.keys(known)) {
+    const value = PL.strings[key];
+    assert.ok(value !== undefined, `pl.json: ${JSON.stringify(key)} has no Polish`);
+    const forms = typeof value === "string" ? [value] : Object.values(value);
+    for (const form of forms) {
+      const got = placeholders(form);
+      const ok = typeof value === "string"
+        ? JSON.stringify(got) === JSON.stringify(placeholders(key))
+        : got.every((p) => placeholders(key).includes(p));
+      assert.ok(ok, `pl.json: ${JSON.stringify(form)} for ${JSON.stringify(key)}`);
+    }
+  }
+  for (const key of Object.keys(PL.strings)) assert.ok(key in known, `pl.json: ${JSON.stringify(key)} is in neither table`);
 });
 
 // ── Every key the code uses is translated ─────────────────────────────────────

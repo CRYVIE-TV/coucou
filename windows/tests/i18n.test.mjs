@@ -22,7 +22,9 @@ const here = dirname(fileURLToPath(import.meta.url));
 const WINDOWS = join(here, "..");
 const MAC = JSON.parse(readFileSync(join(WINDOWS, "src/i18n/strings.json"), "utf8"));
 const EXTRA = JSON.parse(readFileSync(join(WINDOWS, "src/i18n/extra.json"), "utf8"));
-const OTHERS = LANGUAGE_CODES.filter((l) => l !== "en");
+// Polish is not in the Mac's catalog: it lives in its own file, for both tables.
+const PL = JSON.parse(readFileSync(join(WINDOWS, "src/i18n/pl.json"), "utf8"));
+const OTHERS = LANGUAGE_CODES.filter((l) => l !== "en" && l !== "pl");
 
 /** Runs `fn` in `lang`, then puts English back for the other tests. */
 function inLanguage(lang, fn) {
@@ -116,10 +118,19 @@ test("System follows the system's language when Coucou has it, else English", ()
   assert.equal(resolveLanguage("xx", ["bn-IN"]), "bn");
 });
 
-test("the picker offers the Mac's ten languages, Arabic reads right to left", () => {
-  assert.deepEqual(LANGUAGES.map((l) => l.code), ["en", "zh-Hans", "hi", "es", "ar", "fr", "bn", "pt-BR", "ru", "id"]);
+test("the picker offers the Mac's ten languages and Polish, Arabic reads right to left", () => {
+  assert.deepEqual(LANGUAGES.map((l) => l.code), ["en", "zh-Hans", "hi", "es", "ar", "fr", "bn", "pt-BR", "ru", "id", "pl"]);
   assert.equal(isRtl("ar"), true);
-  assert.equal(OTHERS.some((l) => l !== "ar" && isRtl(l)), false);
+  assert.equal(LANGUAGE_CODES.some((l) => l !== "ar" && isRtl(l)), false);
+  assert.equal(resolveLanguage("", ["pl-PL", "en-US"]), "pl");
+  inLanguage("pl", () => {
+    assert.equal(t("Allow"), "Zezwól"); // the Mac's catalog, Polish from pl.json
+    assert.equal(t("Open the chat"), "Otwórz czat"); // extra.json, Polish from pl.json
+    assert.equal(tn("{count} repo", "{count} repos", 1), "1 repozytorium");
+    assert.equal(tn("{count} repo", "{count} repos", 3), "3 repozytoria");
+    assert.equal(tn("{count} repo", "{count} repos", 5), "5 repozytoriów");
+    assert.equal(tn("{count} repo", "{count} repos", 22), "22 repozytoria");
+  });
 });
 
 test("a language change relabels what was built, in place, and says so once", () => {
@@ -185,6 +196,23 @@ for (const [name, table] of [["strings.json", MAC.strings], ["extra.json", EXTRA
 
 test("extra.json never shadows a string of the Mac's", () => {
   for (const key of Object.keys(EXTRA.strings)) assert.ok(!(key in MAC.strings), key);
+});
+
+test("pl.json: Polish for every string of both tables, with the key's placeholders, and nothing else", () => {
+  const known = { ...MAC.strings, ...EXTRA.strings };
+  for (const key of Object.keys(known)) {
+    const value = PL.strings[key];
+    assert.ok(value !== undefined, `pl.json: ${JSON.stringify(key)} has no Polish`);
+    const forms = typeof value === "string" ? [value] : Object.values(value);
+    for (const form of forms) {
+      const got = placeholders(form);
+      const ok = typeof value === "string"
+        ? JSON.stringify(got) === JSON.stringify(placeholders(key))
+        : got.every((p) => placeholders(key).includes(p));
+      assert.ok(ok, `pl.json: ${JSON.stringify(form)} for ${JSON.stringify(key)}`);
+    }
+  }
+  for (const key of Object.keys(PL.strings)) assert.ok(key in known, `pl.json: ${JSON.stringify(key)} is in neither table`);
 });
 
 // ── Every key the code uses is translated ─────────────────────────────────────

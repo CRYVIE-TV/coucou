@@ -6,7 +6,7 @@ import type { Settings } from "./state";
 import { N_ } from "../i18n/i18n";
 
 export type ProviderId =
-  | "anthropic" | "openai" | "google" | "openrouter"
+  | "anthropic" | "cursor" | "openai" | "google" | "openrouter"
   | "ollama" | "lmstudio" | "custom";
 
 export interface ProviderDef {
@@ -25,6 +25,9 @@ export interface ProviderDef {
 
 export const PROVIDERS: readonly ProviderDef[] = [
   { id: "anthropic", name: "Anthropic", accent: "#E07950", key: "anthropic-api-key", urlField: null, defaultModel: "claude-opus-5", prefer: "opus" },
+  // The Cursor SDK (src-tauri/src/cursor_chat.rs): an agent with web search,
+  // files and commands, not a bare completion. Grok 4.7 at 256K, Extra High, Fast.
+  { id: "cursor", name: "Cursor", accent: "#C0C4CC", key: "cursor-api-key", urlField: null, defaultModel: "grok-4.7", prefer: "grok" },
   { id: "google", name: "Google", accent: "#4285F4", key: "google-api-key", urlField: null, defaultModel: "gemini-2.0-flash", prefer: "flash" },
   { id: "openai", name: "OpenAI", accent: "#10A37F", key: "openai-api-key", urlField: null, defaultModel: "gpt-4o", prefer: "mini" },
   { id: "openrouter", name: "OpenRouter", accent: "#6467F2", key: "openrouter-api-key", urlField: null, defaultModel: "openrouter/auto", prefer: null },

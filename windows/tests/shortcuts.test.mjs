@@ -40,7 +40,7 @@ test("no two defaults share a combination", () => {
 });
 
 test("no default types a character with AltGr on the checked European layouts", () => {
-  for (const layout of ["French (AZERTY)", "German (QWERTZ)", "Spanish", "Italian", "Portuguese", "Brazilian (ABNT2)"]) {
+  for (const layout of ["French (AZERTY)", "German (QWERTZ)", "Spanish", "Italian", "Portuguese", "Brazilian (ABNT2)", "Polish (programmers)"]) {
     assert.ok(ALTGR_CHARACTERS[layout], layout);
   }
   for (const d of SHORTCUTS) {
@@ -50,6 +50,10 @@ test("no default types a character with AltGr on the checked European layouts", 
   assert.deepEqual(altGrClashes("Ctrl+Alt+M"), ["German (QWERTZ)"]);
   assert.ok(altGrClashes("Ctrl+Alt+E").length >= 5);
   assert.ok(altGrClashes("Ctrl+Alt+0").includes("French (AZERTY)"));
+  // Nor the upstream Windows defaults on a Polish keyboard: ą, ś and ń.
+  assert.deepEqual(altGrClashes("Ctrl+Alt+A"), ["Polish (programmers)"]);
+  assert.deepEqual(altGrClashes("Ctrl+Alt+S"), ["Polish (programmers)"]);
+  assert.deepEqual(altGrClashes("Ctrl+Alt+N"), ["Polish (programmers)"]);
   // Not Ctrl+Alt: not AltGr.
   assert.deepEqual(altGrClashes("Ctrl+Shift+E"), []);
 });
@@ -141,8 +145,8 @@ test("duplicates flag both actions, and only the same modifiers and key", () => 
 test("a stored binding wins, the rest keep their default, and off ones hold no keys", () => {
   const stored = {
     openChat: { keys: "Ctrl+Alt+K", enabled: true },
-    goToAlert: { keys: "Ctrl+Alt+A", enabled: false },
-    toggleIsland: { keys: "Ctrl+Alt+N", enabled: true },
+    goToAlert: { keys: "Ctrl+Alt+P", enabled: false },
+    toggleIsland: { keys: "Ctrl+Alt+I", enabled: true },
   };
   const chat = SHORTCUTS.find((d) => d.id === "openChat");
   assert.deepEqual(effective(chat, stored), { keys: "Ctrl+Alt+K", enabled: true });

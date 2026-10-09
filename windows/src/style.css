@@ -1,13 +1,17 @@
 /* Coucou for Windows — same palette, sizes and type scale as the macOS island.
    Every colour below is copied from the Swift views. */
 
+@import "./fonts/fonts.css";
+
 :root {
   color-scheme: dark;
 
-  /* After the Latin fonts: the scripts of the other interface languages —
-     Devanagari and Bengali (Nirmala UI), Simplified Chinese (Microsoft YaHei)
-     on Windows, the Noto families on Linux. Arabic and Cyrillic are in Segoe UI. */
-  --font: system-ui, "Segoe UI Variable Text", "Segoe UI", "Segoe UI Emoji", "Nirmala UI",
+  /* Latin text first in the bundled Noto Sans ("Coucou Sans"): Segoe UI and
+     system-ui draw the stroke of ł as a loose comma in WebView2. Then the
+     scripts of the other interface languages — Devanagari and Bengali (Nirmala
+     UI), Simplified Chinese (Microsoft YaHei) on Windows, the Noto families on
+     Linux. Arabic and Cyrillic are in Segoe UI. */
+  --font: "Coucou Sans", system-ui, "Segoe UI Variable Text", "Segoe UI", "Segoe UI Emoji", "Nirmala UI",
     "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans", "Noto Sans Devanagari", "Noto Sans Bengali",
     "Noto Sans Arabic", "Noto Sans CJK SC", "Noto Sans SC", "Droid Sans Fallback", sans-serif;
   --mono: "Cascadia Mono", "Consolas", ui-monospace, monospace;
@@ -632,27 +636,21 @@ body {
   color: var(--red);
 }
 
-/* Shimmer sweep, 2.2 s — same as TickerShimmerText / ShimmeringText */
+/* Shimmer, 2.2 s — TickerShimmerText / ShimmeringText as a colour pulse. The
+   Mac's clipped gradient (background-clip: text) cuts the stroke off ł and the
+   accent off ć in WebView2, so the ticker drew Polish text broken. */
 .shimmer {
-  background: linear-gradient(
-    90deg,
-    #7c818a 0%,
-    #f2f3f5 40%,
-    #7c818a 70%
-  );
-  background-size: 260% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: shimmer 2.2s linear infinite;
+  color: #b7bcc4;
+  animation: shimmer 2.2s ease-in-out infinite;
 }
 
 @keyframes shimmer {
-  from {
-    background-position: 130% 0;
+  0%,
+  100% {
+    color: #7c818a;
   }
-  to {
-    background-position: -130% 0;
+  50% {
+    color: #f2f3f5;
   }
 }
 

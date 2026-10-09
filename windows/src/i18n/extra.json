@@ -3360,6 +3360,83 @@
    "pt-BR": "Só um arquivo solto na ilha pode ser enviado com uma pergunta.",
    "ru": "С вопросом можно отправить только файл, перетащенный на остров.",
    "id": "Hanya file yang dijatuhkan ke pulau yang bisa dikirim bersama pertanyaan."
+  },
+  "Cursor is different: the chat runs a Cursor agent (Grok 4.7, 256K context, Extra High, Fast) through the Cursor SDK and Node. It can search the web, read and edit files and run commands when you ask. The key stays in the system keychain.": {
+   "zh-Hans": "Cursor 有所不同：聊天通过 Cursor SDK 和 Node 运行一个 Cursor 智能体（Grok 4.7，256K 上下文，Extra High，Fast）。应你的要求，它可以搜索网页、读写文件并运行命令。密钥保存在系统钥匙串中。",
+   "hi": "Cursor अलग है: चैट Cursor SDK और Node के ज़रिए एक Cursor एजेंट (Grok 4.7, 256K संदर्भ, Extra High, Fast) चलाती है। आपके कहने पर यह वेब खोज सकता है, फ़ाइलें पढ़-लिख सकता है और कमांड चला सकता है। कुंजी सिस्टम कीचेन में रहती है।",
+   "es": "Cursor es distinto: el chat ejecuta un agente de Cursor (Grok 4.7, contexto de 256K, Extra High, Fast) a través del SDK de Cursor y Node. Puede buscar en la web, leer y editar archivos y ejecutar comandos cuando se lo pidas. La clave se queda en el llavero del sistema.",
+   "ar": "Cursor مختلف: تشغّل الدردشة وكيل Cursor (Grok 4.7، سياق 256K، Extra High، Fast) عبر Cursor SDK وNode. يمكنه البحث في الويب وقراءة الملفات وتعديلها وتشغيل الأوامر عندما تطلب ذلك. يبقى المفتاح في سلسلة مفاتيح النظام.",
+   "fr": "Cursor est différent : le chat fait tourner un agent Cursor (Grok 4.7, contexte 256K, Extra High, Fast) via le SDK Cursor et Node. Il peut chercher sur le web, lire et modifier des fichiers et lancer des commandes quand vous le demandez. La clé reste dans le trousseau du système.",
+   "bn": "Cursor আলাদা: চ্যাটটি Cursor SDK ও Node-এর মাধ্যমে একটি Cursor এজেন্ট (Grok 4.7, 256K কনটেক্সট, Extra High, Fast) চালায়। আপনি চাইলে এটি ওয়েবে খুঁজতে, ফাইল পড়তে ও সম্পাদনা করতে এবং কমান্ড চালাতে পারে। কী সিস্টেম কীচেইনে থাকে।",
+   "pt-BR": "O Cursor é diferente: o chat executa um agente do Cursor (Grok 4.7, contexto de 256K, Extra High, Fast) pelo SDK do Cursor e pelo Node. Ele pode pesquisar na web, ler e editar arquivos e rodar comandos quando você pedir. A chave fica no chaveiro do sistema.",
+   "ru": "Cursor устроен иначе: чат запускает агента Cursor (Grok 4.7, контекст 256K, Extra High, Fast) через Cursor SDK и Node. По вашей просьбе он ищет в интернете, читает и правит файлы и выполняет команды. Ключ хранится в системной связке ключей.",
+   "id": "Cursor berbeda: obrolan menjalankan agen Cursor (Grok 4.7, konteks 256K, Extra High, Fast) melalui Cursor SDK dan Node. Ia bisa mencari di web, membaca dan mengedit file, serta menjalankan perintah saat Anda minta. Kunci tetap tersimpan di keychain sistem."
+  },
+  "The Cursor agent took too long to answer.": {
+   "zh-Hans": "Cursor 智能体回答用时过长。",
+   "hi": "Cursor एजेंट को जवाब देने में बहुत देर लगी।",
+   "es": "El agente de Cursor tardó demasiado en responder.",
+   "ar": "استغرق وكيل Cursor وقتًا طويلًا جدًا للإجابة.",
+   "fr": "L'agent Cursor a mis trop longtemps à répondre.",
+   "bn": "Cursor এজেন্ট উত্তর দিতে খুব বেশি সময় নিয়েছে।",
+   "pt-BR": "O agente do Cursor demorou demais para responder.",
+   "ru": "Агент Cursor слишком долго не отвечал.",
+   "id": "Agen Cursor terlalu lama menjawab."
+  },
+  "Chat helper stopped: {error}": {
+   "zh-Hans": "聊天助手已停止：{error}",
+   "hi": "चैट सहायक रुक गया: {error}",
+   "es": "El ayudante del chat se detuvo: {error}",
+   "ar": "توقف مساعد الدردشة: {error}",
+   "fr": "L'assistant du chat s'est arrêté : {error}",
+   "bn": "চ্যাট সহায়ক বন্ধ হয়ে গেছে: {error}",
+   "pt-BR": "O auxiliar do chat parou: {error}",
+   "ru": "Помощник чата остановился: {error}",
+   "id": "Pembantu obrolan berhenti: {error}"
+  },
+  "Chat helper sent a broken reply.": {
+   "zh-Hans": "聊天助手发回了损坏的回复。",
+   "hi": "चैट सहायक ने ख़राब जवाब भेजा।",
+   "es": "El ayudante del chat envió una respuesta dañada.",
+   "ar": "أرسل مساعد الدردشة ردًا معطوبًا.",
+   "fr": "L'assistant du chat a renvoyé une réponse illisible.",
+   "bn": "চ্যাট সহায়ক একটি ভাঙা উত্তর পাঠিয়েছে।",
+   "pt-BR": "O auxiliar do chat enviou uma resposta corrompida.",
+   "ru": "Помощник чата прислал повреждённый ответ.",
+   "id": "Pembantu obrolan mengirim balasan yang rusak."
+  },
+  "Chat helper is missing ({path}).": {
+   "zh-Hans": "找不到聊天助手（{path}）。",
+   "hi": "चैट सहायक नहीं मिला ({path})।",
+   "es": "Falta el ayudante del chat ({path}).",
+   "ar": "مساعد الدردشة غير موجود ({path}).",
+   "fr": "L'assistant du chat est introuvable ({path}).",
+   "bn": "চ্যাট সহায়ক পাওয়া যায়নি ({path})।",
+   "pt-BR": "O auxiliar do chat não foi encontrado ({path}).",
+   "ru": "Помощник чата не найден ({path}).",
+   "id": "Pembantu obrolan tidak ditemukan ({path})."
+  },
+  "Couldn't start the chat helper. Is Node installed? {error}": {
+   "zh-Hans": "无法启动聊天助手。是否已安装 Node？{error}",
+   "hi": "चैट सहायक शुरू नहीं हो सका। क्या Node इंस्टॉल है? {error}",
+   "es": "No se pudo iniciar el ayudante del chat. ¿Está instalado Node? {error}",
+   "ar": "تعذّر تشغيل مساعد الدردشة. هل Node مثبّت؟ {error}",
+   "fr": "Impossible de lancer l'assistant du chat. Node est-il installé ? {error}",
+   "bn": "চ্যাট সহায়ক চালু করা যায়নি। Node কি ইনস্টল করা আছে? {error}",
+   "pt-BR": "Não foi possível iniciar o auxiliar do chat. O Node está instalado? {error}",
+   "ru": "Не удалось запустить помощника чата. Установлен ли Node? {error}",
+   "id": "Tidak bisa memulai pembantu obrolan. Apakah Node terpasang? {error}"
+  },
+  "Chat helper is busy.": {
+   "zh-Hans": "聊天助手正忙。",
+   "hi": "चैट सहायक व्यस्त है।",
+   "es": "El ayudante del chat está ocupado.",
+   "ar": "مساعد الدردشة مشغول.",
+   "fr": "L'assistant du chat est occupé.",
+   "bn": "চ্যাট সহায়ক ব্যস্ত আছে।",
+   "pt-BR": "O auxiliar do chat está ocupado.",
+   "ru": "Помощник чата занят.",
+   "id": "Pembantu obrolan sedang sibuk."
   }
  }
 }

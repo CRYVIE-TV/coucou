@@ -1,12 +1,14 @@
-// Interface language — the same ten languages as the Mac (0.2.0).
+// Interface language — the same ten languages as the Mac (0.2.0), plus Polish.
 //
 // Strings are looked up by their English text, like the Mac's catalog:
-// `t("Allow")`, `t("Uploading {name}", { name })`. Two tables, both keyed by
+// `t("Allow")`, `t("Uploading {name}", { name })`. Three tables, all keyed by
 // the English text:
 // - strings.json, generated from the Mac's Localizable.xcstrings by
 //   scripts/gen-strings.mjs (never edited by hand);
-// - extra.json, the strings only Windows and Linux have, written by hand.
-// A string missing from both, or from one language, shows in English.
+// - extra.json, the strings only Windows and Linux have, written by hand;
+// - pl.json, the Polish of every string in the two above, written by hand
+//   (the Mac has no Polish, so it cannot come from the catalog).
+// A string missing from all, or from one language, shows in English.
 //
 // The Rust side (src-tauri/src/i18n.rs) embeds the same two files and looks up
 // the same way, for the tray menu, notifications and the errors it returns.
@@ -17,11 +19,12 @@
 
 import MAC from "./strings.json";
 import EXTRA from "./extra.json";
+import PL from "./pl.json";
 
-export const LANGUAGE_CODES = ["en", "zh-Hans", "hi", "es", "ar", "fr", "bn", "pt-BR", "ru", "id"] as const;
+export const LANGUAGE_CODES = ["en", "zh-Hans", "hi", "es", "ar", "fr", "bn", "pt-BR", "ru", "id", "pl"] as const;
 export type Language = (typeof LANGUAGE_CODES)[number];
 
-/** The picker's entries, each in its own language, in the Mac's order. */
+/** The picker's entries, each in its own language, in the Mac's order, then Polish. */
 export const LANGUAGES: readonly { code: Language; name: string }[] = [
   { code: "en", name: "English" },
   { code: "zh-Hans", name: "简体中文" },
@@ -33,6 +36,7 @@ export const LANGUAGES: readonly { code: Language; name: string }[] = [
   { code: "pt-BR", name: "Português (Brasil)" },
   { code: "ru", name: "Русский" },
   { code: "id", name: "Bahasa Indonesia" },
+  { code: "pl", name: "Polski" },
 ];
 
 export type Vars = Record<string, string | number>;
@@ -40,11 +44,14 @@ type Plural = Partial<Record<Intl.LDMLPluralRule, string>>;
 type Entry = Partial<Record<Language, string | Plural>>;
 type Table = Record<string, Entry>;
 
-/** extra.json wins over the Mac's table where both have a string. */
+/** extra.json wins over the Mac's table where both have a string; pl.json adds Polish to either. */
 const TABLE: Table = {
   ...((MAC as { strings: Table }).strings),
   ...((EXTRA as { strings: Table }).strings),
 };
+for (const [key, polish] of Object.entries((PL as { strings: Record<string, string | Plural> }).strings)) {
+  TABLE[key] = { ...TABLE[key], pl: polish };
+}
 
 let current: Language = "en";
 const listeners = new Set<(lang: Language) => void>();

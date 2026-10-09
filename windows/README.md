@@ -19,6 +19,28 @@ Approve Claude Code permissions, watch your session work, drop a file, chat with
 
 ---
 
+## This fork
+
+Built from Coucou for Windows 0.3.0 with four additions. Everything else is upstream.
+
+- **Cursor in the chat** — Settings → Chat providers → Cursor takes a Cursor API key
+  (cursor.com/dashboard → Integrations). The chat then runs a Cursor agent
+  (Grok 4.7, 256K context, Extra High, Fast) through the Cursor SDK and Node:
+  it can search the web, read and edit files and run commands when asked. The
+  helper is `cursor-chat/chat.mjs`, copied to `%LOCALAPPDATA%\Coucou\cursor-chat\`
+  with `@cursor/sdk` installed next to it (`npm install @cursor/sdk` there).
+  Streaming text and tool steps show in the chat as they happen.
+- **Polish** — the eleventh interface language (`src/i18n/pl.json`, hand-written;
+  the Mac has no Polish). The island's Latin text uses the bundled Noto Sans
+  (`src/fonts/`, SIL OFL) because Segoe UI in WebView2 draws ł with a loose stroke,
+  and the ticker's shimmer is a colour pulse rather than a clipped gradient, which
+  cut ł and ć.
+- **Shortcuts safe on a Polish keyboard** — `Ctrl+Alt+P` (alert), `Ctrl+Alt+H`
+  (mute) and `Ctrl+Alt+I` (island) instead of `A`, `S` and `N`, which type ą, ś
+  and ń with AltGr. Polish (programmers) is in the AltGr table Settings checks.
+- **Mojibake repair** — a hook that read UTF-8 as Windows-1252 ("chciaÅ‚bym")
+  is put back ("chciałbym") when the payload reaches the island.
+
 ## Install
 
 Download **[Coucou-Windows.msi](https://github.com/Louis-CFM/coucou/releases/download/windows-latest/Coucou-Windows.msi)**
@@ -63,13 +85,13 @@ You can also [build it yourself](#build-it-yourself).
 | Put a file named like one of Mochi's sounds (`finish.wav`, `approval.mp3`, `greet.m4a`…) in the sounds folder | It replaces that sound after **Settings → General → Reload sounds**. **Open sounds folder** shows the folder: `~/.config/coucou/sounds` on Linux, `%APPDATA%\Coucou\sounds` on Windows |
 | Tray icon | Open, Weekly recap, Wardrobe…, Settings…, Pause, Quit |
 | `Ctrl+Alt+Space` | Opens the chat, from any app |
-| `Ctrl+Alt+A` | Jumps to the waiting permission or question |
+| `Ctrl+Alt+P` | Jumps to the waiting permission or question |
 | `Ctrl+Alt+T` | Brings the session's window forward ("Open terminal") |
 | `Ctrl+Alt+→` / `Ctrl+Alt+←` | Next / previous pill |
-| `Ctrl+Alt+S` | Mutes or unmutes Mochi |
+| `Ctrl+Alt+H` | Mutes or unmutes Mochi |
 | `Ctrl+Alt+G` | Opens the wardrobe |
 | `Ctrl+Alt+D` | Sends Mochi to the desktop, or brings him home |
-| `Ctrl+Alt+N` | Opens and closes the island (off until you turn it on) |
+| `Ctrl+Alt+I` | Opens and closes the island (off until you turn it on) |
 | In the open island: `Ctrl+→` `Ctrl+←`, `Ctrl+1`–`Ctrl+9` | Switch pills |
 | In the open island: `Ctrl+↓` `Ctrl+↑`, `Ctrl+O` | Walk the open GitHub list, open the highlighted row |
 | In the open island: `Ctrl+E` | Opens the latest edit's diff, or closes the diff |
@@ -87,13 +109,14 @@ the recorder.
 The defaults are not the Mac's `⌃⌥` letters. On Windows, `Ctrl+Alt` is `AltGr`,
 so a global `Ctrl+Alt+E` would swallow every `€` typed on a French or German
 keyboard. The defaults were checked against the AltGr layer of the French,
-German, Spanish, Italian, Portuguese and Brazilian (ABNT2) layouts — that is why
-pill switching uses the arrows rather than `[` `]`, and mute is `S` rather than
-`M` (`AltGr+M` is `µ` in German). On top of that, Coucou asks Windows what each
-`Ctrl+Alt` combination types on the layouts you have installed and leaves any
-that types a character unregistered, flagged *Types “ą”* in Settings: Polish,
-for one, puts `ą` on `AltGr+A` and `ś` on `AltGr+S`. The recorder refuses such
-a combination too.
+German, Spanish, Italian, Portuguese, Brazilian (ABNT2) and Polish (programmers)
+layouts — that is why pill switching uses the arrows rather than `[` `]`, mute
+is `H` rather than `M` or `S` (`AltGr+M` is `µ` in German, `AltGr+S` is `ś` in
+Polish), the alert is `P` rather than `A` (`ą`) and the island toggle is `I`
+rather than `N` (`ń`). On top of that, Coucou asks Windows what each `Ctrl+Alt`
+combination types on the layouts you have installed and leaves any that types a
+character unregistered, flagged *Types “ą”* in Settings. The recorder refuses
+such a combination too.
 
 Older Intel graphics drivers rotate the screen on `Ctrl+Alt+←` / `→`; if yours
 still does, those two show up as *In use*. On Linux, Xfce and MATE keep

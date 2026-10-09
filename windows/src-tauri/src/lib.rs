@@ -6,6 +6,7 @@ mod chat;
 mod claude;
 mod codex_plan;
 mod config_file;
+mod cursor_chat;
 mod desktop;
 mod files;
 mod github;
@@ -482,6 +483,8 @@ fn local_set_key(url: String, key: String) -> Result<(), String> {
 #[tauri::command]
 fn chat_reset(chat: State<Chat>) {
     chat.reset();
+    // The Cursor agent keeps its own thread between turns: drop that too.
+    cursor_chat::reset();
 }
 
 /// Copies a dropped file into the inbox and reports its name back.
@@ -612,11 +615,36 @@ fn create_settings_window(app: &AppHandle) {
             win.on_window_event(move |event| {
                 if let tauri::WindowEvent::CloseRequested { api, .. } = event {
                     api.prevent_close();
-                    let _ = hidden.hide();
+                    // On WebView2 a hide() from inside CloseRequested is a
+                    // no-op: the window stayed up. Hide it once the event is over.
+                    let hidden = hidden.clone();
+                    std::thread::spawn(move || {
+                        std::thread::sleep(std::time::Duration::from_millis(40));
+                        let again = hidden.clone();
+                        let _ = hidden.run_on_main_thread(move || hide_settings(&again));
+                    });
                 }
             });
         }
         Err(err) => log::line(format!("settings window failed: {err}")),
+    }
+}
+
+/// Hides the settings window without destroying its webview. Tauri's hide()
+/// alone leaves a WebView2 window on screen when called from its own close
+/// event, so Win32 is asked as well.
+fn hide_settings(win: &tauri::WebviewWindow) {
+    if let Err(err) = win.hide() {
+        log::line(format!("settings hide: {err}"));
+    }
+    #[cfg(windows)]
+    if let Ok(raw) = win.hwnd() {
+        use windows::Win32::Foundation::HWND;
+        use windows::Win32::UI::WindowsAndMessaging::{ShowWindow, SW_HIDE};
+        let hwnd = HWND(raw.0 as *mut std::ffi::c_void);
+        unsafe {
+            let _ = ShowWindow(hwnd, SW_HIDE);
+        }
     }
 }
 

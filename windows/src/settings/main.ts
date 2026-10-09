@@ -486,6 +486,7 @@ function activePillsSection(connected: Record<string, boolean>): HTMLElement {
 const CHAT_STRINGS = {
   get providersTitle() { return t("Chat providers"); },
   get providersHint() { return t("Chat with Google AI, OpenAI or OpenRouter instead of Claude: add a key here, then click the model name above the chat box to switch provider and model. Keys stay in the system keychain. These providers get no web search and no tools: they can answer, never act on this computer."); },
+  get cursorHint() { return t("Cursor is different: the chat runs a Cursor agent (Grok 4.7, 256K context, Extra High, Fast) through the Cursor SDK and Node. It can search the web, read and edit files and run commands when you ask. The key stays in the system keychain."); },
   get stored() { return `••••••••  ${t("(stored)")}`; },
   get save() { return t("Save"); },
   get remove() { return t("Remove"); },
@@ -507,13 +508,14 @@ const CHAT_STRINGS = {
 };
 
 interface CloudDef {
-  id: "google" | "openai" | "openrouter";
+  id: "cursor" | "google" | "openai" | "openrouter";
   name: string;
   placeholder: string;
   where: string;
 }
 
 const CLOUD: CloudDef[] = [
+  { id: "cursor", name: "Cursor", placeholder: "crsr_…", where: "cursor.com/dashboard → Integrations" },
   { id: "google", name: "Google AI", placeholder: "AIza…", where: "aistudio.google.com" },
   { id: "openai", name: "OpenAI", placeholder: "sk-…", where: "platform.openai.com" },
   { id: "openrouter", name: "OpenRouter", placeholder: "sk-or-…", where: "openrouter.ai/keys" },
@@ -584,6 +586,7 @@ function chatProvidersSection(
     {},
     h("h2", {}, h("span", { text: CHAT_STRINGS.providersTitle })),
     h("div", { class: "hint", text: CHAT_STRINGS.providersHint }),
+    h("div", { class: "hint", text: CHAT_STRINGS.cursorHint }),
     list,
   );
 }

@@ -4,6 +4,8 @@
 
 # Coucou
 
+> **Personal Windows fork**, on top of Coucou for Windows 0.3.0. What differs from upstream: the chat has a **Cursor** provider (a Cursor agent with Grok 4.7 through the Cursor SDK — web search, files, commands); the interface speaks **Polish** (Settings → General → Language), with the bundled Noto Sans so ł and ć render in WebView2; the default shortcuts avoid the Polish AltGr letters (`Ctrl+Alt+P` alert, `Ctrl+Alt+H` mute, `Ctrl+Alt+I` island); Polish text that a hook mangled into Windows-1252 is repaired on arrival. API keys stay in Windows Credential Manager and are not in this repository. No installers or releases are published here. The Coucou name, Mochi, the icon and the sounds remain © Louis Raillé — see [LICENSE-ASSETS.md](LICENSE-ASSETS.md). Upstream: [Louis-CFM/coucou](https://github.com/Louis-CFM/coucou).
+
 **A tiny friend that lives in your Mac's notch — or at the top of your screen on Windows and Linux — and keeps an eye on your AI coding agent sessions. And now on your iPhone too.**
 
 Approve permissions, watch your agents work, drop a file, chat with Claude — all without leaving what you're doing. Walk away from your Mac and Mochi follows you to your iPhone: Lock Screen, Dynamic Island, widgets, Siri.

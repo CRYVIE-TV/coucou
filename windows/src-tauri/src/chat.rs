@@ -13,9 +13,10 @@ use serde_json::{json, Value};
 use tauri::AppHandle;
 
 use crate::settings::Settings;
-use crate::{claude, local_chat, openai_compat, secrets};
+use crate::{claude, cursor_chat, local_chat, openai_compat, secrets};
 
 pub const ANTHROPIC: &str = "anthropic";
+pub const CURSOR: &str = cursor_chat::ID;
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(tag = "kind", rename_all = "camelCase")]
@@ -169,6 +170,7 @@ pub fn model_for(settings: &Settings, provider: &str) -> String {
         .map(|m| m.trim().to_string())
         .filter(|m| !m.is_empty())
         .or_else(|| openai_compat::provider(provider).map(|p| p.default_model.to_string()))
+        .or_else(|| (provider == CURSOR).then(|| cursor_chat::DEFAULT_MODEL.to_string()))
         .unwrap_or_default()
 }
 
@@ -210,6 +212,9 @@ pub async fn send(
     if provider == ANTHROPIC || provider.is_empty() {
         return claude::send(chat, &model, query, context).await;
     }
+    if provider == CURSOR {
+        return cursor_chat::send(app, chat, &model, query, context).await;
+    }
     if let Some(p) = openai_compat::provider(provider) {
         return openai_compat::send(chat, p, &model, query, context).await;
     }
@@ -227,6 +232,10 @@ pub async fn models(settings: &Settings, provider: &str) -> Result<Vec<ModelInfo
     if provider == ANTHROPIC {
         let key = secrets::get(claude::KEY).ok_or_else(no_key)?;
         return claude::models(&key).await;
+    }
+    if provider == CURSOR {
+        secrets::get(cursor_chat::KEY).ok_or_else(no_key)?;
+        return Ok(cursor_chat::models());
     }
     if let Some(p) = openai_compat::provider(provider) {
         let key = secrets::get(p.key).ok_or_else(no_key)?;
@@ -334,6 +343,7 @@ mod tests {
         let mut s = Settings::default();
         assert_eq!(model_for(&s, "anthropic"), claude::DEFAULT_MODEL);
         assert_eq!(model_for(&s, "openai"), openai_compat::provider("openai").unwrap().default_model);
+        assert_eq!(model_for(&s, "cursor"), cursor_chat::DEFAULT_MODEL);
         assert_eq!(model_for(&s, "ollama"), "");
         s.chat_models.insert("openai".into(), " gpt-x ".into());
         s.chat_models.insert("ollama".into(), "llama3.2".into());

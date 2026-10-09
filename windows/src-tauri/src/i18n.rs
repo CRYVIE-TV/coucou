@@ -12,10 +12,12 @@ use serde_json::{Map, Value};
 use std::collections::HashMap;
 use std::sync::{OnceLock, RwLock};
 
-pub const LANGUAGES: [&str; 10] = ["en", "zh-Hans", "hi", "es", "ar", "fr", "bn", "pt-BR", "ru", "id"];
+pub const LANGUAGES: [&str; 11] = ["en", "zh-Hans", "hi", "es", "ar", "fr", "bn", "pt-BR", "ru", "id", "pl"];
 
 static MAC: &str = include_str!("../../src/i18n/strings.json");
 static EXTRA: &str = include_str!("../../src/i18n/extra.json");
+/// Polish for every string of the two tables above (the Mac has no Polish).
+static POLISH: &str = include_str!("../../src/i18n/pl.json");
 
 type Table = HashMap<String, Map<String, Value>>;
 
@@ -30,6 +32,14 @@ fn table() -> &'static Table {
             for (key, entry) in strings {
                 if let Value::Object(langs) = entry {
                     out.insert(key.clone(), langs.clone());
+                }
+            }
+        }
+        // pl.json: one Polish value per key, added to the entry it belongs to.
+        if let Ok(Value::Object(root)) = serde_json::from_str::<Value>(POLISH) {
+            if let Some(Value::Object(strings)) = root.get("strings") {
+                for (key, polish) in strings {
+                    out.entry(key.clone()).or_default().insert("pl".into(), polish.clone());
                 }
             }
         }
@@ -165,6 +175,17 @@ fn plural_category(lang: &str, n: u64) -> &'static str {
                 "many"
             }
         }
+        // Polish: 1 → one; 2–4, 22–24… → few; the rest (0, 5–21, 25–31…) → many.
+        "pl" => {
+            let (m10, m100) = (n % 10, n % 100);
+            if n == 1 {
+                "one"
+            } else if (2..=4).contains(&m10) && !(12..=14).contains(&m100) {
+                "few"
+            } else {
+                "many"
+            }
+        }
         "ar" => match (n, n % 100) {
             (0, _) => "zero",
             (1, _) => "one",
@@ -274,6 +295,16 @@ mod tests {
         assert_eq!(plural_category("ru", 23), "few");
         assert_eq!(plural_category("ru", 25), "many");
         assert_eq!(plural_category("ar", 2), "two");
+        assert_eq!(plural_category("pl", 1), "one");
+        assert_eq!(plural_category("pl", 3), "few");
+        assert_eq!(plural_category("pl", 5), "many");
+        assert_eq!(plural_category("pl", 12), "many");
+        assert_eq!(plural_category("pl", 22), "few");
+        set_for_test("pl");
+        assert_eq!(tn("{count} repo", "{count} repos", 1, &[]), "1 repozytorium");
+        assert_eq!(tn("{count} repo", "{count} repos", 3, &[]), "3 repozytoria");
+        assert_eq!(tn("{count} repo", "{count} repos", 7, &[]), "7 repozytoriów");
+        assert_eq!(t("Allow"), "Zezwól");
         set_for_test("en");
     }
 
@@ -282,9 +313,11 @@ mod tests {
         let Value::Object(root) = serde_json::from_str::<Value>(EXTRA).unwrap() else { panic!() };
         let Some(Value::Object(strings)) = root.get("strings") else { panic!("no strings") };
         for (key, entry) in strings {
-            for lang in LANGUAGES.iter().filter(|l| **l != "en") {
+            for lang in LANGUAGES.iter().filter(|l| **l != "en" && **l != "pl") {
                 assert!(entry.get(*lang).is_some(), "{key:?} has no {lang}");
             }
+            // Polish lives in its own file; the merged table must carry it.
+            assert!(table().get(key).and_then(|e| e.get("pl")).is_some(), "{key:?} has no pl");
         }
     }
 }

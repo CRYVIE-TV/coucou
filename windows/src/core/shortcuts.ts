@@ -6,11 +6,12 @@
 // (the recorder in Settings), spots duplicates, and maps the keys pressed
 // inside the open island to what they do.
 //
-// Why Ctrl+Alt+Space / A / T / S / G / ← → rather than the Mac's letters: see
+// Why Ctrl+Alt+Space / P / T / H / G / ← → rather than the Mac's letters: see
 // the top of src-tauri/src/shortcuts.rs. In short, Windows reads Ctrl+Alt as
 // AltGr, and AltGr+E, Q, M, W, C, the digits and most punctuation type a
 // character on at least one of the French, German, Spanish, Italian,
-// Portuguese or Brazilian layouts (ALTGR_CHARACTERS below).
+// Portuguese or Brazilian layouts, and AltGr+A, C, E, L, N, O, S, X, Z type
+// ą ć ę ł ń ó ś ź ż on the Polish one (ALTGR_CHARACTERS below).
 
 // ── Strings shown to the user ─────────────────────────────────────────────────
 // English keys: Settings shows them through `t()` (src/i18n). Key names
@@ -71,14 +72,14 @@ const def = (id: ShortcutId, defaultKeys: string, enabledByDefault: boolean, por
 
 /** Same order and defaults as ACTIONS in src-tauri/src/shortcuts.rs. */
 export const SHORTCUTS: readonly ShortcutDef[] = [
-  def("toggleIsland", "Ctrl+Alt+N", false, true),
+  def("toggleIsland", "Ctrl+Alt+I", false, true),
   def("openChat", "Ctrl+Alt+Space", true, true),
-  def("goToAlert", "Ctrl+Alt+A", true, true),
+  def("goToAlert", "Ctrl+Alt+P", true, true),
   def("jumpToTerminal", "Ctrl+Alt+T", true, true),
   def("attachFrontWindow", "Ctrl+Alt+F", true, false),
   def("nextPill", "Ctrl+Alt+Right", true, true),
   def("prevPill", "Ctrl+Alt+Left", true, true),
-  def("muteToggle", "Ctrl+Alt+S", true, true),
+  def("muteToggle", "Ctrl+Alt+H", true, true),
   def("desktopToggle", "Ctrl+Alt+D", true, true),
   def("wardrobeToggle", "Ctrl+Alt+G", true, true),
 ];
@@ -320,6 +321,9 @@ export const ALTGR_CHARACTERS: Record<string, Record<string, string>> = {
   "Brazilian (ABNT2)": {
     Q: "/", W: "?", E: "°", C: "₢", "1": "¹", "2": "²", "3": "³", "4": "£", "5": "¢", "6": "¬",
   },
+  // The layout nearly every Polish PC uses: AltGr + the base letter types the
+  // letter with its diacritic. ("Polish (214)" is a typewriter layout: rare.)
+  "Polish (programmers)": { A: "ą", C: "ć", E: "ę", L: "ł", N: "ń", O: "ó", S: "ś", X: "ź", Z: "ż" },
 };
 
 /** The layouts on which `keys` would type a character instead of running. */

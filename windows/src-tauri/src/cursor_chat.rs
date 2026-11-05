@@ -51,17 +51,54 @@ impl Drop for Helper {
 }
 
 impl Helper {
-    fn request(&mut self, app: &AppHandle, model: &str, text: &str) -> Result<String, String> {
+    fn request(&mut self, app: &AppHandle, model: &str, text: &str, stream: bool) -> Result<String, String> {
         self.next_id += 1;
         let id = self.next_id;
-        let line = json!({ "op": "send", "id": id, "model": model, "text": text }).to_string();
-        writeln!(self.stdin, "{line}").map_err(|e| tf("Chat helper stopped: {error}", &[("error", &e.to_string())]))?;
-        self.read_reply(app, id)
+        self.write(&json!({ "op": "send", "id": id, "model": model, "text": text }))?;
+        self.read_reply(Some(app), id, TURN_TIMEOUT, stream).map(|(text, _)| text)
     }
 
-    fn read_reply(&mut self, app: &AppHandle, id: u64) -> Result<String, String> {
-        let deadline = std::time::Instant::now() + TURN_TIMEOUT;
+    /// One Grok answer that is not part of the chat. `app` is set when the
+    /// model may call Coucou's voice tools; their results are written back
+    /// while the run is still going.
+    fn once(
+        &mut self,
+        app: Option<&AppHandle>,
+        system: &str,
+        text: &str,
+        timeout: Duration,
+        effort: Option<&str>,
+        definitions: Option<&Vec<Value>>,
+    ) -> Result<(String, bool), String> {
+        self.next_id += 1;
+        let id = self.next_id;
+        let voice = app.is_some();
+        let mut body = json!({
+            "op": "once",
+            "id": id,
+            "system": system,
+            "text": text,
+            "tools": if voice { "voice" } else { "none" },
+        });
+        if let Some(effort) = effort {
+            body["effort"] = json!(effort);
+        }
+        if let Some(definitions) = definitions {
+            body["definitions"] = json!(definitions);
+        }
+        self.write(&body)?;
+        self.read_reply(app, id, timeout, false)
+    }
+
+    fn write(&mut self, value: &Value) -> Result<(), String> {
+        writeln!(self.stdin, "{value}").map_err(|e| tf("Chat helper stopped: {error}", &[("error", &e.to_string())]))?;
+        self.stdin.flush().map_err(|e| tf("Chat helper stopped: {error}", &[("error", &e.to_string())]))
+    }
+
+    fn read_reply(&mut self, app: Option<&AppHandle>, id: u64, timeout: Duration, stream: bool) -> Result<(String, bool), String> {
+        let deadline = std::time::Instant::now() + timeout;
         let mut visible = String::new();
+        let mut acted = false;
         loop {
             let remaining = deadline.saturating_duration_since(std::time::Instant::now());
             if remaining.is_zero() {
@@ -78,20 +115,38 @@ impl Helper {
             if value.get("id").and_then(Value::as_u64) != Some(id) {
                 continue;
             }
+            if value.get("kind").and_then(Value::as_str) == Some("tool") {
+                let name = value.get("name").and_then(Value::as_str).unwrap_or("");
+                let call_id = value.get("callId").and_then(Value::as_str).unwrap_or("");
+                let args = value.get("args").cloned().unwrap_or_else(|| json!({}));
+                let (result, did) = match app {
+                    Some(app) => crate::voice::run_tool(app, name, &args),
+                    None => ("This answer has no tools.".into(), false),
+                };
+                acted |= did;
+                self.write(&json!({ "op": "tool_result", "callId": call_id, "result": result }))?;
+                continue;
+            }
             // Streamed text and tool steps: the turn is still running. The island
             // shows what is visible so far, like a local model's stream.
             match value.get("kind").and_then(Value::as_str) {
                 Some("delta") => {
-                    if let Some(text) = value.get("text").and_then(Value::as_str) {
-                        visible.push_str(text);
-                        let _ = app.emit_to(WINDOW_LABEL, "chat-delta", &visible);
+                    if stream {
+                        if let Some(text) = value.get("text").and_then(Value::as_str) {
+                            visible.push_str(text);
+                            if let Some(app) = app {
+                                let _ = app.emit_to(WINDOW_LABEL, "chat-delta", &visible);
+                            }
+                        }
                     }
                     continue;
                 }
                 Some(_) => {
-                    if visible.is_empty() {
+                    if stream && visible.is_empty() {
                         if let Some(step) = value.get("step").and_then(Value::as_str) {
-                            let _ = app.emit_to(WINDOW_LABEL, "chat-delta", format!("*{step}*"));
+                            if let Some(app) = app {
+                                let _ = app.emit_to(WINDOW_LABEL, "chat-delta", format!("*{step}*"));
+                            }
                         }
                     }
                     continue;
@@ -99,13 +154,14 @@ impl Helper {
                 None => {}
             }
             if value.get("ok").and_then(Value::as_bool) == Some(true) {
-                return value
+                let text = value
                     .get("text")
                     .and_then(Value::as_str)
                     .map(str::trim)
                     .filter(|t| !t.is_empty())
                     .map(str::to_string)
-                    .ok_or_else(|| t("No response text."));
+                    .ok_or_else(|| t("No response text."))?;
+                return Ok((text, acted));
             }
             let why = value.get("error").and_then(Value::as_str).unwrap_or("Cursor chat failed.");
             return Err(why.to_string());
@@ -129,14 +185,14 @@ fn node_program() -> String {
         .unwrap_or_else(|| "node".into())
 }
 
-fn spawn() -> Result<Helper, String> {
+fn spawn(workspace_name: &str) -> Result<Helper, String> {
     let key = secrets::get(KEY).ok_or_else(|| tf("{name} API key missing. Add it in Settings.", &[("name", "Cursor")]))?;
     let dir = settings::local_dir().join("cursor-chat");
     let script = dir.join("chat.mjs");
     if !script.is_file() {
         return Err(tf("Chat helper is missing ({path}).", &[("path", &script.display().to_string())]));
     }
-    let workspace = settings::local_dir().join("chat-workspace");
+    let workspace = settings::local_dir().join(workspace_name);
     std::fs::create_dir_all(&workspace).map_err(|e| e.to_string())?;
 
     let mut cmd = Command::new(node_program());
@@ -174,6 +230,52 @@ fn spawn() -> Result<Helper, String> {
 }
 
 static SESSION: Mutex<Option<Helper>> = Mutex::new(None);
+/// A second helper, so a dictation clean-up or a voice turn never joins the
+/// chat's thread and never blocks it on the same stdin.
+static ONCE: Mutex<Option<Helper>> = Mutex::new(None);
+
+fn with_once<T>(f: impl FnOnce(&mut Helper) -> Result<T, String>) -> Result<T, String> {
+    let mut session = ONCE.lock().map_err(|_| t("Chat helper is busy."))?;
+    if session.is_none() {
+        *session = Some(spawn("cursor-once")?);
+    }
+    match f(session.as_mut().unwrap()) {
+        Ok(value) => Ok(value),
+        Err(err) => {
+            *session = None;
+            Err(err)
+        }
+    }
+}
+
+/// The Cursor key is what dictation, call notes and « OK Coucou » use.
+pub fn has_key() -> bool {
+    secrets::present(KEY)
+}
+
+/// One Grok 4.7 answer, with no tools and no chat history. `effort` is a
+/// reasoning level (`low` for a rewrite that has to come back quickly);
+/// empty keeps Extra High.
+pub fn complete_sync(system: &str, user: &str, timeout: Duration, effort: &str) -> Result<String, String> {
+    let effort = if effort.is_empty() { None } else { Some(effort) };
+    with_once(|helper| helper.once(None, system, user, timeout, effort, None)).map(|(text, _)| text)
+}
+
+pub async fn complete(system: &str, user: &str, timeout: Duration, effort: &str) -> Result<String, String> {
+    let system = system.to_string();
+    let user = user.to_string();
+    let effort = effort.to_string();
+    tokio::task::spawn_blocking(move || complete_sync(&system, &user, timeout, &effort))
+        .await
+        .map_err(|_| tf("Chat helper stopped: {error}", &[("error", "aborted")]))?
+}
+
+/// « OK Coucou »: Grok 4.7 with Coucou's tools. The bool is whether a tool
+/// changed something (a pill, the music, an email ready to send).
+pub fn voice_reply(app: &AppHandle, system: &str, user: &str, timeout: Duration, definitions: &[Value]) -> Result<(String, bool), String> {
+    let definitions = definitions.to_vec();
+    with_once(|helper| helper.once(Some(app), system, user, timeout, None, Some(&definitions)))
+}
 
 /// "New chat": the helper goes, and so does its saved thread, or the next
 /// question would resume the previous conversation.
@@ -229,6 +331,22 @@ pub async fn send(
     query: String,
     context: Option<ChatContext>,
 ) -> Result<ChatReply, String> {
+    send_inner(app, chat, model, query, context, true).await
+}
+
+/// The phone's chat: the same agent, without painting the answer on the island.
+pub async fn send_quiet(app: &AppHandle, chat: &Chat, model: &str, query: String) -> Result<ChatReply, String> {
+    send_inner(app, chat, model, query, None, false).await
+}
+
+async fn send_inner(
+    app: &AppHandle,
+    chat: &Chat,
+    model: &str,
+    query: String,
+    context: Option<ChatContext>,
+    stream: bool,
+) -> Result<ChatReply, String> {
     let turn = chat.begin(ID);
     // The agent remembers its own thread: only turns it never saw are carried.
     let carried = if turn.first || turn.history.is_empty() { Vec::new() } else { turn.history.clone() };
@@ -239,9 +357,9 @@ pub async fn send(
     let answer = tokio::task::spawn_blocking(move || {
         let mut session = SESSION.lock().map_err(|_| t("Chat helper is busy."))?;
         if session.is_none() {
-            *session = Some(spawn()?);
+            *session = Some(spawn("chat-workspace")?);
         }
-        match session.as_mut().unwrap().request(&app, &model, &text) {
+        match session.as_mut().unwrap().request(&app, &model, &text, stream) {
             Ok(answer) => Ok(answer),
             Err(err) => {
                 *session = None;

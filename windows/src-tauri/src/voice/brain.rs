@@ -1,25 +1,24 @@
-// « OK Coucou »'s brain: Claude with the user's key and Coucou's tools —
+// « OK Coucou »'s brain: Grok 4.7 through the Cursor key, with Coucou's tools —
 // pills, music, the user's own data, opening an app, preparing an email (the
-// mail app opens with it filled in; the user sends it) and Anthropic's web
-// search. The conversation lives in memory only and is forgotten 90 s after
-// the last turn. Port of ClaudeVoiceBrain.swift.
+// mail app opens with it filled in; the user sends it) and web search. The
+// conversation lives in memory only and is forgotten 90 s after the last turn.
+// Port of ClaudeVoiceBrain.swift.
 
 use std::time::{Duration, Instant};
 
 use serde_json::{json, Value};
-use tauri::{AppHandle, Manager};
+use tauri::AppHandle;
 
-const FAST_MODEL: &str = "claude-haiku-4-5";
 const FORGET_AFTER: Duration = Duration::from_secs(90);
 
 pub struct Brain {
-    messages: Vec<Value>,
+    turns: Vec<(String, String)>,
     last: Instant,
 }
 
 impl Default for Brain {
     fn default() -> Self {
-        Self { messages: Vec::new(), last: Instant::now() }
+        Self { turns: Vec::new(), last: Instant::now() }
     }
 }
 
@@ -78,7 +77,6 @@ fn tools() -> Vec<Value> {
                 "required": ["recipient", "subject", "body"]
             }
         }),
-        json!({ "type": "web_search_20250305", "name": "web_search", "max_uses": 3 }),
     ]
 }
 
@@ -91,7 +89,7 @@ quick, warm, a little playful. It is {:04}-{:02}-{:02} {:02}:{:02}.\n\
 Everything you write is read aloud: answer in the language the user spoke, in one or two short sentences, \
 no markdown, no lists, no emojis, no links.\n\
 Act with the tools instead of describing: pills, music, service_info for the user's own data, open_app, \
-prepare_email, and web_search for anything current (weather, news, scores, prices, facts you are not sure of). \
+prepare_email, and your web search for anything current (weather, news, scores, prices, facts you are not sure of). \
 Never invent the user's data.\n\
 Email: gather the recipient's address, the subject and what to say (write the text yourself from what the user \
 wants to say, in the language they used), asking for what is missing one short question at a time, then call \
@@ -105,94 +103,35 @@ Pills: {pills}",
 impl Brain {
     pub fn respond(&mut self, app: &AppHandle, transcript: &str) -> Option<Reply> {
         if self.last.elapsed() > FORGET_AFTER {
-            self.messages.clear();
+            self.turns.clear();
         }
         self.last = Instant::now();
-        self.messages.push(json!({ "role": "user", "content": transcript }));
-        self.trim();
         let pills = super::ask_island(app, "pills", json!({ "action": "list" })).unwrap_or_default();
         let system = system_prompt(&pills);
-        let tools = tools();
-        let chat_model = app
-            .try_state::<crate::Shared>()
-            .map(|s| s.settings.lock().unwrap().model.clone())
-            .unwrap_or_default();
-        let mut acted = false;
-        let mut spoken = String::new();
-        for _ in 0..5 {
-            let turn = tauri::async_runtime::block_on(async {
-                match crate::claude::voice_turn(FAST_MODEL, &system, &self.messages, &tools).await {
-                    Ok(v) => Ok(v),
-                    Err(err) if !chat_model.is_empty() => {
-                        crate::log::line(format!("voice: {err}; the chat's model instead"));
-                        crate::claude::voice_turn(&chat_model, &system, &self.messages, &tools).await
-                    }
-                    Err(err) => Err(err),
-                }
-            });
-            let turn = match turn {
-                Ok(t) => t,
-                Err(err) => {
-                    crate::log::line(format!("voice: Claude turn failed: {err}"));
-                    if self.messages.last().is_some_and(|m| m["content"].is_string()) {
-                        self.messages.pop();
-                    }
-                    return acted.then(|| Reply { text: String::new(), acted });
-                }
-            };
-            let content = turn["content"].as_array().cloned().unwrap_or_default();
-            self.messages.push(json!({ "role": "assistant", "content": content.clone() }));
-            let text: String = content.iter().filter(|b| b["type"] == "text").filter_map(|b| b["text"].as_str()).collect::<Vec<_>>().join(" ");
-            if !text.trim().is_empty() {
-                spoken = text;
+        let mut user = String::new();
+        for (said, answer) in &self.turns {
+            user.push_str(&format!("User: {said}\nCoucou: {answer}\n"));
+        }
+        user.push_str(&format!("User: {transcript}"));
+        let (text, acted) = match crate::cursor_chat::voice_reply(app, &system, &user, Duration::from_secs(90), &tools()) {
+            Ok(reply) => reply,
+            Err(err) => {
+                crate::log::line(format!("voice: Grok turn failed: {err}"));
+                return None;
             }
-            let stop = turn["stop_reason"].as_str().unwrap_or("end_turn");
-            if stop == "pause_turn" {
-                continue;
+        };
+        let spoken = spoken_text(&text);
+        if !spoken.is_empty() {
+            self.turns.push((transcript.to_string(), spoken.clone()));
+            if self.turns.len() > 8 {
+                self.turns.drain(..self.turns.len() - 8);
             }
-            let uses: Vec<&Value> = content.iter().filter(|b| b["type"] == "tool_use").collect();
-            if stop != "tool_use" || uses.is_empty() {
-                break;
-            }
-            let mut results = Vec::new();
-            for u in uses {
-                let (result, did) = super::run_tool(app, u["name"].as_str().unwrap_or(""), &u["input"]);
-                acted |= did;
-                results.push(json!({ "type": "tool_result", "tool_use_id": u["id"], "content": result }));
-            }
-            self.messages.push(json!({ "role": "user", "content": results }));
-            spoken.clear();
         }
-        self.repair();
-        Some(Reply { text: spoken_text(&spoken), acted })
-    }
-
-    /// Keeps the last exchanges, never cutting between a tool call and its result.
-    fn trim(&mut self) {
-        if self.messages.len() <= 24 {
-            return;
-        }
-        let mut cut = self.messages.len() - 24;
-        while cut < self.messages.len() && !(self.messages[cut]["role"] == "user" && self.messages[cut]["content"].is_string()) {
-            cut += 1;
-        }
-        self.messages.drain(..cut.min(self.messages.len() - 1));
-    }
-
-    /// The API refuses a history ending on a tool call with no result after it.
-    fn repair(&mut self) {
-        let Some(last) = self.messages.last() else { return };
-        if last["role"] != "assistant" {
-            return;
-        }
-        let calls = last["content"].as_array().is_some_and(|c| c.iter().any(|b| b["type"] == "tool_use"));
-        if calls {
-            self.messages.pop();
-        }
+        Some(Reply { text: spoken, acted })
     }
 }
 
-/// What Claude wrote, ready to be said: citations and markdown left out.
+/// What Grok wrote, ready to be said: citations and markdown left out.
 pub fn spoken_text(text: &str) -> String {
     let mut out = String::with_capacity(text.len());
     let mut skip = 0;
@@ -222,7 +161,7 @@ mod tests {
     fn every_tool_has_a_schema() {
         for tool in tools() {
             assert!(tool["name"].is_string());
-            assert!(tool.get("input_schema").is_some() || tool["type"] == "web_search_20250305");
+            assert!(tool.get("input_schema").is_some());
         }
     }
 }

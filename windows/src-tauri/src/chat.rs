@@ -233,9 +233,10 @@ pub async fn send(
 }
 
 /// One turn of the phone's conversation (phone_link/chat_backend.rs): the same providers as
-/// [`send`], with no file or window context and no `AppHandle`. `on_delta` gets the streamed
-/// text so far, which only the model servers produce; the cloud providers answer all at once.
+/// [`send`], with no file or window context. `on_delta` gets the streamed text so far, which
+/// only the model servers produce; the cloud providers answer all at once.
 pub async fn send_for_phone(
+    app: &AppHandle,
     settings: &Settings,
     chat: &Chat,
     provider: &str,
@@ -248,6 +249,9 @@ pub async fn send_for_phone(
     }
     if provider == ANTHROPIC {
         return claude::send(chat, model, query, None).await;
+    }
+    if provider == CURSOR {
+        return cursor_chat::send_quiet(app, chat, model, query).await;
     }
     if let Some(p) = openai_compat::provider(provider) {
         return openai_compat::send(chat, p, model, query, None).await;

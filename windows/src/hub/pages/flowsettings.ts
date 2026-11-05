@@ -136,8 +136,8 @@ export async function flowSettingsPage(page: HTMLElement, ctx: HubContext) {
   // ── Notetaker ──
   page.append(label(t("Notetaker")));
   page.append(anchor("flow.summary", card(
-    row(t("Summaries"), null, select([["claude", t("Claude (your key)")], ["off", t("No summary")]], prefs.summaryEngine, (engine) => void ctx.setPrefs((p) => (p.summaryEngine = engine)))),
-    h("div", { class: "hub-note", text: t("With Claude, the transcript (never the audio) goes to Anthropic with your key from Notch → Chat.") }),
+    row(t("Summaries"), null, select([["claude", t("Grok 4.7 (your Cursor key)")], ["off", t("No summary")]], prefs.summaryEngine, (engine) => void ctx.setPrefs((p) => (p.summaryEngine = engine)))),
+    h("div", { class: "hub-note", text: t("With Grok 4.7, the transcript (never the audio) goes to Cursor with your key from Notch → Chat.") }),
     divider(),
     h("div", { class: "hub-note", text: t("Everything stays on this computer. Tell the people in the call that you are recording.") }),
   )));

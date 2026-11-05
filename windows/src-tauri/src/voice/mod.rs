@@ -53,9 +53,9 @@ fn pending() -> &'static Mutex<HashMap<u64, mpsc::Sender<String>>> {
 }
 static NEXT_ID: AtomicU64 = AtomicU64::new(1);
 
-/// Whether « OK Coucou » can run: the voice model and a Claude key.
+/// Whether « OK Coucou » can run: the voice model and the Cursor key.
 pub fn requirements_met() -> bool {
-    speech::is_ready() && crate::secrets::present(crate::claude::KEY)
+    speech::is_ready() && crate::cursor_chat::has_key()
 }
 
 /// Starts or stops listening to follow the preference.
@@ -379,7 +379,7 @@ pub fn ask_island(app: &AppHandle, kind: &str, input: Value) -> Option<String> {
     answer
 }
 
-/// Runs one of Claude's tools: what goes back to Claude, and whether something changed.
+/// Runs one of Grok's Coucou tools: what goes back to it, and whether something changed.
 pub fn run_tool(app: &AppHandle, name: &str, input: &Value) -> (String, bool) {
     match name {
         "pills" => {

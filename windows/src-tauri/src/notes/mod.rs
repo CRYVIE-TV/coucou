@@ -472,7 +472,7 @@ fn process(app: &AppHandle, id: &str) {
     taker.working.lock().unwrap().retain(|w| w != id);
     if result.is_ok() {
         let engine = crate::flow::get(app).map(|f| f.store.lock().unwrap().prefs.summary_engine).unwrap_or_default();
-        if engine == SummaryEngine::Claude && crate::flow::cleanup::has_key() {
+        if engine == SummaryEngine::Claude && crate::cursor_chat::has_key() {
             summarize(app, id);
         }
         let title = taker.note(id).map(|n| n.title).unwrap_or_default();
@@ -548,11 +548,6 @@ fn summarize(app: &AppHandle, id: &str) {
     }
     taker.working.lock().unwrap().push(id.to_string());
     let _ = app.emit_to(crate::HUB_LABEL, "notes-changed", id);
-    let model = app
-        .try_state::<crate::Shared>()
-        .map(|s| s.settings.lock().unwrap().model.clone())
-        .filter(|m| !m.is_empty())
-        .unwrap_or_else(|| crate::claude::DEFAULT_MODEL.to_string());
     let mut transcript = plain_transcript(&note);
     if transcript.len() > 400_000 {
         let mut cut = 400_000;
@@ -562,14 +557,7 @@ fn summarize(app: &AppHandle, id: &str) {
         transcript.truncate(cut);
     }
     let user = format!("<transcript>\n{transcript}\n</transcript>");
-    let reply = tauri::async_runtime::block_on(async {
-        match crate::claude::complete(&model, builder::SUMMARY_INSTRUCTIONS, &user, 2048, Duration::from_secs(120)).await {
-            Ok(text) => Some(text),
-            Err(_) => crate::claude::complete(crate::flow::cleanup::MODEL, builder::SUMMARY_INSTRUCTIONS, &user, 2048, Duration::from_secs(120))
-                .await
-                .ok(),
-        }
-    });
+    let reply = crate::cursor_chat::complete_sync(builder::SUMMARY_INSTRUCTIONS, &user, Duration::from_secs(120), "").ok();
     taker.working.lock().unwrap().retain(|w| w != id);
     let Some(reply) = reply else {
         let _ = app.emit_to(crate::HUB_LABEL, "notes-changed", id);

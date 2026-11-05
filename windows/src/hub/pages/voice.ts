@@ -54,7 +54,7 @@ export async function voicePage(page: HTMLElement, ctx: HubContext) {
     row(t("Parakeet, on your computer"), t("Hears « OK Coucou » here, without the internet."), modelsControl(ctx, () => ctx.navigate("voice"))),
   );
   if (prefs.voice && !status.hasClaudeKey) {
-    main.append(h("div", { class: "hub-warn", text: t("Coucou answers with Claude: add your Claude key in Notch → Chat.") }));
+    main.append(h("div", { class: "hub-warn", text: t("Coucou answers with Grok 4.7: add your Cursor key in Notch → Chat.") }));
   } else if (prefs.voice && !ready) {
     main.append(h("div", { class: "hub-warn", text: t("Download the voice model so Coucou can hear you.") }));
   }
@@ -77,7 +77,7 @@ export async function voicePage(page: HTMLElement, ctx: HubContext) {
 
   page.append(label(t("Privacy")));
   page.append(card(
-    h("div", { class: "hub-note", text: t("Your voice never leaves this computer: Parakeet turns it into text here. Only the words after « OK Coucou » go to Anthropic with your Claude key, and to ElevenLabs if you picked it for the answers.") }),
+    h("div", { class: "hub-note", text: t("Your voice never leaves this computer: Parakeet turns it into text here. Only the words after « OK Coucou » go to Grok 4.7 with your Cursor key, and to ElevenLabs if you picked it for the answers.") }),
     divider(),
     h("div", { class: "hub-note", text: t("An email is never sent by Coucou: your mail app opens with it written, and you send it.") }),
   ));

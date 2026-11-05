@@ -19,7 +19,7 @@ use crate::{chat, claude, log, openai_compat, secrets, Shared};
 pub const MAX_ALLOWED: usize = 50;
 const MAX_MODEL_CHARS: usize = 200;
 
-const PROVIDERS: [&str; 7] = ["anthropic", "google", "openai", "openrouter", "ollama", "lmstudio", "custom"];
+const PROVIDERS: [&str; 8] = ["cursor", "anthropic", "google", "openai", "openrouter", "ollama", "lmstudio", "custom"];
 
 pub struct AppChat {
     app: AppHandle,
@@ -45,6 +45,7 @@ impl ChatBackend for AppChat {
     fn send(&self, model_id: &str, text: String, deltas: UnboundedSender<String>) -> BoxFuture<Result<String, ChatFail>> {
         let settings = self.settings();
         let chat = self.chat.clone();
+        let app = self.app.clone();
         let id = model_id.to_string();
         Box::pin(async move {
             let Some((provider, model)) = parse_model_id(&id) else { return Err(ChatFail::Internal) };
@@ -56,7 +57,7 @@ impl ChatBackend for AppChat {
             if !ready {
                 return Err(ChatFail::NoKey);
             }
-            let result = chat::send_for_phone(&settings, &chat, provider, model, text, |so_far| {
+            let result = chat::send_for_phone(&app, &settings, &chat, provider, model, text, |so_far| {
                 let _ = deltas.send(so_far);
             })
             .await;
@@ -88,11 +89,15 @@ fn key_name(provider: &str) -> Option<&'static str> {
     if provider == chat::ANTHROPIC {
         return Some(claude::KEY);
     }
+    if provider == chat::CURSOR {
+        return Some(crate::cursor_chat::KEY);
+    }
     openai_compat::provider(provider).map(|p| p.key)
 }
 
 pub fn provider_name(provider: &str) -> String {
     match provider {
+        "cursor" => "Cursor".into(),
         "anthropic" => "Anthropic".into(),
         "google" => "Google".into(),
         "openai" => "OpenAI".into(),
@@ -202,6 +207,8 @@ mod tests {
 
     #[test]
     fn keys_are_found_by_provider() {
+        assert_eq!(key_name("cursor"), Some("cursor-api-key"));
+        assert_eq!(parse_model_id("cursor/grok-4.7"), Some(("cursor", "grok-4.7")));
         assert_eq!(key_name("anthropic"), Some("anthropic-api-key"));
         assert_eq!(key_name("openai"), Some("openai-api-key"));
         assert_eq!(key_name("ollama"), None);

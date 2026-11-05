@@ -5,20 +5,20 @@ import { Agent } from "@cursor/sdk";
 import readline from "node:readline";
 import fs from "node:fs";
 import path from "node:path";
-import { homedir } from "node:os";
+import { homedir, tmpdir } from "node:os";
 
 // Grok 4.7 has no separate Max switch. Extra High (xhigh) is the top effort.
 // Context stays at 256k, as requested. Fast is on. Any other model id the
 // island picks is handed to the SDK as it is.
 const DEFAULT_MODEL = "grok-4.7";
-function modelFor(id) {
+function modelFor(id, effort) {
   const name = String(id || DEFAULT_MODEL);
   if (!name.startsWith("grok")) return { id: name };
   return {
     id: name,
     params: [
       { id: "context", value: "256k" },
-      { id: "reasoning_effort", value: "xhigh" },
+      { id: "reasoning_effort", value: effort || "xhigh" },
       { id: "fast", value: "true" },
     ],
   };
@@ -228,14 +228,119 @@ async function ensure() {
   return agent;
 }
 
+async function dispose(current) {
+  // close() returns nothing. Calling .catch on that throws and hides the
+  // real answer, so a one-shot turn always looked like a failure.
+  if (!current || typeof current.close !== "function") return;
+  try {
+    await current.close();
+  } catch {
+    /* already gone */
+  }
+}
+
 async function closeAgent() {
   const current = agent;
   agent = null;
   preface = "";
-  if (current) await current.close();
+  await dispose(current);
+}
+
+// One question, one answer, thrown away afterwards. Dictation clean-up, call
+// summaries and « OK Coucou » use this so they never join the chat's thread.
+// `tools: "voice"` exposes Coucou's own tools; their results come back as
+// later stdin lines while this run is still going.
+const toolWaiters = new Map();
+let toolSeq = 0;
+
+function waitForTool(messageId, name, args) {
+  return new Promise((resolve) => {
+    const callId = `${messageId}:${++toolSeq}`;
+    const timer = setTimeout(() => {
+      toolWaiters.delete(callId);
+      resolve("The tool did not answer in time.");
+    }, 20000);
+    toolWaiters.set(callId, (result) => {
+      clearTimeout(timer);
+      resolve(result);
+    });
+    reply({ id: messageId, kind: "tool", callId, name, args });
+  });
+}
+
+function voiceTools(message) {
+  const defs = Array.isArray(message.definitions) ? message.definitions : [];
+  const tools = {};
+  for (const def of defs) {
+    if (!def || typeof def.name !== "string" || !def.name) continue;
+    const name = def.name;
+    tools[name] = {
+      description: typeof def.description === "string" ? def.description : name,
+      inputSchema: def.input_schema && typeof def.input_schema === "object" ? def.input_schema : { type: "object", properties: {} },
+      execute: (args) => waitForTool(message.id, name, args),
+    };
+  }
+  return tools;
+}
+
+async function createOnce(base, system) {
+  // This key cannot set --system-prompt (the server rejects it on the first
+  // send). The instructions go in front of the question instead.
+  const prompt = String(system || "").trim();
+  const open = async (options) => ({
+    agent: await Agent.create(options),
+    preface: prompt ? `${prompt}\n\n` : "",
+  });
+  try {
+    return await open(base);
+  } catch (err) {
+    const why = err instanceof Error ? err.message : String(err);
+    const custom = base.model?.params?.some((p) => p.id === "reasoning_effort" && p.value !== "xhigh");
+    if (custom && /param|effort|model/i.test(why)) {
+      return await open({ ...base, model: modelFor(DEFAULT_MODEL) });
+    }
+    throw err;
+  }
+}
+
+async function runOnce(message) {
+  const key = process.env.CURSOR_API_KEY;
+  if (!key) throw new Error("Cursor API key missing.");
+  const voice = message.tools === "voice";
+  const customTools = voice ? voiceTools(message) : undefined;
+  const effort = typeof message.effort === "string" && message.effort ? message.effort : undefined;
+  const dir = path.join(tmpdir(), "coucou-once");
+  fs.mkdirSync(dir, { recursive: true });
+  const opened = await createOnce(
+    {
+      apiKey: key,
+      model: modelFor(DEFAULT_MODEL, effort),
+      name: "Coucou",
+      tools: voice ? ["webSearch", "mcp"] : [],
+      local: { cwd: dir, settingSources: [], customTools },
+    },
+    message.system,
+  );
+  const current = opened.agent;
+  try {
+    const run = await current.send(`${opened.preface}${message.text ?? ""}`, {});
+    const result = await run.wait();
+    if (result.status === "error") {
+      throw new Error(result.error?.message || "The agent run failed.");
+    }
+    const answer = (result.result || "").trim();
+    if (!answer) throw new Error("No response text.");
+    reply({ id: message.id, ok: true, text: answer });
+  } finally {
+    await dispose(current);
+  }
 }
 
 async function handle(message) {
+  if (message.op === "once") {
+    await runOnce(message);
+    return;
+  }
   if (message.op === "reset") {
     await closeAgent();
     for (const file of [idFile, transcriptFile, lockFile]) fs.rmSync(file, { force: true });
@@ -315,14 +420,24 @@ for await (const line of lines) {
     reply({ ok: false, error: "Bad request." });
     continue;
   }
-  try {
-    await handle(message);
-  } catch (err) {
+  if (message.op === "tool_result") {
+    const done = toolWaiters.get(String(message.callId));
+    if (done) {
+      toolWaiters.delete(String(message.callId));
+      const result = typeof message.result === "string" ? message.result : JSON.stringify(message.result ?? "");
+      done(result);
+    }
+    continue;
+  }
+  // Not awaited: a voice tool's result is another stdin line, and this loop
+  // has to be free to read it while the agent run is still going.
+  void handle(message).catch(async (err) => {
     reply({
       id: message.id,
       ok: false,
       error: err instanceof Error ? err.message : String(err),
     });
+    if (message.op === "once") return;
     // Drop the live handle but keep the saved agent id. The turn lock stays,
     // so the next message resumes the same conversation and expires a wedged run.
     try {
@@ -330,5 +445,5 @@ for await (const line of lines) {
     } catch {
       agent = null;
     }
-  }
+  });
 }

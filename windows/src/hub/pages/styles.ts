@@ -16,13 +16,12 @@ export function styleOptions(): [Style, string][] {
 export async function stylesPage(page: HTMLElement, ctx: HubContext) {
   const status = await ctx.refresh();
   let styles: AppStyle[] = (await FlowBridge.styles()) ?? [];
-  page.append(ctx.hero("styles", t("Styles"), t("Claude cleans up what you say, in the style of the app you write in.")));
+  page.append(ctx.hero("styles", t("Styles"), t("Grok 4.7 cleans up what you say, in the style of the app you write in.")));
   const write = pageSave(page);
   const save = async (next: AppStyle[]) => {
     const result = await write(() => FlowBridge.setStyles(next));
     if (result === "pending") return;
     if (result === "saved") styles = next;
-    // Restore the actual selection as well when the native store rejects it.
     drawApps();
   };
 
@@ -43,11 +42,11 @@ export async function stylesPage(page: HTMLElement, ctx: HubContext) {
     });
   };
 
-  const keyNote = h("div", { class: "hub-warn", text: t("The clean-up uses your Claude key. Add it in Notch → Chat.") });
+  const keyNote = h("div", { class: "hub-warn", text: t("The clean-up uses Grok 4.7 through your Cursor key. Add it in Notch → Chat.") });
   keyNote.style.display = status.hasClaudeKey ? "none" : "";
   const defaultRow = row(t("Other apps"), null, select(styleOptions(), status.prefs.defaultStyle, (style) => void ctx.setPrefs((p) => (p.defaultStyle = style))));
   const stylesCard = card(
-    row(t("Clean up with Claude"), t("Removes the “um”, the repeats and the corrections you made while speaking, and fixes the punctuation."),
+    row(t("Clean up with Grok 4.7"), t("Removes the “um”, the repeats and the corrections you made while speaking, and fixes the punctuation."),
       toggle(status.prefs.cleanup, (on) => {
         void ctx.setPrefs((p) => (p.cleanup = on));
         perApp.classList.toggle("dimmed", !on);
@@ -55,7 +54,7 @@ export async function stylesPage(page: HTMLElement, ctx: HubContext) {
     keyNote,
     divider(),
     defaultRow,
-    h("div", { class: "hub-note", text: t("With the clean-up on, the text (never your voice) goes to Anthropic with your Claude key. Off, everything stays on this computer.") }),
+    h("div", { class: "hub-note", text: t("With the clean-up on, the text (never your voice) goes to Grok 4.7 with your Cursor key. Off, everything stays on this computer.") }),
   );
   stylesCard.dataset.anchor = "flow.styles";
   page.append(stylesCard);

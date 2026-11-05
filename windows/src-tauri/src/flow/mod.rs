@@ -459,6 +459,7 @@ pub struct FlowStatus {
     models: speech::ModelsStatus,
     /// "ok", or why the key can't be watched here ("wayland", "no-display").
     keys: String,
+    /// The Cursor key, which Grok 4.7 uses. The name stays, the island already reads it.
     has_claude_key: bool,
     mics: Vec<audio::InputDevice>,
     platform: &'static str,

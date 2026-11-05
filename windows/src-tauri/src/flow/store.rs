@@ -99,14 +99,14 @@ pub struct Prefs {
     pub mic: String,
     /// Days the history is kept: 0 = not kept, -1 = forever.
     pub keep_days: i64,
-    /// Clean the words with Claude before pasting them (needs the Claude key).
+    /// Clean the words with Grok 4.7 before pasting them (needs the Cursor key).
     pub cleanup: bool,
     /// The style of the apps that have none of their own.
     pub default_style: Style,
     pub summary_engine: SummaryEngine,
     /// Open the Coucou window when Coucou is opened (not when it starts with the computer).
     pub open_at_launch: bool,
-    /// « OK Coucou »: listen for it and answer with Claude (needs the Claude key).
+    /// « OK Coucou »: listen for it and answer with Grok 4.7 (needs the Cursor key).
     pub voice: bool,
     /// The other apps' sound is muted while Coucou listens to you (Windows).
     pub mute_others: bool,

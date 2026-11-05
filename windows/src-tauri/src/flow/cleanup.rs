@@ -1,9 +1,8 @@
-// The clean-up of Flow dictation: Claude removes the "um", the repeats and the
+// The clean-up of Flow dictation: Grok 4.7 removes the "um", the repeats and the
 // corrections said on the way ("at 3, no, at 4" → "at 4"), fixes the
 // punctuation and writes in the app's style. Only when it is turned on in the
-// Coucou window and a Claude key is set, or else Claude Code is installed; the
-// text (never the audio) then goes to Anthropic with that key or through the
-// user's own Claude Code, and nowhere else. Any problem (no network, slow
+// Coucou window and the Cursor key is set; the text (never the audio) then goes
+// to Grok through that key, and nowhere else. Any problem (no network, slow
 // answer, odd reply) and the words are pasted as they were heard. Port of
 // FlowCleanup.swift.
 
@@ -12,14 +11,12 @@ use std::time::Duration;
 use super::store::Style;
 use super::text;
 
-pub const MODEL: &str = "claude-haiku-4-5";
 /// Past this, the words are pasted as heard rather than keeping you waiting.
-const TIMEOUT: Duration = Duration::from_secs(4);
-/// Claude Code takes a couple of seconds just to start.
-const RELAY_TIMEOUT: Duration = Duration::from_secs(10);
+/// Low effort, so this stays a rewrite and not a long think.
+const TIMEOUT: Duration = Duration::from_secs(20);
 
 pub fn has_key() -> bool {
-    crate::claude::ready()
+    crate::cursor_chat::has_key()
 }
 
 pub async fn clean(raw: &str, style: Style, app: Option<&str>, words: &[String]) -> String {
@@ -27,8 +24,7 @@ pub async fn clean(raw: &str, style: Style, app: Option<&str>, words: &[String])
         return raw.to_string();
     }
     let user = format!("<dictation>\n{raw}\n</dictation>");
-    let timeout = if crate::claude::uses_relay() { RELAY_TIMEOUT } else { TIMEOUT };
-    match crate::claude::complete(MODEL, &system(style, app, words), &user, 2048, timeout).await {
+    match crate::cursor_chat::complete(&system(style, app, words), &user, TIMEOUT, "low").await {
         Ok(reply) => {
             let cleaned = reply.replace("<dictation>", "").replace("</dictation>", "").trim().to_string();
             if plausible(&cleaned, raw) {

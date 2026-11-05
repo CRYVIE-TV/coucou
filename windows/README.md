@@ -21,7 +21,7 @@ Approve Claude Code permissions, watch your session work, drop a file, chat with
 
 ## This fork
 
-Built from Coucou for Windows 0.5.0 with four additions. Everything else is upstream.
+Built from Coucou for Windows 0.5.9 with four additions. Everything else is upstream.
 
 - **Cursor in the chat** — Settings → Chat providers → Cursor takes a Cursor API key
   (cursor.com/dashboard → Integrations). The chat then runs a Cursor agent
